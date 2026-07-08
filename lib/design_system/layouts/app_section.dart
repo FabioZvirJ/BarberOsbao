@@ -42,7 +42,7 @@ class AppSection extends StatelessWidget {
                     subtitle!,
                     style: TextStyle(
                       fontSize: 13,
-                      color: isDark ? Colors.white50 : Colors.black54,
+                      color: isDark ? Colors.white60 : Colors.black54,
                     ),
                   ),
                 ],

@@ -118,7 +118,7 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
             final isSelected = _selectedServices.any((s) => s.id == srv.id);
 
             return Padding(
-              padding: const EdgeInsets.bottom(10),
+              padding: const EdgeInsets.only(bottom: 10),
               child: AppCard(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 borderGlow: isSelected,

@@ -35,7 +35,7 @@ class AppStatCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white50 : Colors.black45,
+                  color: isDark ? Colors.white60 : Colors.black45,
                 ),
               ),
               if (icon != null) icon!,

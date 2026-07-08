@@ -57,7 +57,7 @@ class AppEmptyState extends StatelessWidget {
               description,
               style: TextStyle(
                 fontSize: 14,
-                color: isDark ? Colors.white50 : Colors.black54,
+                color: isDark ? Colors.white60 : Colors.black54,
                 height: 1.4,
               ),
               textAlign: TextAlign.center,

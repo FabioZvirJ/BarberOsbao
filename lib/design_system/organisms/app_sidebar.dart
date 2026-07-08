@@ -102,7 +102,7 @@ class AppSidebar extends StatelessWidget {
                 final isActive = item.id == activeId;
 
                 return Padding(
-                  padding: const EdgeInsets.bottom(6),
+                  padding: const EdgeInsets.only(bottom: 6),
                   child: InkWell(
                     onTap: () => onSelected(item.id),
                     borderRadius: BorderRadius.circular(12),
@@ -122,7 +122,7 @@ class AppSidebar extends StatelessWidget {
                         children: [
                           Icon(
                             item.icon,
-                            color: isActive ? ThemeColors.primary : (isDark ? Colors.white50 : Colors.black54),
+                            color: isActive ? ThemeColors.primary : (isDark ? Colors.white60 : Colors.black54),
                             size: 20,
                           ),
                           const SizedBox(width: 16),

@@ -233,7 +233,7 @@ class DashboardPage extends ConsumerWidget {
                                           child: ListView(
                                             physics: const NeverScrollableScrollPhysics(),
                                             children: mem.remainingBenefits.map((b) => Padding(
-                                              padding: const EdgeInsets.bottom(4.0),
+                                              padding: const EdgeInsets.only(bottom: 4.0),
                                               child: Row(
                                                 children: [
                                                   const Icon(Icons.check_circle_outline, color: ThemeColors.success, size: 14),

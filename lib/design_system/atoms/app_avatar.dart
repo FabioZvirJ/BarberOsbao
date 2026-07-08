@@ -20,7 +20,7 @@ class AppAvatar extends StatelessWidget {
         border: Border.all(color: Colors.white, width: 2),
         image: DecorationImage(
           image: NetworkImage(url),
-          fit: BoxShape.cover,
+          fit: BoxFit.cover,
         ),
       ),
     );
