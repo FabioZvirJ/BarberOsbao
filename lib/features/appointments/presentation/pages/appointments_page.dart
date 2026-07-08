@@ -185,7 +185,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
                       cells: [
                         Text(apt.barberName, style: const TextStyle(fontWeight: FontWeight.bold)),
                         Text(apt.services.map((s) => s.name).join(', '), maxLines: 1, overflow: TextOverflow.ellipsis),
-                        Text('${apt.date.split('-').reverse().join('/')} às ${apt.time}'),
+                        Text('${apt.date.split('-').reversed.join('/')} às ${apt.time}'),
                         Text('R\$ ${apt.totalValue.toStringAsFixed(2)}'),
                         AppBadge(label: statusLabel, variant: badgeVar),
                         if (apt.status == 'confirmed')

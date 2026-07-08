@@ -99,7 +99,7 @@ class PlansPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Sua assinatura renova automaticamente em: ${mem.nextRenewalDate.split('-').reverse().join('/')}',
+                        'Sua assinatura renova automaticamente em: ${mem.nextRenewalDate.split('-').reversed.join('/')}',
                         style: const TextStyle(color: Colors.grey, fontSize: 13),
                       ),
                       const Divider(height: 32),

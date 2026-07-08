@@ -159,7 +159,7 @@ class DashboardPage extends ConsumerWidget {
                                         ),
                                         const SizedBox(height: 12),
                                         Text(
-                                          '${upcoming.date.split('-').reverse().join('/')} às ${upcoming.time}',
+                                          '${upcoming.date.split('-').reversed.join('/')} às ${upcoming.time}',
                                           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                                         ),
                                         const SizedBox(height: 4),
@@ -201,7 +201,7 @@ class DashboardPage extends ConsumerWidget {
                                     title: 'PLANO ATIVO',
                                     value: mem.planName,
                                     icon: const Icon(Icons.star, color: ThemeColors.primary),
-                                    trendText: 'Renova em ${mem.nextRenewalDate.split('-').reverse().join('/')}',
+                                    trendText: 'Renova em ${mem.nextRenewalDate.split('-').reversed.join('/')}',
                                     positiveTrend: true,
                                   );
                                 },

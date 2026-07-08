@@ -4,7 +4,7 @@ part 'coupon.freezed.dart';
 part 'coupon.g.dart';
 
 @freezed
-class Coupon with _$Coupon {
+abstract class Coupon with _$Coupon {
   const factory Coupon({
     required String id,
     required String code,

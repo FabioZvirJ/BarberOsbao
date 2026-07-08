@@ -4,7 +4,7 @@ part 'barber.freezed.dart';
 part 'barber.g.dart';
 
 @freezed
-class Barber with _$Barber {
+abstract class Barber with _$Barber {
   const factory Barber({
     required String id,
     required String name,

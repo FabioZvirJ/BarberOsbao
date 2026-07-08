@@ -4,7 +4,7 @@ part 'plan.freezed.dart';
 part 'plan.g.dart';
 
 @freezed
-class Plan with _$Plan {
+abstract class Plan with _$Plan {
   const factory Plan({
     required String id,
     required String name,
