@@ -197,23 +197,35 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
               type: p.status ? AppStatusType.success : AppStatusType.danger,
             ),
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                   icon: const Icon(Icons.add_circle_outline, size: 18, color: ThemeColors.primary),
                   onPressed: () => _showQuickMovementDialog(context, p, 'Entrada'),
                   tooltip: 'Entrada rápida',
                 ),
+                const SizedBox(width: 8),
                 IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                   icon: const Icon(Icons.remove_circle_outline, size: 18, color: ThemeColors.warning),
                   onPressed: () => _showQuickMovementDialog(context, p, 'Saída'),
                   tooltip: 'Saída rápida',
                 ),
+                const SizedBox(width: 8),
                 IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                   icon: const Icon(Icons.edit_outlined, size: 18),
                   onPressed: () => _showFormDialog(context, formCategories, p),
                   tooltip: 'Editar',
                 ),
+                const SizedBox(width: 8),
                 IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                   icon: const Icon(Icons.delete_outline, size: 18, color: ThemeColors.danger),
                   onPressed: () => _showDeleteDialog(context, p),
                   tooltip: 'Excluir',
