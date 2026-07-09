@@ -190,7 +190,7 @@ class DashboardPage extends ConsumerWidget {
               crossAxisCount: crossCount,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              mainAxisExtent: 130,
+              mainAxisExtent: 140,
             ),
             itemCount: items.length,
             itemBuilder: (context, index) {
@@ -198,6 +198,7 @@ class DashboardPage extends ConsumerWidget {
               return InkWell(
                 onTap: () => context.go(item['path'] as String),
                 child: AppCard(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
