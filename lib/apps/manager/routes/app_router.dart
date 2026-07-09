@@ -4,18 +4,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/core/auth/application/auth_controller.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_scaffold.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_sidebar.dart';
-import 'package:barber_osbao/apps/manager/presentation/pages/dashboard_page.dart';
-import 'package:barber_osbao/apps/manager/presentation/pages/agenda_page.dart';
-import 'package:barber_osbao/apps/manager/presentation/pages/clientes_page.dart';
-import 'package:barber_osbao/apps/manager/presentation/pages/funcionarios_page.dart';
-import 'package:barber_osbao/apps/manager/presentation/pages/servicos_page.dart';
-import 'package:barber_osbao/apps/manager/presentation/pages/produtos_page.dart';
-import 'package:barber_osbao/apps/manager/presentation/pages/estoque_page.dart';
-import 'package:barber_osbao/apps/manager/presentation/pages/planos_page.dart';
-import 'package:barber_osbao/apps/manager/presentation/pages/clube_page.dart';
-import 'package:barber_osbao/apps/manager/presentation/pages/financeiro_page.dart';
-import 'package:barber_osbao/apps/manager/presentation/pages/relatorios_page.dart';
-import 'package:barber_osbao/apps/manager/presentation/pages/configuracoes_page.dart';
+import 'package:barber_osbao/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:barber_osbao/features/agenda/presentation/pages/agenda_page.dart';
+import 'package:barber_osbao/features/clientes/presentation/pages/clientes_page.dart';
+import 'package:barber_osbao/features/funcionarios/presentation/pages/funcionarios_page.dart';
+import 'package:barber_osbao/features/servicos/presentation/pages/servicos_page.dart';
+import 'package:barber_osbao/features/produtos/presentation/pages/produtos_page.dart';
+import 'package:barber_osbao/features/produtos/presentation/pages/estoque_page.dart';
+import 'package:barber_osbao/features/planos/presentation/pages/planos_page.dart';
+import 'package:barber_osbao/features/clube/presentation/pages/clube_page.dart';
+import 'package:barber_osbao/features/financeiro/presentation/pages/financeiro_page.dart';
+import 'package:barber_osbao/features/relatorios/presentation/pages/relatorios_page.dart';
+import 'package:barber_osbao/features/configuracoes/presentation/pages/configuracoes_page.dart';
+import 'package:barber_osbao/features/categorias/presentation/pages/categorias_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'manager_root');
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'manager_shell');
@@ -52,6 +53,8 @@ final GoRouter managerRouter = GoRouter(
           activeId = 'relatorios';
         } else if (location.startsWith('/configuracoes')) {
           activeId = 'configuracoes';
+        } else if (location.startsWith('/categorias')) {
+          activeId = 'categorias';
         }
 
         return Consumer(
@@ -168,6 +171,10 @@ final GoRouter managerRouter = GoRouter(
         GoRoute(
           path: '/configuracoes',
           builder: (context, state) => const ConfiguracoesPage(),
+        ),
+        GoRoute(
+          path: '/categorias',
+          builder: (context, state) => const CategoriasPage(),
         ),
       ],
     ),
