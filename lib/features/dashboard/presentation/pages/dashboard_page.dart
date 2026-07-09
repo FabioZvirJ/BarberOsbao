@@ -238,7 +238,7 @@ class DashboardPage extends ConsumerWidget {
               crossAxisCount: crossCount,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              mainAxisExtent: 80,
+              mainAxisExtent: 150,
             ),
             children: [
               AppActionButton(
