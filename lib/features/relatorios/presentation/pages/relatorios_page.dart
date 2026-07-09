@@ -76,7 +76,7 @@ class RelatoriosPage extends ConsumerWidget {
             crossAxisCount: crossCount,
             crossAxisSpacing: 20,
             mainAxisSpacing: 20,
-            mainAxisExtent: 220,
+            mainAxisExtent: 240,
           ),
           itemCount: reports.length,
           itemBuilder: (context, index) {
@@ -86,6 +86,7 @@ class RelatoriosPage extends ConsumerWidget {
             final icon = iconMap[report['icon']] ?? Icons.bar_chart;
 
             return AppCard(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
