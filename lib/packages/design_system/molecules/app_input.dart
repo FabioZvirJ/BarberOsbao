@@ -11,6 +11,7 @@ class AppInput extends StatelessWidget {
   final TextInputType keyboardType;
   final FormFieldValidator<String>? validator;
   final ValueChanged<String>? onChanged;
+  final int maxLines;
 
   const AppInput({
     super.key,
@@ -23,6 +24,7 @@ class AppInput extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.validator,
     this.onChanged,
+    this.maxLines = 1,
   });
 
   @override
@@ -45,6 +47,7 @@ class AppInput extends StatelessWidget {
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
+          maxLines: maxLines,
           validator: validator,
           onChanged: onChanged,
           style: const TextStyle(fontSize: 15),
