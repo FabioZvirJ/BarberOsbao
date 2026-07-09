@@ -95,7 +95,7 @@ class DashboardPage extends ConsumerWidget {
             crossAxisCount: crossCount,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            mainAxisExtent: 120,
+            mainAxisExtent: 130,
           ),
           children: [
             InkWell(

@@ -118,7 +118,7 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
             crossAxisCount: crossCount,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
-            mainAxisExtent: 110,
+            mainAxisExtent: 130,
           ),
           children: [
             AppStatCard(
