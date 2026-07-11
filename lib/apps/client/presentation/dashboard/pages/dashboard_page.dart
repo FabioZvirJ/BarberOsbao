@@ -20,14 +20,10 @@ class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
 
   void _openBookingWizard(BuildContext context, {dynamic preselectedService}) {
-    showModalBottomSheet(
+    AppModal.show(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => AppModal(
-        title: 'Agendar Horário',
-        child: BookingWizard(preselectedService: preselectedService),
-      ),
+      title: 'Agendar Horário',
+      child: BookingWizard(preselectedService: preselectedService),
     );
   }
 

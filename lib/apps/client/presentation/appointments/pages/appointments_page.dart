@@ -24,14 +24,10 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
   String _searchQuery = '';
 
   void _openBookingWizard() {
-    showModalBottomSheet(
+    AppModal.show(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const AppModal(
-        title: 'Agendar Horário',
-        child: BookingWizard(),
-      ),
+      title: 'Agendar Horário',
+      child: const BookingWizard(),
     );
   }
 
