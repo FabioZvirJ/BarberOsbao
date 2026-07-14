@@ -90,7 +90,6 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
           const SizedBox(height: 16),
           LayoutBuilder(
             builder: (context, constraints) {
-              final isDesktop = constraints.maxWidth > 800;
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -113,7 +112,7 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                       if (_calendarSelectedDate.isNotEmpty) ...[
                         const SizedBox(width: 8),
                         Chip(
-                          backgroundColor: ThemeColors.primary.withOpacity(0.2),
+                          backgroundColor: ThemeColors.primary.withValues(alpha: 0.2),
                           label: Text(_calendarSelectedDate.split('-').reversed.join('/'), style: const TextStyle(color: ThemeColors.primary, fontSize: 11)),
                           onDeleted: () => setState(() {
                             _calendarSelectedDate = '';
@@ -465,7 +464,7 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                     children: [
                       DropdownButtonFormField<String>(
                         dropdownColor: ThemeColors.darkBg,
-                        value: selectedClient,
+                        initialValue: selectedClient,
                         decoration: const InputDecoration(
                           labelText: 'Cliente',
                           labelStyle: TextStyle(color: Colors.white70),
@@ -483,7 +482,7 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               dropdownColor: ThemeColors.darkBg,
-                              value: selectedBarber,
+                              initialValue: selectedBarber,
                               decoration: const InputDecoration(
                                 labelText: 'Barbeiro',
                                 labelStyle: TextStyle(color: Colors.white70),
@@ -500,7 +499,7 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               dropdownColor: ThemeColors.darkBg,
-                              value: selectedService,
+                              initialValue: selectedService,
                               decoration: const InputDecoration(
                                 labelText: 'Serviço Principal',
                                 labelStyle: TextStyle(color: Colors.white70),
@@ -565,7 +564,7 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               dropdownColor: ThemeColors.darkBg,
-                              value: status,
+                              initialValue: status,
                               decoration: const InputDecoration(
                                 labelText: 'Status',
                                 labelStyle: TextStyle(color: Colors.white70),

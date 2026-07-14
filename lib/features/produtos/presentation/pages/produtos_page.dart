@@ -288,7 +288,7 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               dropdownColor: ThemeColors.darkBg,
-                              value: category,
+                              initialValue: category,
                               decoration: const InputDecoration(
                                 labelText: 'Categoria',
                                 labelStyle: TextStyle(color: Colors.white70),
@@ -388,7 +388,7 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
                       SwitchListTile(
                         title: const Text('Produto Ativo', style: TextStyle(color: Colors.white70, fontSize: 14)),
                         value: status,
-                        activeColor: ThemeColors.primary,
+                        activeThumbColor: ThemeColors.primary,
                         onChanged: (val) => setState(() => status = val),
                       ),
                     ],

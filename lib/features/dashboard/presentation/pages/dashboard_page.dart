@@ -10,7 +10,6 @@ import 'package:barber_osbao/packages/design_system/molecules/app_stat_card.dart
 import 'package:barber_osbao/packages/design_system/molecules/app_chart_card.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_action_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
-import 'package:barber_osbao/packages/design_system/atoms/app_avatar.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/dashboard/presentation/controllers/dashboard_controller.dart';
 import 'package:barber_osbao/features/agenda/presentation/controllers/agenda_controller.dart';

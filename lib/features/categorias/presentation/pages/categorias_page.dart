@@ -195,7 +195,7 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       dropdownColor: ThemeColors.darkBg,
-                      value: tipo,
+                      initialValue: tipo,
                       decoration: const InputDecoration(
                         labelText: 'Tipo de Módulo',
                         labelStyle: TextStyle(color: Colors.white70),

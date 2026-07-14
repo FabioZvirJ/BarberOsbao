@@ -23,16 +23,16 @@ class DashboardController extends Notifier<AppState<Map<String, dynamic>>> {
     _repository = ref.watch(dashboardRepositoryProvider);
     
     // Reload dashboard stats when dependencies change
-    ref.listen(agendaControllerProvider, (_, __) {
+    ref.listen(agendaControllerProvider, (_, _) {
       loadStats();
     });
-    ref.listen(transacoesControllerProvider, (_, __) {
+    ref.listen(transacoesControllerProvider, (_, _) {
       loadStats();
     });
-    ref.listen(clientesControllerProvider, (_, __) {
+    ref.listen(clientesControllerProvider, (_, _) {
       loadStats();
     });
-    ref.listen(funcionariosControllerProvider, (_, __) {
+    ref.listen(funcionariosControllerProvider, (_, _) {
       loadStats();
     });
 

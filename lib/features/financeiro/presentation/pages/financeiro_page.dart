@@ -311,7 +311,7 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
                     children: [
                       DropdownButtonFormField<String>(
                         dropdownColor: ThemeColors.darkBg,
-                        value: type,
+                        initialValue: type,
                         decoration: const InputDecoration(
                           labelText: 'Tipo de Lançamento',
                           labelStyle: TextStyle(color: Colors.white70),
@@ -354,7 +354,7 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               dropdownColor: ThemeColors.darkBg,
-                              value: category,
+                              initialValue: category,
                               decoration: const InputDecoration(
                                 labelText: 'Categoria',
                                 labelStyle: TextStyle(color: Colors.white70),
@@ -375,7 +375,7 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               dropdownColor: ThemeColors.darkBg,
-                              value: paymentMethod,
+                              initialValue: paymentMethod,
                               decoration: const InputDecoration(
                                 labelText: 'Forma de Pagamento',
                                 labelStyle: TextStyle(color: Colors.white70),
@@ -399,7 +399,7 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               dropdownColor: ThemeColors.darkBg,
-                              value: status,
+                              initialValue: status,
                               decoration: const InputDecoration(
                                 labelText: 'Status',
                                 labelStyle: TextStyle(color: Colors.white70),

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_container.dart';
-import 'package:barber_osbao/packages/design_system/layouts/app_section.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_table.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_badge.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
-import 'package:barber_osbao/packages/core/models/appointment.dart';
 import 'package:barber_osbao/packages/core/shared/appointments/application/appointment_controller.dart';
 import 'package:barber_osbao/apps/client/presentation/appointments/widgets/booking_wizard.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_modal.dart';

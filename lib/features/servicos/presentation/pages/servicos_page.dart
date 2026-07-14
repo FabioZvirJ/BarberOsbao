@@ -287,7 +287,7 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               dropdownColor: ThemeColors.darkBg,
-                              value: category,
+                              initialValue: category,
                               decoration: const InputDecoration(
                                 labelText: 'Categoria',
                                 labelStyle: TextStyle(color: Colors.white70),
@@ -328,7 +328,7 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               dropdownColor: ThemeColors.darkBg,
-                              value: colorHex,
+                              initialValue: colorHex,
                               decoration: const InputDecoration(
                                 labelText: 'Cor do Card',
                                 labelStyle: TextStyle(color: Colors.white70),
@@ -378,7 +378,7 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
                       SwitchListTile(
                         title: const Text('Serviço Ativo', style: TextStyle(color: Colors.white70, fontSize: 14)),
                         value: status,
-                        activeColor: ThemeColors.primary,
+                        activeThumbColor: ThemeColors.primary,
                         onChanged: (val) => setState(() => status = val),
                       ),
                     ],

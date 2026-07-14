@@ -14,7 +14,6 @@ import 'package:barber_osbao/packages/core/auth/application/auth_controller.dart
 import 'package:barber_osbao/packages/core/shared/appointments/application/appointment_controller.dart';
 import 'package:barber_osbao/apps/client/presentation/appointments/widgets/booking_wizard.dart';
 import 'package:barber_osbao/packages/core/shared/plans/application/plans_controller.dart';
-import 'package:intl/intl.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -104,7 +103,7 @@ class DashboardPage extends ConsumerWidget {
                               Icon(
                                 Icons.content_cut,
                                 size: 100,
-                                color: ThemeColors.primary.withOpacity(0.2),
+                                color: ThemeColors.primary.withValues(alpha: 0.2),
                               ),
                             ],
                           ],

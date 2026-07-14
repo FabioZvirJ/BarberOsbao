@@ -58,7 +58,6 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
   Widget build(BuildContext context) {
     final businessState = ref.watch(businessSettingsControllerProvider);
     final userState = ref.watch(authControllerProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (businessState is AppLoading || userState.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator(color: ThemeColors.primary)));
@@ -126,7 +125,6 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
             // 2. Schedule options & working hours
             LayoutBuilder(
               builder: (context, constraints) {
-                final isDesktop = constraints.maxWidth > 800;
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -160,7 +158,7 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                             children: [
                               DropdownButtonFormField<String>(
                                 dropdownColor: ThemeColors.darkBg,
-                                value: settings.slotInterval,
+                                initialValue: settings.slotInterval,
                                 decoration: const InputDecoration(
                                   labelText: 'Tempo entre Atendimentos',
                                   labelStyle: TextStyle(color: Colors.white70, fontSize: 13),
@@ -187,7 +185,7 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                                 title: const Text('Tema Escuro (Dark Mode)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                                 subtitle: const Text('Alterna a identidade visual da dashboard admin'),
                                 value: user?.theme == 'dark',
-                                activeColor: ThemeColors.primary,
+                                activeThumbColor: ThemeColors.primary,
                                 onChanged: (val) {
                                   if (user != null) {
                                     ref.read(authControllerProvider.notifier).updateUser(
@@ -218,7 +216,7 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                       title: const Text('WhatsApp Notificações Automáticas', style: TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: const Text('Envia lembretes automáticos de agendamentos e aniversários via WhatsApp API.'),
                       value: user?.whatsappNotifications ?? false,
-                      activeColor: ThemeColors.primary,
+                      activeThumbColor: ThemeColors.primary,
                       onChanged: (val) {
                         if (user != null) {
                           ref.read(authControllerProvider.notifier).updateUser(
@@ -231,7 +229,7 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                     SwitchListTile(
                       title: const Text('Notificações de E-mail', style: TextStyle(fontWeight: FontWeight.bold)),
                       value: user?.emailNotifications ?? true,
-                      activeColor: ThemeColors.primary,
+                      activeThumbColor: ThemeColors.primary,
                       onChanged: (val) {
                         if (user != null) {
                           ref.read(authControllerProvider.notifier).updateUser(
@@ -244,7 +242,7 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                     SwitchListTile(
                       title: const Text('Notificações Push (Navegador)', style: TextStyle(fontWeight: FontWeight.bold)),
                       value: user?.pushNotifications ?? true,
-                      activeColor: ThemeColors.primary,
+                      activeThumbColor: ThemeColors.primary,
                       onChanged: (val) {
                         if (user != null) {
                           ref.read(authControllerProvider.notifier).updateUser(
@@ -302,7 +300,7 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: isOpen ? ThemeColors.primary.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+            color: isOpen ? ThemeColors.primary.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(

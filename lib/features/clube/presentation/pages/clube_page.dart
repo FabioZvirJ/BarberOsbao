@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
-import 'package:barber_osbao/packages/design_system/layouts/app_section.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_table.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_card.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
@@ -54,7 +53,7 @@ class ClubePage extends ConsumerWidget {
                           Row(
                             children: const [
                               Icon(Icons.stars, color: ThemeColors.primary),
-                              const SizedBox(width: 8),
+                              SizedBox(width: 8),
                               Text(
                                 'Regra: R\$ 1,00 gasto = 1 ponto',
                                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
@@ -324,7 +323,7 @@ class ClubePage extends ConsumerWidget {
                       SwitchListTile(
                         title: const Text('Recompensa Ativa', style: TextStyle(color: Colors.white70, fontSize: 14)),
                         value: active,
-                        activeColor: ThemeColors.primary,
+                        activeThumbColor: ThemeColors.primary,
                         onChanged: (val) => setState(() => active = val),
                       ),
                     ],

@@ -7,7 +7,6 @@ import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_badge.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/packages/core/shared/plans/application/plans_controller.dart';
-import 'package:barber_osbao/packages/core/models/plan.dart';
 
 class PlansPage extends ConsumerWidget {
   const PlansPage({super.key});
@@ -16,7 +15,6 @@ class PlansPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final membershipState = ref.watch(membershipControllerProvider);
     final plansState = ref.watch(plansProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: AppContainer(
@@ -62,7 +60,7 @@ class PlansPage extends ConsumerWidget {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 24),
-                        Icon(Icons.arrow_downward, color: ThemeColors.primary.withOpacity(0.5)),
+                        Icon(Icons.arrow_downward, color: ThemeColors.primary.withValues(alpha: 0.5)),
                       ],
                     ),
                   );

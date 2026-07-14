@@ -231,7 +231,7 @@ class _EstoquePageState extends ConsumerState<EstoquePage> {
                   children: [
                     DropdownButtonFormField<String>(
                       dropdownColor: ThemeColors.darkBg,
-                      value: selectedProductId,
+                      initialValue: selectedProductId,
                       decoration: const InputDecoration(
                         labelText: 'Produto',
                         labelStyle: TextStyle(color: Colors.white70),
@@ -246,7 +246,7 @@ class _EstoquePageState extends ConsumerState<EstoquePage> {
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
                       dropdownColor: ThemeColors.darkBg,
-                      value: type,
+                      initialValue: type,
                       decoration: const InputDecoration(
                         labelText: 'Tipo de Lançamento',
                         labelStyle: TextStyle(color: Colors.white70),

@@ -203,7 +203,7 @@ class PlanosPage extends ConsumerWidget {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               dropdownColor: ThemeColors.darkBg,
-                              value: period,
+                              initialValue: period,
                               decoration: const InputDecoration(
                                 labelText: 'Cobrança',
                                 labelStyle: TextStyle(color: Colors.white70),
@@ -251,13 +251,13 @@ class PlanosPage extends ConsumerWidget {
                       SwitchListTile(
                         title: const Text('Destacar Plano (Recomendado)', style: TextStyle(color: Colors.white70, fontSize: 14)),
                         value: recommended,
-                        activeColor: ThemeColors.primary,
+                        activeThumbColor: ThemeColors.primary,
                         onChanged: (val) => setState(() => recommended = val),
                       ),
                       SwitchListTile(
                         title: const Text('Plano Ativo', style: TextStyle(color: Colors.white70, fontSize: 14)),
                         value: status,
-                        activeColor: ThemeColors.primary,
+                        activeThumbColor: ThemeColors.primary,
                         onChanged: (val) => setState(() => status = val),
                       ),
                       const SizedBox(height: 16),

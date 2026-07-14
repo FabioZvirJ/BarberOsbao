@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/core/models/appointment.dart';
 import 'package:barber_osbao/packages/core/models/barber.dart';
 import 'package:barber_osbao/packages/core/models/service_model.dart';
-import 'package:barber_osbao/packages/core/models/user.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_chip.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_avatar.dart';

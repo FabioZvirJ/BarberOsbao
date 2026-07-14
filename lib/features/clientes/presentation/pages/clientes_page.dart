@@ -306,7 +306,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               dropdownColor: ThemeColors.darkBg,
-                              value: plano,
+                              initialValue: plano,
                               decoration: const InputDecoration(
                                 labelText: 'Plano',
                                 labelStyle: TextStyle(color: Colors.white70),
@@ -328,7 +328,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               dropdownColor: ThemeColors.darkBg,
-                              value: status,
+                              initialValue: status,
                               decoration: const InputDecoration(
                                 labelText: 'Status',
                                 labelStyle: TextStyle(color: Colors.white70),

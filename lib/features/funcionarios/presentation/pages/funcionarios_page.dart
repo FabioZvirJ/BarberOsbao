@@ -349,7 +349,7 @@ class _FuncionariosPageState extends ConsumerState<FuncionariosPage> {
                       SwitchListTile(
                         title: const Text('Funcionário Ativo', style: TextStyle(color: Colors.white70, fontSize: 14)),
                         value: active,
-                        activeColor: ThemeColors.primary,
+                        activeThumbColor: ThemeColors.primary,
                         onChanged: (val) => setState(() => active = val),
                       ),
                     ],

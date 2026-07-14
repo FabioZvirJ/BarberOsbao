@@ -1,5 +1,4 @@
 import 'package:barber_osbao/packages/core/models/user.dart';
-import 'package:barber_osbao/packages/core/models/customer.dart';
 import 'package:barber_osbao/packages/core/models/barber.dart';
 import 'package:barber_osbao/packages/core/models/service_model.dart';
 import 'package:barber_osbao/packages/core/models/appointment.dart';
