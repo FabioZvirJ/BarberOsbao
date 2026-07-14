@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
+import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_section.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_table.dart';
@@ -38,6 +39,7 @@ class _FuncionariosPageState extends ConsumerState<FuncionariosPage> {
   Widget build(BuildContext context) {
     final state = ref.watch(funcionariosControllerProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isMobile = AppBreakpoints.isMobile(context);
 
     return AppPage(
       title: 'Funcionários',
@@ -46,24 +48,41 @@ class _FuncionariosPageState extends ConsumerState<FuncionariosPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: AppSearchBar(
-                  controller: _searchController,
-                  placeholder: 'Pesquisar profissional por nome, cargo ou especialidade...',
-                  onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
-                  onClear: () => setState(() => _searchQuery = ''),
-                ),
+          // Responsive toolbar
+          if (isMobile) ...
+            [
+              AppSearchBar(
+                controller: _searchController,
+                placeholder: 'Pesquisar profissional por nome, cargo ou especialidade...',
+                onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
+                onClear: () => setState(() => _searchQuery = ''),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(height: 10),
               AppButton(
                 label: 'Cadastrar Funcionário',
                 icon: const Icon(Icons.add, size: 16),
                 onPressed: () => _showFormDialog(context),
               ),
-            ],
-          ),
+            ]
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: AppSearchBar(
+                    controller: _searchController,
+                    placeholder: 'Pesquisar profissional por nome, cargo ou especialidade...',
+                    onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
+                    onClear: () => setState(() => _searchQuery = ''),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                AppButton(
+                  label: 'Cadastrar Funcionário',
+                  icon: const Icon(Icons.add, size: 16),
+                  onPressed: () => _showFormDialog(context),
+                ),
+              ],
+            ),
           const SizedBox(height: 16),
           AppFilters(
             options: const ['Todos', 'Ativo', 'Inativo'],
@@ -127,6 +146,7 @@ class _FuncionariosPageState extends ConsumerState<FuncionariosPage> {
     }
 
     return AppTable(
+      minWidth: 900,
       columns: [
         AppTableColumn(label: 'BARBEIRO', width: 200),
         AppTableColumn(label: 'CARGO'),

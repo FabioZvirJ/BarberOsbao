@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
+import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_section.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_table.dart';
@@ -38,6 +39,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
   Widget build(BuildContext context) {
     final state = ref.watch(clientesControllerProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isMobile = AppBreakpoints.isMobile(context);
 
     return AppPage(
       title: 'Clientes',
@@ -46,27 +48,47 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: AppSearchBar(
-                  controller: _searchController,
-                  placeholder: 'Pesquisar por nome, email ou telefone...',
-                  onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
-                  onClear: () => setState(() => _searchQuery = ''),
-                ),
+          // Responsive toolbar
+          if (isMobile) ...
+            [
+              AppSearchBar(
+                controller: _searchController,
+                placeholder: 'Pesquisar por nome, email ou telefone...',
+                onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
+                onClear: () => setState(() => _searchQuery = ''),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(height: 10),
               AppButton(
                 label: 'Novo Cliente',
                 icon: const Icon(Icons.add, size: 16),
                 onPressed: () => _showFormDialog(context),
               ),
-            ],
-          ),
+            ]
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: AppSearchBar(
+                    controller: _searchController,
+                    placeholder: 'Pesquisar por nome, email ou telefone...',
+                    onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
+                    onClear: () => setState(() => _searchQuery = ''),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                AppButton(
+                  label: 'Novo Cliente',
+                  icon: const Icon(Icons.add, size: 16),
+                  onPressed: () => _showFormDialog(context),
+                ),
+              ],
+            ),
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // Filters — Wrap so they reflow on smaller screens
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               AppFilters(
                 options: const ['Todos', 'Ativos', 'Inativos'],
@@ -163,6 +185,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
     }
 
     return AppTable(
+      minWidth: 900,
       columns: [
         AppTableColumn(label: 'FOTO', width: 60),
         AppTableColumn(label: 'NOME'),

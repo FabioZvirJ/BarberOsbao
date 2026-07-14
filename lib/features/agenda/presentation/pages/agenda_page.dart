@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
+import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_section.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_table.dart';
@@ -46,6 +47,7 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
     final employeesState = ref.watch(funcionariosControllerProvider);
     final servicesState = ref.watch(servicosControllerProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isMobile = AppBreakpoints.isMobile(context);
 
     // Resolve list of barbers for filtering
     final List<String> barbers = ['Todos'];
@@ -68,62 +70,83 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Filter section
-          Row(
-            children: [
-              Expanded(
-                child: AppSearchBar(
-                  controller: _searchController,
-                  placeholder: 'Pesquisar cliente, barbeiro ou serviço...',
-                  onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
-                  onClear: () => setState(() => _searchQuery = ''),
-                ),
+          // Responsive toolbar: row on tablet+, column on mobile
+          if (isMobile) ...
+            [
+              AppSearchBar(
+                controller: _searchController,
+                placeholder: 'Pesquisar cliente, barbeiro ou serviço...',
+                onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
+                onClear: () => setState(() => _searchQuery = ''),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(height: 10),
               AppButton(
                 label: 'Novo Agendamento',
                 icon: const Icon(Icons.add, size: 16),
                 onPressed: () => _showFormDialog(context, clientsState, employeesState, servicesState),
               ),
-            ],
-          ),
+            ]
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: AppSearchBar(
+                    controller: _searchController,
+                    placeholder: 'Pesquisar cliente, barbeiro ou serviço...',
+                    onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
+                    onClear: () => setState(() => _searchQuery = ''),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                AppButton(
+                  label: 'Novo Agendamento',
+                  icon: const Icon(Icons.add, size: 16),
+                  onPressed: () => _showFormDialog(context, clientsState, employeesState, servicesState),
+                ),
+              ],
+            ),
           const SizedBox(height: 16),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+          // Secondary filters
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  AppFilters(
+                    options: const ['Hoje', 'Semana', 'Mês', 'Todos'],
+                    selectedOption: _selectedDateRange,
+                    onSelected: (val) => setState(() {
+                      _selectedDateRange = val;
+                      _calendarSelectedDate = ''; // Clear calendar filter
+                    }),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.calendar_month, color: ThemeColors.primary),
+                    onPressed: () => _showCalendarPicker(context),
+                    tooltip: 'Escolher Data no Calendário',
+                  ),
+                  if (_calendarSelectedDate.isNotEmpty)
+                    Chip(
+                      backgroundColor: ThemeColors.primary.withValues(alpha: 0.2),
+                      label: Text(_calendarSelectedDate.split('-').reversed.join('/'), style: const TextStyle(color: ThemeColors.primary, fontSize: 11)),
+                      onDeleted: () => setState(() {
+                        _calendarSelectedDate = '';
+                        _selectedDateRange = 'Hoje';
+                      }),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 16,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Row(
-                    children: [
-                      AppFilters(
-                        options: const ['Hoje', 'Semana', 'Mês', 'Todos'],
-                        selectedOption: _selectedDateRange,
-                        onSelected: (val) => setState(() {
-                          _selectedDateRange = val;
-                          _calendarSelectedDate = ''; // Clear calendar filter
-                        }),
-                      ),
-                      const SizedBox(width: 16),
-                      IconButton(
-                        icon: const Icon(Icons.calendar_month, color: ThemeColors.primary),
-                        onPressed: () => _showCalendarPicker(context),
-                        tooltip: 'Escolher Data no Calendário',
-                      ),
-                      if (_calendarSelectedDate.isNotEmpty) ...[
-                        const SizedBox(width: 8),
-                        Chip(
-                          backgroundColor: ThemeColors.primary.withValues(alpha: 0.2),
-                          label: Text(_calendarSelectedDate.split('-').reversed.join('/'), style: const TextStyle(color: ThemeColors.primary, fontSize: 11)),
-                          onDeleted: () => setState(() {
-                            _calendarSelectedDate = '';
-                            _selectedDateRange = 'Hoje';
-                          }),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       const Text('Barbeiro: ', style: TextStyle(color: Colors.grey, fontSize: 12)),
                       const SizedBox(width: 6),
@@ -137,7 +160,11 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                           if (val != null) setState(() => _selectedBarber = val);
                         },
                       ),
-                      const SizedBox(width: 24),
+                    ],
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                       const Text('Status: ', style: TextStyle(color: Colors.grey, fontSize: 12)),
                       const SizedBox(width: 6),
                       DropdownButton<String>(
@@ -159,8 +186,8 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                     ],
                   ),
                 ],
-              );
-            },
+              ),
+            ],
           ),
           const SizedBox(height: 24),
 
@@ -266,6 +293,7 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
     };
 
     return AppTable(
+      minWidth: 900,
       columns: [
         AppTableColumn(label: 'DATA/HORÁRIO'),
         AppTableColumn(label: 'CLIENTE'),
