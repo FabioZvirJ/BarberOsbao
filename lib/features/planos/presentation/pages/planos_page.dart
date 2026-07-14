@@ -8,6 +8,7 @@ import 'package:barber_osbao/packages/design_system/organisms/app_table.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
+import 'package:barber_osbao/packages/design_system/molecules/app_card.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/planos/domain/models/plano.dart';
 import 'package:barber_osbao/features/planos/presentation/controllers/planos_controller.dart';
@@ -74,82 +75,223 @@ class PlanosPage extends ConsumerWidget {
       );
     }
 
-    return AppTable(
-      columns: [
-        AppTableColumn(label: 'PLANO'),
-        AppTableColumn(label: 'VALOR RECORRENTE'),
-        AppTableColumn(label: 'COBRANÇA'),
-        AppTableColumn(label: 'LIMITES (CORTES/DESCONTOS)'),
-        AppTableColumn(label: 'BENEFÍCIOS INCLUSOS', width: 350),
-        AppTableColumn(label: 'STATUS'),
-        AppTableColumn(label: 'AÇÕES', width: 100),
-      ],
-      rows: data.map((plan) {
-        return AppTableRow(
-          cells: [
-            Row(
-              children: [
-                Text(plan.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                if (plan.recommended) ...[
-                  const SizedBox(width: 8),
-                  const AppStatusChip(label: 'Destaque', type: AppStatusType.info),
-                ]
-              ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 960) {
+          return AppTable(
+            columns: [
+              AppTableColumn(label: 'PLANO'),
+              AppTableColumn(label: 'VALOR RECORRENTE'),
+              AppTableColumn(label: 'COBRANÇA'),
+              AppTableColumn(label: 'LIMITES (CORTES/DESCONTOS)'),
+              AppTableColumn(label: 'BENEFÍCIOS INCLUSOS', width: 350),
+              AppTableColumn(label: 'STATUS'),
+              AppTableColumn(label: 'AÇÕES', width: 100),
+            ],
+            rows: data.map((plan) {
+              return AppTableRow(
+                cells: [
+                  Row(
+                    children: [
+                      Text(plan.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      if (plan.recommended) ...[
+                        const SizedBox(width: 8),
+                        const AppStatusChip(label: 'Destaque', type: AppStatusType.info),
+                      ]
+                    ],
+                  ),
+                  Text(
+                    'R\$ ${plan.price.toStringAsFixed(2)}',
+                    style: const TextStyle(color: ThemeColors.primary, fontWeight: FontWeight.bold),
+                  ),
+                  Text(plan.period.toUpperCase()),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        plan.cutsCount == 9999 ? 'Cortes Ilimitados' : '${plan.cutsCount} cortes/mês',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      Text(
+                        plan.productDiscount > 0
+                            ? 'Desconto produtos: ${(plan.productDiscount * 100).toStringAsFixed(0)}%'
+                            : 'Sem desc. em produtos',
+                        style: const TextStyle(fontSize: 10, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: plan.benefits.map((b) => Row(
+                        children: [
+                          const Icon(Icons.check_circle_outline, color: ThemeColors.primary, size: 12),
+                          const SizedBox(width: 6),
+                          Expanded(child: Text(b, style: const TextStyle(fontSize: 12))),
+                        ],
+                      )).toList(),
+                    ),
+                  ),
+                  AppStatusChip(
+                    label: plan.status ? 'Ativo' : 'Inativo',
+                    type: plan.status ? AppStatusType.success : AppStatusType.danger,
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        onPressed: () => _showFormDialog(context, ref, plan),
+                        tooltip: 'Editar',
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, size: 18, color: ThemeColors.danger),
+                        onPressed: () => _showDeleteDialog(context, ref, plan),
+                        tooltip: 'Excluir',
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            }).toList(),
+          );
+        } else {
+          final isTablet = constraints.maxWidth > 650;
+          return GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: isTablet ? 2 : 1,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: isTablet ? 1.25 : 1.1,
             ),
-            Text(
-              'R\$ ${plan.price.toStringAsFixed(2)}',
-              style: const TextStyle(color: ThemeColors.primary, fontWeight: FontWeight.bold),
-            ),
-            Text(plan.period.toUpperCase()),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  plan.cutsCount == 9999 ? 'Cortes Ilimitados' : '${plan.cutsCount} cortes/mês',
-                  style: const TextStyle(fontSize: 12),
+            itemCount: data.length,
+            itemBuilder: (context, index) {
+              return _buildCard(context, data[index], isDark, ref);
+            },
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildCard(BuildContext context, Plano plan, bool isDark, WidgetRef ref) {
+    return AppCard(
+      borderGlow: plan.recommended,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      plan.name,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    if (plan.recommended)
+                      const AppStatusChip(label: 'Destaque', type: AppStatusType.info),
+                  ],
                 ),
-                Text(
-                  plan.productDiscount > 0
-                      ? 'Desconto produtos: ${(plan.productDiscount * 100).toStringAsFixed(0)}%'
-                      : 'Sem desc. em produtos',
-                  style: const TextStyle(fontSize: 10, color: Colors.grey),
+              ),
+              const SizedBox(width: 8),
+              AppStatusChip(
+                label: plan.status ? 'Ativo' : 'Inativo',
+                type: plan.status ? AppStatusType.success : AppStatusType.danger,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                'R\$ ${plan.price.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  color: ThemeColors.primary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '/ ${plan.period}',
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(),
+          const SizedBox(height: 8),
+          Text(
+            plan.cutsCount == 9999 ? 'Cortes Ilimitados' : '${plan.cutsCount} cortes/mês',
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            plan.productDiscount > 0
+                ? 'Desconto produtos: ${(plan.productDiscount * 100).toStringAsFixed(0)}%'
+                : 'Sem desc. em produtos',
+            style: const TextStyle(fontSize: 11, color: Colors.grey),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Benefícios:',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+          ),
+          const SizedBox(height: 6),
+          Expanded(
+            child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: plan.benefits.map((b) => Row(
-                  children: [
-                    const Icon(Icons.check_circle_outline, color: ThemeColors.primary, size: 12),
-                    const SizedBox(width: 6),
-                    Expanded(child: Text(b, style: const TextStyle(fontSize: 12))),
-                  ],
+                children: plan.benefits.map((b) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(top: 2.0),
+                        child: Icon(Icons.check_circle_outline, color: ThemeColors.primary, size: 12),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          b,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
                 )).toList(),
               ),
             ),
-            AppStatusChip(
-              label: plan.status ? 'Ativo' : 'Inativo',
-              type: plan.status ? AppStatusType.success : AppStatusType.danger,
-            ),
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined, size: 18),
-                  onPressed: () => _showFormDialog(context, ref, plan),
-                  tooltip: 'Editar',
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 18, color: ThemeColors.danger),
-                  onPressed: () => _showDeleteDialog(context, ref, plan),
-                  tooltip: 'Excluir',
-                ),
-              ],
-            ),
-          ],
-        );
-      }).toList(),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit_outlined, size: 18),
+                onPressed: () => _showFormDialog(context, ref, plan),
+                tooltip: 'Editar',
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.delete_outline, size: 18, color: ThemeColors.danger),
+                onPressed: () => _showDeleteDialog(context, ref, plan),
+                tooltip: 'Excluir',
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
