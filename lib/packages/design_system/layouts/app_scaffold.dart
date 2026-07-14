@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_sidebar.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
+import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 
 class AppScaffold extends StatelessWidget {
   final Widget body;
@@ -23,8 +24,7 @@ class AppScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final width = MediaQuery.of(context).size.width;
-    final isDesktop = width >= 960;
+    final isDesktop = AppBreakpoints.isDesktop(context);
 
     final sidebar = AppSidebar(
       activeId: activeSidebarId,

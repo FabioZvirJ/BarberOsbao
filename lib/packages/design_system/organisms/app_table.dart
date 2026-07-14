@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
+import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 
 class AppTableColumn {
   final String label;
@@ -19,17 +20,23 @@ class AppTable extends StatelessWidget {
   final List<AppTableColumn> columns;
   final List<AppTableRow> rows;
 
+  /// Minimum width for the table content when horizontal scroll is active.
+  /// Defaults to 700. Increase for tables with many columns.
+  final double minWidth;
+
   const AppTable({
     super.key,
     required this.columns,
     required this.rows,
+    this.minWidth = 700,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDesktop = AppBreakpoints.isDesktop(context);
 
-    return Column(
+    final tableContent = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Table Header
@@ -95,7 +102,7 @@ class AppTable extends StatelessWidget {
                     children: List.generate(row.cells.length, (cellIdx) {
                       final colWidth = columns[cellIdx].width;
                       final cellWidget = row.cells[cellIdx];
-                      
+
                       if (colWidth != null) {
                         return SizedBox(width: colWidth, child: cellWidget);
                       }
@@ -108,6 +115,17 @@ class AppTable extends StatelessWidget {
           ),
         ),
       ],
+    );
+
+    // On desktop show the table full-width; on tablet/mobile wrap in horizontal scroll.
+    if (isDesktop) return tableContent;
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minWidth: minWidth),
+        child: tableContent,
+      ),
     );
   }
 }
