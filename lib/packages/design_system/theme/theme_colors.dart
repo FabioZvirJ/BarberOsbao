@@ -21,7 +21,7 @@ class ThemeColors {
 
   static List<BoxShadow> get softShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.04),
+      color: Colors.black.withValues(alpha: 0.04),
       blurRadius: 20,
       offset: const Offset(0, 10),
     ),
@@ -29,7 +29,7 @@ class ThemeColors {
 
   static List<BoxShadow> get goldGlow => [
     BoxShadow(
-      color: primary.withOpacity(0.2),
+      color: primary.withValues(alpha: 0.2),
       blurRadius: 15,
       offset: const Offset(0, 5),
     ),

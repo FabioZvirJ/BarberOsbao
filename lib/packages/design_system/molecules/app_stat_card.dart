@@ -39,7 +39,7 @@ class AppStatCard extends StatelessWidget {
                   color: isDark ? Colors.white60 : Colors.black45,
                 ),
               ),
-              if (icon != null) icon!,
+              ?icon,
             ],
           ),
           const SizedBox(height: 12),

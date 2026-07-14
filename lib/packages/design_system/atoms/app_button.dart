@@ -46,7 +46,6 @@ class AppButton extends StatelessWidget {
         border = BorderSide(color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300, width: 1.5);
         break;
       case AppButtonVariant.primary:
-      default:
         bg = ThemeColors.primary;
         fg = isDark ? Colors.black : Colors.white;
         break;

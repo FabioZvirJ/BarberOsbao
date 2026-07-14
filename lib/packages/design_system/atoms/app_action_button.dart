@@ -48,7 +48,7 @@ class _AppActionButtonState extends State<AppActionButton> {
             boxShadow: _isHovered
                 ? [
                     BoxShadow(
-                      color: widget.color.withOpacity(0.15),
+                      color: widget.color.withValues(alpha: 0.15),
                       blurRadius: 15,
                       offset: const Offset(0, 8),
                     )
@@ -63,7 +63,7 @@ class _AppActionButtonState extends State<AppActionButton> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _isHovered ? widget.color : widget.color.withOpacity(0.1),
+                  color: _isHovered ? widget.color : widget.color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(

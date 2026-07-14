@@ -81,7 +81,7 @@ class AppScaffold extends StatelessWidget {
                         ],
                       ),
                     ),
-                  if (header != null) header!,
+                  ?header,
                   Expanded(
                     child: body,
                   ),

@@ -22,24 +22,23 @@ class AppBadge extends StatelessWidget {
 
     switch (variant) {
       case AppBadgeVariant.primary:
-        bg = ThemeColors.primary.withOpacity(0.12);
+        bg = ThemeColors.primary.withValues(alpha: 0.12);
         fg = ThemeColors.primary;
         break;
       case AppBadgeVariant.success:
-        bg = ThemeColors.success.withOpacity(0.12);
+        bg = ThemeColors.success.withValues(alpha: 0.12);
         fg = ThemeColors.success;
         break;
       case AppBadgeVariant.warning:
-        bg = ThemeColors.warning.withOpacity(0.12);
+        bg = ThemeColors.warning.withValues(alpha: 0.12);
         fg = ThemeColors.warning;
         break;
       case AppBadgeVariant.danger:
-        bg = ThemeColors.danger.withOpacity(0.12);
+        bg = ThemeColors.danger.withValues(alpha: 0.12);
         fg = ThemeColors.danger;
         break;
       case AppBadgeVariant.neutral:
-      default:
-        bg = isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05);
+        bg = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05);
         fg = isDark ? Colors.white70 : Colors.black54;
         break;
     }

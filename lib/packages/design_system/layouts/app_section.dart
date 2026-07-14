@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 
 class AppSection extends StatelessWidget {
   final String title;
@@ -48,7 +47,7 @@ class AppSection extends StatelessWidget {
                 ],
               ],
             ),
-            if (trailing != null) trailing!,
+            ?trailing,
           ],
         ),
         const SizedBox(height: 20),

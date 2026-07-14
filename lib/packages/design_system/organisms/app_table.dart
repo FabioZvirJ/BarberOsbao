@@ -36,7 +36,7 @@ class AppTable extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           decoration: BoxDecoration(
-            color: isDark ? ThemeColors.darkSurface.withOpacity(0.5) : Colors.grey.shade50,
+            color: isDark ? ThemeColors.darkSurface.withValues(alpha: 0.5) : Colors.grey.shade50,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(ThemeColors.radius),
               topRight: Radius.circular(ThemeColors.radius),
