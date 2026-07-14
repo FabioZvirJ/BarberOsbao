@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
+import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_table.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_card.dart';
@@ -30,7 +31,7 @@ class ClubePage extends ConsumerWidget {
           // Statistics and Rules Row
           LayoutBuilder(
             builder: (context, constraints) {
-              final isDesktop = constraints.maxWidth > 800;
+              final isDesktop = constraints.maxWidth >= AppBreakpoints.desktop;
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -91,9 +92,12 @@ class ClubePage extends ConsumerWidget {
           ),
           const SizedBox(height: 32),
 
-          // Coupons section
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // Coupons section header — responsive
+          Wrap(
+            spacing: 12,
+            runSpacing: 10,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               const Text(
                 'Recompensas do Clube',
@@ -151,6 +155,7 @@ class ClubePage extends ConsumerWidget {
     }
 
     return AppTable(
+      minWidth: 900,
       columns: [
         AppTableColumn(label: 'IMAGEM', width: 60),
         AppTableColumn(label: 'RECOMPENSA', width: 220),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
+import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_section.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_card.dart';
@@ -91,31 +92,56 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
               child: AppCard(
                 child: Column(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(child: AppInput(label: 'Nome Comercial', controller: _nameController)),
-                        const SizedBox(width: 16),
-                        Expanded(child: AppInput(label: 'Link do Logotipo (URL)', controller: _logoController)),
-                      ],
-                    ),
+                    // Responsive 2-col layout
+                    AppBreakpoints.isMobile(context)
+                        ? Column(
+                            children: [
+                              AppInput(label: 'Nome Comercial', controller: _nameController),
+                              const SizedBox(height: 16),
+                              AppInput(label: 'Link do Logotipo (URL)', controller: _logoController),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              Expanded(child: AppInput(label: 'Nome Comercial', controller: _nameController)),
+                              const SizedBox(width: 16),
+                              Expanded(child: AppInput(label: 'Link do Logotipo (URL)', controller: _logoController)),
+                            ],
+                          ),
                     const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(child: AppInput(label: 'Telefone de Contato', controller: _phoneController)),
-                        const SizedBox(width: 16),
-                        Expanded(child: AppInput(label: 'Chave PIX Recebimento', controller: _pixController)),
-                      ],
-                    ),
+                    AppBreakpoints.isMobile(context)
+                        ? Column(
+                            children: [
+                              AppInput(label: 'Telefone de Contato', controller: _phoneController),
+                              const SizedBox(height: 16),
+                              AppInput(label: 'Chave PIX Recebimento', controller: _pixController),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              Expanded(child: AppInput(label: 'Telefone de Contato', controller: _phoneController)),
+                              const SizedBox(width: 16),
+                              Expanded(child: AppInput(label: 'Chave PIX Recebimento', controller: _pixController)),
+                            ],
+                          ),
                     const SizedBox(height: 16),
                     AppInput(label: 'Endereço Completo', controller: _addressController),
                     const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(child: AppInput(label: 'Instagram', controller: _instaController, placeholder: '@usuario')),
-                        const SizedBox(width: 16),
-                        Expanded(child: AppInput(label: 'Facebook Page', controller: _faceController)),
-                      ],
-                    ),
+                    AppBreakpoints.isMobile(context)
+                        ? Column(
+                            children: [
+                              AppInput(label: 'Instagram', controller: _instaController, placeholder: '@usuario'),
+                              const SizedBox(height: 16),
+                              AppInput(label: 'Facebook Page', controller: _faceController),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              Expanded(child: AppInput(label: 'Instagram', controller: _instaController, placeholder: '@usuario')),
+                              const SizedBox(width: 16),
+                              Expanded(child: AppInput(label: 'Facebook Page', controller: _faceController)),
+                            ],
+                          ),
                   ],
                 ),
               ),
@@ -123,14 +149,12 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
             const SizedBox(height: 32),
 
             // 2. Schedule options & working hours
-            LayoutBuilder(
-              builder: (context, constraints) {
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Working hours
-                    Expanded(
-                      child: AppSection(
+            AppBreakpoints.isMobile(context)
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Working hours
+                      AppSection(
                         title: 'Horário de Funcionamento',
                         subtitle: 'Defina os horários de atendimento da loja',
                         child: AppCard(
@@ -145,11 +169,9 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 24),
-                    // Intervals and theme preference
-                    Expanded(
-                      child: AppSection(
+                      const SizedBox(height: 24),
+                      // Intervals and theme preference
+                      AppSection(
                         title: 'Configurações de Agendamento',
                         subtitle: 'Defina intervalos e opções visuais',
                         child: AppCard(
@@ -198,11 +220,84 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                );
-              },
-            ),
+                    ],
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Working hours
+                      Expanded(
+                        child: AppSection(
+                          title: 'Horário de Funcionamento',
+                          subtitle: 'Defina os horários de atendimento da loja',
+                          child: AppCard(
+                            child: Column(
+                              children: [
+                                _buildHourRow('Segunda a Sexta', settings.workingHours['Segunda a Sexta'] ?? '09:00 - 20:00'),
+                                const Divider(height: 24),
+                                _buildHourRow('Sábado', settings.workingHours['Sábado'] ?? '09:00 - 18:00'),
+                                const Divider(height: 24),
+                                _buildHourRow('Domingo', settings.workingHours['Domingo'] ?? 'Fechado', isOpen: false),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 24),
+                      // Intervals and theme preference
+                      Expanded(
+                        child: AppSection(
+                          title: 'Configurações de Agendamento',
+                          subtitle: 'Defina intervalos e opções visuais',
+                          child: AppCard(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                DropdownButtonFormField<String>(
+                                  dropdownColor: ThemeColors.darkBg,
+                                  initialValue: settings.slotInterval,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Tempo entre Atendimentos',
+                                    labelStyle: TextStyle(color: Colors.white70, fontSize: 13),
+                                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
+                                  ),
+                                  style: const TextStyle(color: Colors.white),
+                                  items: const [
+                                    DropdownMenuItem(value: '15', child: Text('15 Minutos')),
+                                    DropdownMenuItem(value: '30', child: Text('30 Minutos')),
+                                    DropdownMenuItem(value: '45', child: Text('45 Minutos')),
+                                    DropdownMenuItem(value: '60', child: Text('60 Minutos')),
+                                  ],
+                                  onChanged: (val) {
+                                    if (val != null) {
+                                      ref.read(businessSettingsControllerProvider.notifier).updateSettings(
+                                            settings.copyWith(slotInterval: val),
+                                          );
+                                    }
+                                  },
+                                ),
+                                const SizedBox(height: 24),
+                                SwitchListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  title: const Text('Tema Escuro (Dark Mode)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                  subtitle: const Text('Alterna a identidade visual da dashboard admin'),
+                                  value: user?.theme == 'dark',
+                                  activeThumbColor: ThemeColors.primary,
+                                  onChanged: (val) {
+                                    if (user != null) {
+                                      ref.read(authControllerProvider.notifier).updateUser(
+                                            user.copyWith(theme: val ? 'dark' : 'light'),
+                                          );
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
             const SizedBox(height: 32),
 
             // 3. Notification switches & WhatsApp Integration
