@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
+import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_section.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_table.dart';
@@ -30,6 +31,7 @@ class _EstoquePageState extends ConsumerState<EstoquePage> {
     final productsState = ref.watch(produtosControllerProvider);
     final movementsState = ref.watch(movimentacoesControllerProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isMobile = AppBreakpoints.isMobile(context);
 
     return AppPage(
       title: 'Estoque',
@@ -38,9 +40,12 @@ class _EstoquePageState extends ConsumerState<EstoquePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header Actions
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // Header Actions — responsive
+          Wrap(
+            spacing: 12,
+            runSpacing: 10,
+            alignment: isMobile ? WrapAlignment.start : WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               AppFilters(
                 options: const ['Movimentações', 'Baixo Estoque', 'Entradas', 'Saídas'],
@@ -109,6 +114,7 @@ class _EstoquePageState extends ConsumerState<EstoquePage> {
       }
 
       return AppTable(
+        minWidth: 700,
         columns: [
           AppTableColumn(label: 'PRODUTO'),
           AppTableColumn(label: 'CÓDIGO'),
@@ -168,6 +174,7 @@ class _EstoquePageState extends ConsumerState<EstoquePage> {
     }
 
     return AppTable(
+      minWidth: 800,
       columns: [
         AppTableColumn(label: 'CÓDIGO MOV.'),
         AppTableColumn(label: 'PRODUTO'),

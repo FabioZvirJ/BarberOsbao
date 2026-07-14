@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
+import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_section.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_table.dart';
@@ -46,9 +47,11 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
           _buildChartsRow(summaryState),
           const SizedBox(height: 32),
 
-          // Filters and Actions Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // Filters and Actions — responsive Wrap
+          Wrap(
+            spacing: 12,
+            runSpacing: 10,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               AppFilters(
                 options: const ['Fluxo de Caixa', 'Receitas', 'Despesas', 'Comissões'],
@@ -56,6 +59,7 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
                 onSelected: (val) => setState(() => _selectedTab = val),
               ),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   AppButton(
                     label: 'Exportar Excel',
@@ -177,7 +181,7 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isDesktop = constraints.maxWidth > 800;
+        final isDesktop = constraints.maxWidth >= AppBreakpoints.desktop;
         return Row(
           children: [
             Expanded(
@@ -242,6 +246,7 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
     }
 
     return AppTable(
+      minWidth: 850,
       columns: [
         AppTableColumn(label: 'DESCRIÇÃO', width: 250),
         AppTableColumn(label: 'CATEGORIA'),

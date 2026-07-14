@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
+import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_section.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_table.dart';
@@ -38,6 +39,7 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
     final state = ref.watch(produtosControllerProvider);
     final categoriesState = ref.watch(categoriasControllerProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isMobile = AppBreakpoints.isMobile(context);
 
     // Resolve categories
     final List<String> categories = ['Todos'];
@@ -61,24 +63,41 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: AppSearchBar(
-                  controller: _searchController,
-                  placeholder: 'Pesquisar produto por nome, marca ou fornecedor...',
-                  onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
-                  onClear: () => setState(() => _searchQuery = ''),
-                ),
+          // Responsive toolbar
+          if (isMobile) ...
+            [
+              AppSearchBar(
+                controller: _searchController,
+                placeholder: 'Pesquisar produto por nome, marca ou fornecedor...',
+                onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
+                onClear: () => setState(() => _searchQuery = ''),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(height: 10),
               AppButton(
                 label: 'Novo Produto',
                 icon: const Icon(Icons.add, size: 16),
                 onPressed: () => _showFormDialog(context, categories.where((c) => c != 'Todos').toList()),
               ),
-            ],
-          ),
+            ]
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: AppSearchBar(
+                    controller: _searchController,
+                    placeholder: 'Pesquisar produto por nome, marca ou fornecedor...',
+                    onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
+                    onClear: () => setState(() => _searchQuery = ''),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                AppButton(
+                  label: 'Novo Produto',
+                  icon: const Icon(Icons.add, size: 16),
+                  onPressed: () => _showFormDialog(context, categories.where((c) => c != 'Todos').toList()),
+                ),
+              ],
+            ),
           const SizedBox(height: 16),
           AppFilters(
             options: categories,
@@ -140,6 +159,7 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
     }
 
     return AppTable(
+      minWidth: 900,
       columns: [
         AppTableColumn(label: 'IMAGEM', width: 60),
         AppTableColumn(label: 'PRODUTO', width: 220),
