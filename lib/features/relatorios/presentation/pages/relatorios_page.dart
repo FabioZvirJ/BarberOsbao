@@ -96,7 +96,7 @@ class RelatoriosPage extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.1),
+                          color: color.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
@@ -170,13 +170,17 @@ class RelatoriosPage extends ConsumerWidget {
       barrierDismissible: false,
       builder: (ctx) {
         Future.delayed(const Duration(seconds: 1), () {
-          Navigator.of(ctx).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Download concluído: $title.$format'),
-              backgroundColor: ThemeColors.success,
-            ),
-          );
+          if (ctx.mounted) {
+            Navigator.of(ctx).pop();
+          }
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Download concluído: $title.$format'),
+                backgroundColor: ThemeColors.success,
+              ),
+            );
+          }
         });
 
         return AlertDialog(
