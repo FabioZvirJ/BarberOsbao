@@ -1,6 +1,6 @@
 import 'package:barber_osbao/features/financeiro/domain/models/transacao.dart';
-import 'package:barber_osbao/features/financeiro/domain/models/comanda.dart';
-import 'package:barber_osbao/features/financeiro/domain/models/caixa_turno.dart';
+import 'package:barber_osbao/features/financeiro/domain/models/bill.dart';
+import 'package:barber_osbao/features/financeiro/domain/models/cash_shift.dart';
 import 'package:barber_osbao/features/financeiro/domain/repositories/financeiro_repository.dart';
 
 class MockFinanceiroRepository implements FinanceiroRepository {
@@ -18,34 +18,34 @@ class MockFinanceiroRepository implements FinanceiroRepository {
     const TransacaoFinanceira(id: 'f_11', type: 'expense', description: 'Comissão - Marcos Silva (Semana 27)', amount: 620.0, category: 'Comissão', date: '2026-07-07', paymentMethod: 'PIX', status: 'paid'),
   ];
 
-  final List<Comanda> _comandas = [
-    const Comanda(
+  final List<Bill> _bills = [
+    const Bill(
       id: 'c_1',
-      clienteNome: 'Gustavo Santos',
+      clientName: 'Gustavo Santos',
       status: 'open',
-      itens: [
-        ItemComanda(id: 's_1', name: 'Corte Degradê', type: 'service', price: 45.0, professionalName: 'Marcos Silva'),
+      items: [
+        BillItem(id: 's_1', name: 'Corte Degradê', type: 'service', price: 45.0, professionalName: 'Marcos Silva'),
       ],
-      pagamentos: [],
+      payments: [],
       date: '2026-07-09',
       time: '14:30',
     ),
-    const Comanda(
+    const Bill(
       id: 'c_2',
-      clienteNome: 'Bruno Lima',
+      clientName: 'Bruno Lima',
       status: 'open',
-      itens: [
-        ItemComanda(id: 's_2', name: 'Barba Completa', type: 'service', price: 35.0, professionalName: 'Arthur Santos'),
-        ItemComanda(id: 'p_1', name: 'Pomada Matte', type: 'product', price: 65.0),
+      items: [
+        BillItem(id: 's_2', name: 'Barba Completa', type: 'service', price: 35.0, professionalName: 'Arthur Santos'),
+        BillItem(id: 'p_1', name: 'Pomada Matte', type: 'product', price: 65.0),
       ],
-      pagamentos: [],
+      payments: [],
       date: '2026-07-09',
       time: '15:15',
     ),
   ];
 
-  final List<CaixaTurno> _caixas = [];
-  final List<MovimentoCaixa> _movimentos = [];
+  final List<CashShift> _cashShifts = [];
+  final List<CashMovement> _cashMovements = [];
 
   @override
   Future<List<TransacaoFinanceira>> getTransacoes() async {
@@ -120,60 +120,60 @@ class MockFinanceiroRepository implements FinanceiroRepository {
     };
   }
 
-  // Comanda Operations implementation
+  // Bill Operations implementation
   @override
-  Future<List<Comanda>> getComandas() async {
+  Future<List<Bill>> getBills() async {
     await Future.delayed(const Duration(milliseconds: 150));
-    return List.from(_comandas);
+    return List.from(_bills);
   }
 
   @override
-  Future<Comanda> saveComanda(Comanda comanda) async {
+  Future<Bill> saveBill(Bill bill) async {
     await Future.delayed(const Duration(milliseconds: 150));
-    final idx = _comandas.indexWhere((c) => c.id == comanda.id);
+    final idx = _bills.indexWhere((c) => c.id == bill.id);
     if (idx != -1) {
-      _comandas[idx] = comanda;
-      return comanda;
+      _bills[idx] = bill;
+      return bill;
     } else {
-      final newComanda = comanda.copyWith(
-        id: comanda.id.isEmpty ? 'c_${DateTime.now().millisecondsSinceEpoch}' : comanda.id,
+      final newBill = bill.copyWith(
+        id: bill.id.isEmpty ? 'c_${DateTime.now().millisecondsSinceEpoch}' : bill.id,
       );
-      _comandas.add(newComanda);
-      return newComanda;
+      _bills.add(newBill);
+      return newBill;
     }
   }
 
-  // Caixa Operations implementation
+  // Cash Register Operations implementation
   @override
-  Future<CaixaTurno?> getActiveCaixa() async {
+  Future<CashShift?> getActiveCashShift() async {
     await Future.delayed(const Duration(milliseconds: 150));
-    final openCaixas = _caixas.where((c) => c.status == 'open').toList();
-    return openCaixas.isNotEmpty ? openCaixas.first : null;
+    final openShifts = _cashShifts.where((c) => c.status == 'open').toList();
+    return openShifts.isNotEmpty ? openShifts.first : null;
   }
 
   @override
-  Future<CaixaTurno> abrirCaixa(double saldoInicial) async {
+  Future<CashShift> openCashShift(double initialBalance) async {
     await Future.delayed(const Duration(milliseconds: 200));
     final now = DateTime.now();
     final todayStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
     final timeStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
     
-    final newCaixa = CaixaTurno(
+    final newShift = CashShift(
       id: 'cx_${now.millisecondsSinceEpoch}',
       operatorName: 'Fábio Zvir',
       openDate: todayStr,
       openTime: timeStr,
-      initialBalance: saldoInicial,
+      initialBalance: initialBalance,
       status: 'open',
     );
-    _caixas.add(newCaixa);
-    return newCaixa;
+    _cashShifts.add(newShift);
+    return newShift;
   }
 
   @override
-  Future<CaixaTurno> fecharCaixa(double saldoFinal, double dinheiroInformado) async {
+  Future<CashShift> closeCashShift(double finalBalance, double reportedCash) async {
     await Future.delayed(const Duration(milliseconds: 200));
-    final active = await getActiveCaixa();
+    final active = await getActiveCashShift();
     if (active == null) {
       throw Exception('Nenhum caixa ativo encontrado para fechamento.');
     }
@@ -184,47 +184,46 @@ class MockFinanceiroRepository implements FinanceiroRepository {
 
     // Calculate expected balance: initialBalance + all cash entries - all cash exits
     double moneyEntries = 0.0;
-    final activeMovements = _movimentos.where((m) => m.caixaId == active.id).toList();
+    final activeMovements = _cashMovements.where((m) => m.cashShiftId == active.id).toList();
     for (final mv in activeMovements) {
-      if (mv.type == 'entrada' || mv.type == 'suprimento') {
+      if (mv.type == 'input' || mv.type == 'supply') {
         moneyEntries += mv.amount;
-      } else if (mv.type == 'saida' || mv.type == 'sangria') {
+      } else if (mv.type == 'output' || mv.type == 'withdraw') {
         moneyEntries -= mv.amount;
       }
     }
 
-    final moneyExpected = active.initialBalance + moneyEntries;
+    final totalExpected = active.initialBalance + moneyEntries;
 
     final closed = active.copyWith(
       closeDate: todayStr,
       closeTime: timeStr,
-      finalBalance: saldoFinal,
-      moneyExpected: moneyExpected,
-      moneyReported: dinheiroInformado,
+      totalExpected: totalExpected,
+      totalReported: reportedCash,
       status: 'closed',
     );
 
-    final idx = _caixas.indexWhere((c) => c.id == active.id);
+    final idx = _cashShifts.indexWhere((c) => c.id == active.id);
     if (idx != -1) {
-      _caixas[idx] = closed;
+      _cashShifts[idx] = closed;
     }
 
     return closed;
   }
 
   @override
-  Future<MovimentoCaixa> addMovimentoCaixa(MovimentoCaixa movimento) async {
+  Future<CashMovement> addCashMovement(CashMovement movement) async {
     await Future.delayed(const Duration(milliseconds: 150));
-    final newM = movimento.copyWith(
+    final newM = movement.copyWith(
       id: 'mv_${DateTime.now().millisecondsSinceEpoch}',
     );
-    _movimentos.add(newM);
+    _cashMovements.add(newM);
     return newM;
   }
 
   @override
-  Future<List<MovimentoCaixa>> getMovimentosCaixa(String caixaId) async {
+  Future<List<CashMovement>> getCashMovements(String cashShiftId) async {
     await Future.delayed(const Duration(milliseconds: 150));
-    return _movimentos.where((m) => m.caixaId == caixaId).toList();
+    return _cashMovements.where((m) => m.cashShiftId == cashShiftId).toList();
   }
 }
