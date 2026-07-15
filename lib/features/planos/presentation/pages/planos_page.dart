@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
+import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_section.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_table.dart';
@@ -77,8 +78,9 @@ class PlanosPage extends ConsumerWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth > 960) {
+        if (AppBreakpoints.isDesktop(context)) {
           return AppTable(
+            minWidth: 1000,
             columns: [
               AppTableColumn(label: 'PLANO'),
               AppTableColumn(label: 'VALOR RECORRENTE'),
