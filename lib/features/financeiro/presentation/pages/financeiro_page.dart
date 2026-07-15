@@ -15,8 +15,8 @@ import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/financeiro/domain/models/transacao.dart';
 import 'package:barber_osbao/features/financeiro/presentation/controllers/financeiro_controller.dart';
-import 'package:barber_osbao/features/financeiro/presentation/pages/comandas_page.dart';
-import 'package:barber_osbao/features/financeiro/presentation/pages/caixa_page.dart';
+import 'package:barber_osbao/features/financeiro/presentation/pages/bills_page.dart';
+import 'package:barber_osbao/features/financeiro/presentation/pages/cash_page.dart';
 
 class FinanceiroPage extends ConsumerStatefulWidget {
   const FinanceiroPage({super.key});
@@ -52,9 +52,9 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
 
           // Render selected module
           if (_selectedModule == 'Comandas & PDV')
-            const ComandasPage()
+            const BillsPage()
           else if (_selectedModule == 'Operação de Caixa')
-            const CaixaPage()
+            const CashPage()
           else ...[
             // Stat cards summary
             _buildStatCards(summaryState),
