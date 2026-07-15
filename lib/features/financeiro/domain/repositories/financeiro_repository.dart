@@ -1,20 +1,20 @@
 import 'package:barber_osbao/features/financeiro/domain/models/transacao.dart';
-import 'package:barber_osbao/features/financeiro/domain/models/comanda.dart';
-import 'package:barber_osbao/features/financeiro/domain/models/caixa_turno.dart';
+import 'package:barber_osbao/features/financeiro/domain/models/bill.dart';
+import 'package:barber_osbao/features/financeiro/domain/models/cash_shift.dart';
 
 abstract class FinanceiroRepository {
   Future<List<TransacaoFinanceira>> getTransacoes();
   Future<TransacaoFinanceira> createTransacao(TransacaoFinanceira transacao);
   Future<Map<String, dynamic>> getFinanceSummary();
 
-  // Comanda Operations
-  Future<List<Comanda>> getComandas();
-  Future<Comanda> saveComanda(Comanda comanda);
+  // Bill Operations
+  Future<List<Bill>> getBills();
+  Future<Bill> saveBill(Bill bill);
 
-  // Caixa Operations
-  Future<CaixaTurno?> getActiveCaixa();
-  Future<CaixaTurno> abrirCaixa(double saldoInicial);
-  Future<CaixaTurno> fecharCaixa(double saldoFinal, double dinheiroInformado);
-  Future<MovimentoCaixa> addMovimentoCaixa(MovimentoCaixa movimento);
-  Future<List<MovimentoCaixa>> getMovimentosCaixa(String caixaId);
+  // Cash Register Operations
+  Future<CashShift?> getActiveCashShift();
+  Future<CashShift> openCashShift(double initialBalance);
+  Future<CashShift> closeCashShift(double finalBalance, double reportedCash);
+  Future<CashMovement> addCashMovement(CashMovement movement);
+  Future<List<CashMovement>> getCashMovements(String cashShiftId);
 }
