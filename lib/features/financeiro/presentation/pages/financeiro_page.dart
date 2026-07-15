@@ -15,6 +15,8 @@ import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/financeiro/domain/models/transacao.dart';
 import 'package:barber_osbao/features/financeiro/presentation/controllers/financeiro_controller.dart';
+import 'package:barber_osbao/features/financeiro/presentation/pages/comandas_page.dart';
+import 'package:barber_osbao/features/financeiro/presentation/pages/caixa_page.dart';
 
 class FinanceiroPage extends ConsumerStatefulWidget {
   const FinanceiroPage({super.key});
@@ -24,6 +26,7 @@ class FinanceiroPage extends ConsumerStatefulWidget {
 }
 
 class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
+  String _selectedModule = 'Relatórios';
   String _selectedTab = 'Fluxo de Caixa';
 
   @override
@@ -39,58 +42,73 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Stat cards summary
-          _buildStatCards(summaryState),
-          const SizedBox(height: 24),
-
-          // Charts Row
-          _buildChartsRow(summaryState),
-          const SizedBox(height: 32),
-
-          // Filters and Actions — responsive Wrap
-          Wrap(
-            spacing: 12,
-            runSpacing: 10,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              AppFilters(
-                options: const ['Fluxo de Caixa', 'Receitas', 'Despesas', 'Comissões'],
-                selectedOption: _selectedTab,
-                onSelected: (val) => setState(() => _selectedTab = val),
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AppButton(
-                    label: 'Exportar Excel',
-                    icon: const Icon(Icons.download, size: 16),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Planilha financeira exportada com sucesso!'),
-                          backgroundColor: ThemeColors.success,
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 12),
-                  AppButton(
-                    label: 'Nova Transação',
-                    icon: const Icon(Icons.add, size: 16),
-                    onPressed: () => _showFormDialog(context),
-                  ),
-                ],
-              ),
-            ],
+          // Module Selection Bar
+          AppFilters(
+            options: const ['Relatórios', 'Comandas & PDV', 'Operação de Caixa'],
+            selectedOption: _selectedModule,
+            onSelected: (val) => setState(() => _selectedModule = val),
           ),
           const SizedBox(height: 24),
 
-          // Entries table
-          AppSection(
-            title: _selectedTab,
-            subtitle: 'Histórico detalhado de transações financeiras',
-            child: _buildContent(transacoesState, isDark),
-          ),
+          // Render selected module
+          if (_selectedModule == 'Comandas & PDV')
+            const ComandasPage()
+          else if (_selectedModule == 'Operação de Caixa')
+            const CaixaPage()
+          else ...[
+            // Stat cards summary
+            _buildStatCards(summaryState),
+            const SizedBox(height: 24),
+
+            // Charts Row
+            _buildChartsRow(summaryState),
+            const SizedBox(height: 32),
+
+            // Filters and Actions — responsive Wrap
+            Wrap(
+              spacing: 12,
+              runSpacing: 10,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                AppFilters(
+                  options: const ['Fluxo de Caixa', 'Receitas', 'Despesas', 'Comissões'],
+                  selectedOption: _selectedTab,
+                  onSelected: (val) => setState(() => _selectedTab = val),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppButton(
+                      label: 'Exportar Excel',
+                      icon: const Icon(Icons.download, size: 16),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Planilha financeira exportada com sucesso!'),
+                            backgroundColor: ThemeColors.success,
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 12),
+                    AppButton(
+                      label: 'Nova Transação',
+                      icon: const Icon(Icons.add, size: 16),
+                      onPressed: () => _showFormDialog(context),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Entries table
+            AppSection(
+              title: _selectedTab,
+              subtitle: 'Histórico detalhado de transações financeiras',
+              child: _buildContent(transacoesState, isDark),
+            ),
+          ],
         ],
       ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, end: 0, curve: Curves.easeOut),
     );
