@@ -43,8 +43,10 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
     super.dispose();
   }
 
-  double get _totalPrice => _selectedServices.fold(0.0, (sum, s) => sum + s.price);
-  int get _totalDuration => _selectedServices.fold(0, (sum, s) => sum + s.durationMinutes);
+  double get _totalPrice =>
+      _selectedServices.fold(0.0, (sum, s) => sum + s.price);
+  int get _totalDuration =>
+      _selectedServices.fold(0, (sum, s) => sum + s.durationMinutes);
 
   void _nextStep() {
     setState(() => _currentStep++);
@@ -55,12 +57,42 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
   }
 
   Future<void> _submitBooking() async {
-    if (_selectedBarber == null || _selectedDate == null || _selectedTime == null || _selectedServices.isEmpty) {
+    if (_selectedBarber == null ||
+        _selectedDate == null ||
+        _selectedTime == null ||
+        _selectedServices.isEmpty) {
       return;
     }
 
     final user = ref.read(authControllerProvider).value;
     if (user == null) return;
+
+    final dateStr = _selectedDate!.toIso8601String().split('T')[0];
+    final appointmentsState = ref.read(appointmentsControllerProvider);
+    final existingList = appointmentsState.value ?? [];
+
+    // Double check conflict
+    final hasConflict = existingList.any(
+      (a) =>
+          a.barberId == _selectedBarber!.id &&
+          a.date == dateStr &&
+          a.time == _selectedTime &&
+          a.status != 'cancelled',
+    );
+
+    if (hasConflict) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Este horário já está reservado. Por favor, escolha outro.',
+            ),
+            backgroundColor: ThemeColors.warning,
+          ),
+        );
+      }
+      return;
+    }
 
     final apt = Appointment(
       id: 'apt_${DateTime.now().millisecondsSinceEpoch}',
@@ -69,7 +101,7 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
       barberName: _selectedBarber!.name,
       barberAvatar: _selectedBarber!.avatarUrl,
       services: _selectedServices,
-      date: _selectedDate!.toIso8601String().split('T')[0],
+      date: dateStr,
       time: _selectedTime!,
       totalValue: _totalPrice,
       status: 'confirmed',
@@ -77,7 +109,9 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
     );
 
     try {
-      await ref.read(appointmentsControllerProvider.notifier).createAppointment(apt);
+      await ref
+          .read(appointmentsControllerProvider.notifier)
+          .createAppointment(apt);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -119,7 +153,10 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: AppCard(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 borderGlow: isSelected,
                 onTap: () {
                   setState(() {
@@ -135,7 +172,9 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
                     Icon(
                       srv.category == 'cabelo'
                           ? Icons.content_cut
-                          : (srv.category == 'barba' ? Icons.face : Icons.brush),
+                          : (srv.category == 'barba'
+                                ? Icons.face
+                                : Icons.brush),
                       color: ThemeColors.primary,
                       size: 24,
                     ),
@@ -144,10 +183,16 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(srv.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(
+                            srv.name,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           Text(
                             '${srv.durationMinutes} min • R\$ ${srv.price.toStringAsFixed(2)}',
-                            style: const TextStyle(color: Colors.grey, fontSize: 13),
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 13,
+                            ),
                           ),
                         ],
                       ),
@@ -160,7 +205,9 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
                           if (val == true) {
                             _selectedServices.add(srv);
                           } else {
-                            _selectedServices.removeWhere((s) => s.id == srv.id);
+                            _selectedServices.removeWhere(
+                              (s) => s.id == srv.id,
+                            );
                           }
                         });
                       },
@@ -210,18 +257,28 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
                   const SizedBox(height: 10),
                   Text(
                     barber.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.star, color: ThemeColors.primary, size: 14),
+                      const Icon(
+                        Icons.star,
+                        color: ThemeColors.primary,
+                        size: 14,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         barber.rating.toString(),
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -234,9 +291,32 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
     );
   }
 
-  Widget _buildDateTimeStep() {
-    final times = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
-    
+  Widget _buildDateTimeStep(List<Appointment> existingAppointments) {
+    final times = [
+      '09:00',
+      '10:00',
+      '11:00',
+      '13:00',
+      '14:00',
+      '15:00',
+      '16:00',
+      '17:00',
+      '18:00',
+    ];
+    final dateStr = _selectedDate != null
+        ? '${_selectedDate!.year}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.day.toString().padLeft(2, '0')}'
+        : null;
+
+    final bookedTimes = existingAppointments
+        .where(
+          (a) =>
+              a.barberId == _selectedBarber?.id &&
+              a.date == dateStr &&
+              a.status != 'cancelled',
+        )
+        .map((a) => a.time)
+        .toSet();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -244,21 +324,53 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
           label: 'Data do Agendamento',
           selectedDate: _selectedDate,
           onDateSelected: (date) {
-            setState(() => _selectedDate = date);
+            setState(() {
+              _selectedDate = date;
+              _selectedTime = null;
+            });
           },
         ),
         const SizedBox(height: 24),
         if (_selectedDate != null) ...[
-          const Text(
-            'Horários Disponíveis',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Horários Disponíveis',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              if (bookedTimes.isNotEmpty)
+                Text(
+                  '${bookedTimes.length} horário(s) ocupado(s)',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: ThemeColors.warning,
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 12),
           Wrap(
             spacing: 10,
             runSpacing: 10,
             children: times.map((t) {
+              final isBooked = bookedTimes.contains(t);
               final isSelected = _selectedTime == t;
+
+              if (isBooked) {
+                return Opacity(
+                  opacity: 0.45,
+                  child: Tooltip(
+                    message: 'Horário já reservado para este barbeiro',
+                    child: AppChip(
+                      label: '$t (Ocupado)',
+                      selected: false,
+                      onTap: () {},
+                    ),
+                  ),
+                );
+              }
+
               return AppChip(
                 label: t,
                 selected: isSelected,
@@ -285,33 +397,45 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
             children: [
               Row(
                 children: [
-                  if (_selectedBarber != null) AppAvatar(url: _selectedBarber!.avatarUrl, size: 44),
+                  if (_selectedBarber != null)
+                    AppAvatar(url: _selectedBarber!.avatarUrl, size: 44),
                   const SizedBox(width: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(_selectedBarber?.name ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
-                      const Text('Profissional selecionado', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                      Text(
+                        _selectedBarber?.name ?? '',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const Text(
+                        'Profissional selecionado',
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
                     ],
                   ),
                 ],
               ),
               const Divider(height: 32),
-              ..._selectedServices.map((s) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(s.name),
-                        Text('R\$ ${s.price.toStringAsFixed(2)}'),
-                      ],
-                    ),
-                  )),
+              ..._selectedServices.map(
+                (s) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(s.name),
+                      Text('R\$ ${s.price.toStringAsFixed(2)}'),
+                    ],
+                  ),
+                ),
+              ),
               const Divider(height: 32),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Duração Estimada:', style: TextStyle(color: Colors.grey)),
+                  const Text(
+                    'Duração Estimada:',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                   Text('$_totalDuration min'),
                 ],
               ),
@@ -319,10 +443,17 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Valor Total:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Valor Total:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   Text(
                     'R\$ ${_totalPrice.toStringAsFixed(2)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: ThemeColors.primary, fontSize: 16),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: ThemeColors.primary,
+                      fontSize: 16,
+                    ),
                   ),
                 ],
               ),
@@ -336,7 +467,9 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
           decoration: InputDecoration(
             hintText: 'Observações adicionais (opcional)',
             filled: true,
-            fillColor: Theme.of(context).brightness == Brightness.dark ? ThemeColors.darkSurface : Colors.white,
+            fillColor: Theme.of(context).brightness == Brightness.dark
+                ? ThemeColors.darkSurface
+                : Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(ThemeColors.radius),
               borderSide: BorderSide.none,
@@ -351,13 +484,27 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
   Widget build(BuildContext context) {
     final servicesState = ref.watch(servicesProvider);
     final barbersState = ref.watch(barbersProvider);
+    final appointmentsState = ref.watch(appointmentsControllerProvider);
+    final existingAppointments = appointmentsState.value ?? [];
 
     return servicesState.when(
-      loading: () => const SizedBox(height: 200, child: Center(child: CircularProgressIndicator())),
-      error: (e, s) => const SizedBox(height: 200, child: Center(child: Text('Erro ao carregar dados.'))),
+      loading: () => const SizedBox(
+        height: 200,
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, s) => const SizedBox(
+        height: 200,
+        child: Center(child: Text('Erro ao carregar dados.')),
+      ),
       data: (services) => barbersState.when(
-        loading: () => const SizedBox(height: 200, child: Center(child: CircularProgressIndicator())),
-        error: (e, s) => const SizedBox(height: 200, child: Center(child: Text('Erro ao carregar profissionais.'))),
+        loading: () => const SizedBox(
+          height: 200,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+        error: (e, s) => const SizedBox(
+          height: 200,
+          child: Center(child: Text('Erro ao carregar profissionais.')),
+        ),
         data: (barbers) {
           Widget stepWidget;
           bool canAdvance = false;
@@ -372,7 +519,7 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
               canAdvance = _selectedBarber != null;
               break;
             case 2:
-              stepWidget = _buildDateTimeStep();
+              stepWidget = _buildDateTimeStep(existingAppointments);
               canAdvance = _selectedDate != null && _selectedTime != null;
               break;
             case 3:
