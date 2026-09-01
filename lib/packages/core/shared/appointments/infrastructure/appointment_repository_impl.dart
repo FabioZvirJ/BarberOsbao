@@ -9,7 +9,7 @@ import 'package:barber_osbao/packages/core/shared/appointments/domain/appointmen
 
 class AppointmentRepositoryImpl implements AppointmentRepository {
   final AppDatabase _db;
-  
+
   // Keep local memory cache for mock editing
   static final List<Appointment> _memAppointments = [...MockData.appointments];
 
@@ -50,21 +50,25 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
     // 2. Populate Drift cache with default mock data if empty
     for (final apt in _memAppointments) {
       try {
-        await _db.into(_db.cachedAppointments).insertOnConflictUpdate(
-          CachedAppointmentsCompanion.insert(
-            id: apt.id,
-            userId: apt.userId,
-            barberId: apt.barberId,
-            barberName: apt.barberName,
-            barberAvatar: apt.barberAvatar,
-            date: apt.date,
-            time: apt.time,
-            totalValue: apt.totalValue,
-            status: apt.status,
-            servicesJson: jsonEncode(apt.services.map((s) => s.toJson()).toList()),
-            notes: Value(apt.notes),
-          ),
-        );
+        await _db
+            .into(_db.cachedAppointments)
+            .insertOnConflictUpdate(
+              CachedAppointmentsCompanion.insert(
+                id: apt.id,
+                userId: apt.userId,
+                barberId: apt.barberId,
+                barberName: apt.barberName,
+                barberAvatar: apt.barberAvatar,
+                date: apt.date,
+                time: apt.time,
+                totalValue: apt.totalValue,
+                status: apt.status,
+                servicesJson: jsonEncode(
+                  apt.services.map((s) => s.toJson()).toList(),
+                ),
+                notes: Value(apt.notes),
+              ),
+            );
       } catch (_) {}
     }
 
@@ -74,27 +78,31 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   @override
   Future<Appointment> createAppointment(Appointment appointment) async {
     await Future.delayed(const Duration(milliseconds: 800));
-    
+
     // Add to memory mock
     _memAppointments.insert(0, appointment);
 
     // Save to Drift offline cache
     try {
-      await _db.into(_db.cachedAppointments).insertOnConflictUpdate(
-        CachedAppointmentsCompanion.insert(
-          id: appointment.id,
-          userId: appointment.userId,
-          barberId: appointment.barberId,
-          barberName: appointment.barberName,
-          barberAvatar: appointment.barberAvatar,
-          date: appointment.date,
-          time: appointment.time,
-          totalValue: appointment.totalValue,
-          status: appointment.status,
-          servicesJson: jsonEncode(appointment.services.map((s) => s.toJson()).toList()),
-          notes: Value(appointment.notes),
-        ),
-      );
+      await _db
+          .into(_db.cachedAppointments)
+          .insertOnConflictUpdate(
+            CachedAppointmentsCompanion.insert(
+              id: appointment.id,
+              userId: appointment.userId,
+              barberId: appointment.barberId,
+              barberName: appointment.barberName,
+              barberAvatar: appointment.barberAvatar,
+              date: appointment.date,
+              time: appointment.time,
+              totalValue: appointment.totalValue,
+              status: appointment.status,
+              servicesJson: jsonEncode(
+                appointment.services.map((s) => s.toJson()).toList(),
+              ),
+              notes: Value(appointment.notes),
+            ),
+          );
     } catch (_) {}
 
     return appointment;
@@ -111,11 +119,9 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
 
       // Update in Drift offline cache
       try {
-        await _db.update(_db.cachedAppointments).write(
-          CachedAppointmentsCompanion(
-            status: Value(updated.status),
-          ),
-        );
+        await (_db.update(_db.cachedAppointments)
+              ..where((tbl) => tbl.id.equals(id)))
+            .write(CachedAppointmentsCompanion(status: Value(updated.status)));
       } catch (_) {}
 
       return updated;
