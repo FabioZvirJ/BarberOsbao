@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
@@ -126,7 +125,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
             child: _buildContent(state, isDark),
           ),
         ],
-      ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, end: 0, curve: Curves.easeOut),
+      ),
     );
   }
 
@@ -259,170 +258,6 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
     );
   }
 
-  void _showFormDialog(BuildContext context, [Cliente? customer]) {
-    final formKey = GlobalKey<FormState>();
-    final nameController = TextEditingController(text: customer?.name ?? '');
-    final emailController = TextEditingController(text: customer?.email ?? '');
-    final phoneController = TextEditingController(text: customer?.phone ?? '');
-    final nascimentoController = TextEditingController(text: customer?.nascimento ?? '');
-    final avatarUrlController = TextEditingController(text: customer?.avatarUrl ?? '');
-    final observacoesController = TextEditingController(text: customer?.observacoes ?? '');
-    String plano = customer?.plano ?? 'Nenhum';
-    String status = customer?.status ?? 'active';
-
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              backgroundColor: ThemeColors.darkBg,
-              title: Text(customer == null ? 'Cadastrar Cliente' : 'Editar Cliente', style: const TextStyle(color: Colors.white)),
-              content: SingleChildScrollView(
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AppInput(
-                        label: 'Nome Completo',
-                        placeholder: 'Ex: João Carlos da Silva',
-                        controller: nameController,
-                        validator: (val) => val == null || val.isEmpty ? 'Nome obrigatório' : null,
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: AppInput(
-                              label: 'Telefone',
-                              placeholder: 'Ex: (11) 99999-9999',
-                              controller: phoneController,
-                              validator: (val) => val == null || val.isEmpty ? 'Telefone obrigatório' : null,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: AppInput(
-                              label: 'Nascimento',
-                              placeholder: 'Ex: 15/08/1990',
-                              controller: nascimentoController,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      AppInput(
-                        label: 'E-mail',
-                        placeholder: 'Ex: joao@gmail.com',
-                        controller: emailController,
-                      ),
-                      const SizedBox(height: 12),
-                      AppInput(
-                        label: 'URL da Foto (Avatar)',
-                        placeholder: 'Ex: https://images.unsplash.com/...',
-                        controller: avatarUrlController,
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              dropdownColor: ThemeColors.darkBg,
-                              initialValue: plano,
-                              decoration: const InputDecoration(
-                                labelText: 'Plano',
-                                labelStyle: TextStyle(color: Colors.white70),
-                                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
-                              ),
-                              style: const TextStyle(color: Colors.white),
-                              items: const [
-                                DropdownMenuItem(value: 'Nenhum', child: Text('Nenhum')),
-                                DropdownMenuItem(value: 'Plano Cavalheiro', child: Text('Plano Cavalheiro')),
-                                DropdownMenuItem(value: 'Plano Barão', child: Text('Plano Barão')),
-                                DropdownMenuItem(value: 'Plano Imperial', child: Text('Plano Imperial')),
-                              ],
-                              onChanged: (val) {
-                                if (val != null) setState(() => plano = val);
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              dropdownColor: ThemeColors.darkBg,
-                              initialValue: status,
-                              decoration: const InputDecoration(
-                                labelText: 'Status',
-                                labelStyle: TextStyle(color: Colors.white70),
-                                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
-                              ),
-                              style: const TextStyle(color: Colors.white),
-                              items: const [
-                                DropdownMenuItem(value: 'active', child: Text('Ativo')),
-                                DropdownMenuItem(value: 'inactive', child: Text('Inativo')),
-                              ],
-                              onChanged: (val) {
-                                if (val != null) setState(() => status = val);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      AppInput(
-                        label: 'Observações',
-                        placeholder: 'Ex: Alérgico a produtos mentolados...',
-                        controller: observacoesController,
-                        maxLines: 3,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.primary),
-                  onPressed: () {
-                    if (formKey.currentState?.validate() ?? false) {
-                      final newCli = Cliente(
-                        id: customer?.id ?? '',
-                        name: nameController.text.trim(),
-                        email: emailController.text.trim(),
-                        phone: phoneController.text.trim(),
-                        avatarUrl: avatarUrlController.text.isNotEmpty
-                            ? avatarUrlController.text.trim()
-                            : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&width=150',
-                        nascimento: nascimentoController.text.trim(),
-                        plano: plano,
-                        ultimaVisita: customer?.ultimaVisita ?? 'Nunca',
-                        totalGasto: customer?.totalGasto ?? 0.0,
-                        observacoes: observacoesController.text.trim(),
-                        status: status,
-                      );
-
-                      if (customer == null) {
-                        ref.read(clientesControllerProvider.notifier).addCliente(newCli);
-                      } else {
-                        ref.read(clientesControllerProvider.notifier).editCliente(newCli);
-                      }
-                      Navigator.of(ctx).pop();
-                    }
-                  },
-                  child: const Text('Salvar', style: TextStyle(color: Colors.black)),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
   void _showDeleteDialog(BuildContext context, Cliente customer) {
     showDialog(
       context: context,
@@ -514,6 +349,210 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showFormDialog(BuildContext context, [Cliente? customer]) {
+    showDialog(
+      context: context,
+      builder: (ctx) => _ClienteFormDialog(customer: customer),
+    );
+  }
+}
+
+class _ClienteFormDialog extends ConsumerStatefulWidget {
+  final Cliente? customer;
+
+  const _ClienteFormDialog({this.customer});
+
+  @override
+  ConsumerState<_ClienteFormDialog> createState() => _ClienteFormDialogState();
+}
+
+class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _phoneController;
+  late final TextEditingController _nascimentoController;
+  late final TextEditingController _avatarUrlController;
+  late final TextEditingController _observacoesController;
+  late String _plano;
+  late String _status;
+
+  @override
+  void initState() {
+    super.initState();
+    final c = widget.customer;
+    _nameController = TextEditingController(text: c?.name ?? '');
+    _emailController = TextEditingController(text: c?.email ?? '');
+    _phoneController = TextEditingController(text: c?.phone ?? '');
+    _nascimentoController = TextEditingController(text: c?.nascimento ?? '');
+    _avatarUrlController = TextEditingController(text: c?.avatarUrl ?? '');
+    _observacoesController = TextEditingController(text: c?.observacoes ?? '');
+    _plano = c?.plano ?? 'Nenhum';
+    _status = c?.status ?? 'active';
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _nascimentoController.dispose();
+    _avatarUrlController.dispose();
+    _observacoesController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final customer = widget.customer;
+
+    return AlertDialog(
+      backgroundColor: ThemeColors.darkBg,
+      title: Text(
+        customer == null ? 'Cadastrar Cliente' : 'Editar Cliente',
+        style: const TextStyle(color: Colors.white),
+      ),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppInput(
+                label: 'Nome Completo',
+                placeholder: 'Ex: João Carlos da Silva',
+                controller: _nameController,
+                validator: (val) => val == null || val.isEmpty ? 'Nome obrigatório' : null,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppInput(
+                      label: 'Telefone',
+                      placeholder: 'Ex: (11) 99999-9999',
+                      controller: _phoneController,
+                      validator: (val) => val == null || val.isEmpty ? 'Telefone obrigatório' : null,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: AppInput(
+                      label: 'Nascimento',
+                      placeholder: 'Ex: 15/08/1990',
+                      controller: _nascimentoController,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              AppInput(
+                label: 'E-mail',
+                placeholder: 'Ex: joao@gmail.com',
+                controller: _emailController,
+              ),
+              const SizedBox(height: 12),
+              AppInput(
+                label: 'URL da Foto (Avatar)',
+                placeholder: 'Ex: https://images.unsplash.com/...',
+                controller: _avatarUrlController,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      dropdownColor: ThemeColors.darkBg,
+                      initialValue: _plano,
+                      decoration: const InputDecoration(
+                        labelText: 'Plano',
+                        labelStyle: TextStyle(color: Colors.white70),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                      items: const [
+                        DropdownMenuItem(value: 'Nenhum', child: Text('Nenhum')),
+                        DropdownMenuItem(value: 'Plano Cavalheiro', child: Text('Plano Cavalheiro')),
+                        DropdownMenuItem(value: 'Plano Barão', child: Text('Plano Barão')),
+                        DropdownMenuItem(value: 'Plano Imperial', child: Text('Plano Imperial')),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) setState(() => _plano = val);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      dropdownColor: ThemeColors.darkBg,
+                      initialValue: _status,
+                      decoration: const InputDecoration(
+                        labelText: 'Status',
+                        labelStyle: TextStyle(color: Colors.white70),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                      items: const [
+                        DropdownMenuItem(value: 'active', child: Text('Ativo')),
+                        DropdownMenuItem(value: 'inactive', child: Text('Inativo')),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) setState(() => _status = val);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              AppInput(
+                label: 'Observações',
+                placeholder: 'Ex: Alérgico a produtos mentolados...',
+                controller: _observacoesController,
+                maxLines: 3,
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.primary),
+          onPressed: () {
+            if (_formKey.currentState?.validate() ?? false) {
+              final newCli = Cliente(
+                id: customer?.id ?? '',
+                name: _nameController.text.trim(),
+                email: _emailController.text.trim(),
+                phone: _phoneController.text.trim(),
+                avatarUrl: _avatarUrlController.text.isNotEmpty
+                    ? _avatarUrlController.text.trim()
+                    : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&width=150',
+                nascimento: _nascimentoController.text.trim(),
+                plano: _plano,
+                ultimaVisita: customer?.ultimaVisita ?? 'Nunca',
+                totalGasto: customer?.totalGasto ?? 0.0,
+                observacoes: _observacoesController.text.trim(),
+                status: _status,
+              );
+
+              if (customer == null) {
+                ref.read(clientesControllerProvider.notifier).addCliente(newCli);
+              } else {
+                ref.read(clientesControllerProvider.notifier).editCliente(newCli);
+              }
+              Navigator.of(context).pop();
+            }
+          },
+          child: const Text('Salvar', style: TextStyle(color: Colors.black)),
+        ),
+      ],
     );
   }
 }

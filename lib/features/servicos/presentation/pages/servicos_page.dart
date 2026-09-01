@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
@@ -59,34 +58,38 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
     return AppPage(
       title: 'Serviços',
       userName: 'Fábio Zvir',
-      userAvatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&width=150',
+      userAvatarUrl:
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&width=150',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Responsive toolbar
-          if (isMobile) ...
-            [
-              AppSearchBar(
-                controller: _searchController,
-                placeholder: 'Pesquisar serviço por nome ou descrição...',
-                onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
-                onClear: () => setState(() => _searchQuery = ''),
+          if (isMobile) ...[
+            AppSearchBar(
+              controller: _searchController,
+              placeholder: 'Pesquisar serviço por nome ou descrição...',
+              onChanged: (val) =>
+                  setState(() => _searchQuery = val.toLowerCase()),
+              onClear: () => setState(() => _searchQuery = ''),
+            ),
+            const SizedBox(height: 10),
+            AppButton(
+              label: 'Novo Serviço',
+              icon: const Icon(Icons.add, size: 16),
+              onPressed: () => _showFormDialog(
+                context,
+                categories.where((c) => c != 'Todos').toList(),
               ),
-              const SizedBox(height: 10),
-              AppButton(
-                label: 'Novo Serviço',
-                icon: const Icon(Icons.add, size: 16),
-                onPressed: () => _showFormDialog(context, categories.where((c) => c != 'Todos').toList()),
-              ),
-            ]
-          else
+            ),
+          ] else
             Row(
               children: [
                 Expanded(
                   child: AppSearchBar(
                     controller: _searchController,
                     placeholder: 'Pesquisar serviço por nome ou descrição...',
-                    onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
+                    onChanged: (val) =>
+                        setState(() => _searchQuery = val.toLowerCase()),
                     onClear: () => setState(() => _searchQuery = ''),
                   ),
                 ),
@@ -94,7 +97,10 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
                 AppButton(
                   label: 'Novo Serviço',
                   icon: const Icon(Icons.add, size: 16),
-                  onPressed: () => _showFormDialog(context, categories.where((c) => c != 'Todos').toList()),
+                  onPressed: () => _showFormDialog(
+                    context,
+                    categories.where((c) => c != 'Todos').toList(),
+                  ),
                 ),
               ],
             ),
@@ -108,26 +114,42 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
 
           AppSection(
             title: 'Catálogo de Serviços',
-            subtitle: 'Lista de serviços oferecidos na barbearia. Use as setas para reordenar a exibição.',
-            child: _buildContent(state, isDark, categories.where((c) => c != 'Todos').toList()),
+            subtitle:
+                'Lista de serviços oferecidos na barbearia. Use as setas para reordenar a exibição.',
+            child: _buildContent(
+              state,
+              isDark,
+              categories.where((c) => c != 'Todos').toList(),
+            ),
           ),
         ],
-      ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, end: 0, curve: Curves.easeOut),
+      ),
     );
   }
 
-  Widget _buildContent(AppState<List<Servico>> state, bool isDark, List<String> formCategories) {
+  Widget _buildContent(
+    AppState<List<Servico>> state,
+    bool isDark,
+    List<String> formCategories,
+  ) {
     if (state is AppLoading) {
       return const Padding(
         padding: EdgeInsets.all(40.0),
-        child: Center(child: CircularProgressIndicator(color: ThemeColors.primary)),
+        child: Center(
+          child: CircularProgressIndicator(color: ThemeColors.primary),
+        ),
       );
     }
 
     if (state is AppError) {
       return Padding(
         padding: const EdgeInsets.all(40.0),
-        child: Center(child: Text('Erro: ${(state as AppError).message}', style: const TextStyle(color: ThemeColors.danger))),
+        child: Center(
+          child: Text(
+            'Erro: ${(state as AppError).message}',
+            style: const TextStyle(color: ThemeColors.danger),
+          ),
+        ),
       );
     }
 
@@ -136,14 +158,19 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
       return Container(
         padding: const EdgeInsets.all(40),
         alignment: Alignment.center,
-        child: Text('Nenhum serviço cadastrado.', style: TextStyle(color: isDark ? Colors.white30 : Colors.grey)),
+        child: Text(
+          'Nenhum serviço cadastrado.',
+          style: TextStyle(color: isDark ? Colors.white30 : Colors.grey),
+        ),
       );
     }
 
     final filtered = data.where((s) {
-      final matchesSearch = s.name.toLowerCase().contains(_searchQuery) ||
+      final matchesSearch =
+          s.name.toLowerCase().contains(_searchQuery) ||
           s.description.toLowerCase().contains(_searchQuery);
-      final matchesCategory = _selectedCategory == 'Todos' || s.category == _selectedCategory;
+      final matchesCategory =
+          _selectedCategory == 'Todos' || s.category == _selectedCategory;
       return matchesSearch && matchesCategory;
     }).toList();
 
@@ -151,7 +178,10 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
       return Container(
         padding: const EdgeInsets.all(40),
         alignment: Alignment.center,
-        child: Text('Nenhum serviço correspondente aos filtros.', style: TextStyle(color: isDark ? Colors.white30 : Colors.grey)),
+        child: Text(
+          'Nenhum serviço correspondente aos filtros.',
+          style: TextStyle(color: isDark ? Colors.white30 : Colors.grey),
+        ),
       );
     }
 
@@ -179,13 +209,17 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
                 width: 40,
                 height: 40,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => const Icon(Icons.content_cut, size: 24),
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.content_cut, size: 24),
               ),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(s.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  s.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 if (s.description.isNotEmpty)
                   Text(
                     s.description,
@@ -199,7 +233,10 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
             Text('${s.durationMinutes} min'),
             Text(
               'R\$ ${s.price.toStringAsFixed(2)}',
-              style: const TextStyle(color: ThemeColors.primary, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: ThemeColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Container(
               width: 16,
@@ -224,7 +261,9 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
                           final temp = updated[idx];
                           updated[idx] = updated[idx - 1];
                           updated[idx - 1] = temp;
-                          ref.read(servicosControllerProvider.notifier).updateOrder(updated);
+                          ref
+                              .read(servicosControllerProvider.notifier)
+                              .updateOrder(updated);
                         }
                       : null,
                 ),
@@ -236,7 +275,9 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
                           final temp = updated[idx];
                           updated[idx] = updated[idx + 1];
                           updated[idx + 1] = temp;
-                          ref.read(servicosControllerProvider.notifier).updateOrder(updated);
+                          ref
+                              .read(servicosControllerProvider.notifier)
+                              .updateOrder(updated);
                         }
                       : null,
                 ),
@@ -250,7 +291,11 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
                   tooltip: 'Editar',
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 18, color: ThemeColors.danger),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    size: 18,
+                    color: ThemeColors.danger,
+                  ),
                   onPressed: () => _showDeleteDialog(context, s),
                   tooltip: 'Excluir',
                 ),
@@ -262,212 +307,304 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
     );
   }
 
-  void _showFormDialog(BuildContext context, List<String> categories, [Servico? service]) {
-    final formKey = GlobalKey<FormState>();
-    final nameController = TextEditingController(text: service?.name ?? '');
-    final descriptionController = TextEditingController(text: service?.description ?? '');
-    final priceController = TextEditingController(text: service?.price.toString() ?? '');
-    final durationController = TextEditingController(text: service?.durationMinutes.toString() ?? '30');
-    final imageUrlController = TextEditingController(text: service?.imageUrl ?? '');
-    String category = service?.category ?? (categories.isNotEmpty ? categories[0] : 'Cabelo');
-    String colorHex = service?.colorHex ?? 'C89B3C';
-    bool status = service?.status ?? true;
-
-    final colorOptions = [
-      {'name': 'Dourado', 'hex': 'C89B3C'},
-      {'name': 'Verde', 'hex': '22C55E'},
-      {'name': 'Azul', 'hex': '3B82F6'},
-      {'name': 'Roxo', 'hex': 'A855F7'},
-      {'name': 'Vermelho', 'hex': 'EF4444'},
-    ];
-
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              backgroundColor: ThemeColors.darkBg,
-              title: Text(service == null ? 'Criar Serviço' : 'Editar Serviço', style: const TextStyle(color: Colors.white)),
-              content: SingleChildScrollView(
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AppInput(
-                        label: 'Nome do Serviço',
-                        placeholder: 'Ex: Barboterapia Completa',
-                        controller: nameController,
-                        validator: (val) => val == null || val.isEmpty ? 'Nome obrigatório' : null,
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              dropdownColor: ThemeColors.darkBg,
-                              initialValue: category,
-                              decoration: const InputDecoration(
-                                labelText: 'Categoria',
-                                labelStyle: TextStyle(color: Colors.white70),
-                                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
-                              ),
-                              style: const TextStyle(color: Colors.white),
-                              items: categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                              onChanged: (val) {
-                                if (val != null) setState(() => category = val);
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: AppInput(
-                              label: 'Preço (R\$)',
-                              placeholder: 'Ex: 45.00',
-                              controller: priceController,
-                              keyboardType: TextInputType.number,
-                              validator: (val) => val == null || val.isEmpty ? 'Preço obrigatório' : null,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: AppInput(
-                              label: 'Duração (minutos)',
-                              placeholder: 'Ex: 30',
-                              controller: durationController,
-                              keyboardType: TextInputType.number,
-                              validator: (val) => val == null || val.isEmpty ? 'Duração obrigatória' : null,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              dropdownColor: ThemeColors.darkBg,
-                              initialValue: colorHex,
-                              decoration: const InputDecoration(
-                                labelText: 'Cor do Card',
-                                labelStyle: TextStyle(color: Colors.white70),
-                                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
-                              ),
-                              style: const TextStyle(color: Colors.white),
-                              items: colorOptions
-                                  .map((c) => DropdownMenuItem(
-                                        value: c['hex'],
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              width: 12,
-                                              height: 12,
-                                              decoration: BoxDecoration(
-                                                color: Color(int.parse('FF${c['hex']}', radix: 16)),
-                                                shape: BoxShape.circle,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(c['name']!),
-                                          ],
-                                        ),
-                                      ))
-                                  .toList(),
-                              onChanged: (val) {
-                                if (val != null) setState(() => colorHex = val);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      AppInput(
-                        label: 'URL da Imagem',
-                        placeholder: 'Ex: https://unsplash.com/...',
-                        controller: imageUrlController,
-                      ),
-                      const SizedBox(height: 12),
-                      AppInput(
-                        label: 'Descrição do Serviço',
-                        placeholder: 'Ex: Detalhes do que está incluso...',
-                        controller: descriptionController,
-                        maxLines: 2,
-                      ),
-                      const SizedBox(height: 12),
-                      SwitchListTile(
-                        title: const Text('Serviço Ativo', style: TextStyle(color: Colors.white70, fontSize: 14)),
-                        value: status,
-                        activeThumbColor: ThemeColors.primary,
-                        onChanged: (val) => setState(() => status = val),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.primary),
-                  onPressed: () {
-                    if (formKey.currentState?.validate() ?? false) {
-                      final newSrv = Servico(
-                        id: service?.id ?? '',
-                        name: nameController.text.trim(),
-                        category: category,
-                        description: descriptionController.text.trim(),
-                        price: double.parse(priceController.text.trim()),
-                        durationMinutes: int.parse(durationController.text.trim()),
-                        imageUrl: imageUrlController.text.isNotEmpty
-                            ? imageUrlController.text.trim()
-                            : 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?q=80&width=150',
-                        colorHex: colorHex,
-                        status: status,
-                      );
-
-                      if (service == null) {
-                        ref.read(servicosControllerProvider.notifier).addServico(newSrv);
-                      } else {
-                        ref.read(servicosControllerProvider.notifier).editServico(newSrv);
-                      }
-                      Navigator.of(ctx).pop();
-                    }
-                  },
-                  child: const Text('Salvar', style: TextStyle(color: Colors.black)),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
   void _showDeleteDialog(BuildContext context, Servico service) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: ThemeColors.darkBg,
-        title: const Text('Excluir Serviço', style: TextStyle(color: Colors.white)),
-        content: Text('Tem certeza que deseja excluir o serviço "${service.name}"? Clientes não conseguirão mais agendá-lo.', style: const TextStyle(color: Colors.white70)),
+        title: const Text(
+          'Excluir Serviço',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          'Tem certeza que deseja excluir o serviço "${service.name}"? Clientes não conseguirão mais agendá-lo.',
+          style: const TextStyle(color: Colors.white70),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(color: Colors.white70),
+            ),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.danger),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ThemeColors.danger,
+            ),
             onPressed: () {
-              ref.read(servicosControllerProvider.notifier).removeServico(service.id);
+              ref
+                  .read(servicosControllerProvider.notifier)
+                  .removeServico(service.id);
               Navigator.of(ctx).pop();
             },
             child: const Text('Excluir', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
+    );
+  }
+
+  void _showFormDialog(
+    BuildContext context,
+    List<String> categories, [
+    Servico? service,
+  ]) {
+    showDialog(
+      context: context,
+      builder: (ctx) =>
+          _ServicoFormDialog(categories: categories, service: service),
+    );
+  }
+}
+
+class _ServicoFormDialog extends ConsumerStatefulWidget {
+  final List<String> categories;
+  final Servico? service;
+
+  const _ServicoFormDialog({required this.categories, this.service});
+
+  @override
+  ConsumerState<_ServicoFormDialog> createState() => _ServicoFormDialogState();
+}
+
+class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameController;
+  late final TextEditingController _descriptionController;
+  late final TextEditingController _priceController;
+  late final TextEditingController _durationController;
+  late final TextEditingController _imageUrlController;
+  late String _category;
+  late String _colorHex;
+  late bool _status;
+
+  final _colorOptions = const [
+    {'name': 'Dourado', 'hex': 'C89B3C'},
+    {'name': 'Verde', 'hex': '22C55E'},
+    {'name': 'Azul', 'hex': '3B82F6'},
+    {'name': 'Roxo', 'hex': 'A855F7'},
+    {'name': 'Vermelho', 'hex': 'EF4444'},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    final s = widget.service;
+    _nameController = TextEditingController(text: s?.name ?? '');
+    _descriptionController = TextEditingController(text: s?.description ?? '');
+    _priceController = TextEditingController(text: s?.price.toString() ?? '');
+    _durationController = TextEditingController(
+      text: s?.durationMinutes.toString() ?? '30',
+    );
+    _imageUrlController = TextEditingController(text: s?.imageUrl ?? '');
+    _category =
+        s?.category ??
+        (widget.categories.isNotEmpty ? widget.categories[0] : 'Cabelo');
+    _colorHex = s?.colorHex ?? 'C89B3C';
+    _status = s?.status ?? true;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _priceController.dispose();
+    _durationController.dispose();
+    _imageUrlController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final service = widget.service;
+
+    return AlertDialog(
+      backgroundColor: ThemeColors.darkBg,
+      title: Text(
+        service == null ? 'Criar Serviço' : 'Editar Serviço',
+        style: const TextStyle(color: Colors.white),
+      ),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppInput(
+                label: 'Nome do Serviço',
+                placeholder: 'Ex: Barboterapia Completa',
+                controller: _nameController,
+                validator: (val) =>
+                    val == null || val.isEmpty ? 'Nome obrigatório' : null,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      dropdownColor: ThemeColors.darkBg,
+                      initialValue: _category,
+                      decoration: const InputDecoration(
+                        labelText: 'Categoria',
+                        labelStyle: TextStyle(color: Colors.white70),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white30),
+                        ),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                      items: widget.categories
+                          .map(
+                            (c) => DropdownMenuItem(value: c, child: Text(c)),
+                          )
+                          .toList(),
+                      onChanged: (val) {
+                        if (val != null) setState(() => _category = val);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: AppInput(
+                      label: 'Preço (R\$)',
+                      placeholder: 'Ex: 45.00',
+                      controller: _priceController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      validator: (val) => val == null || val.isEmpty
+                          ? 'Preço obrigatório'
+                          : null,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppInput(
+                      label: 'Duração (minutos)',
+                      placeholder: 'Ex: 30',
+                      controller: _durationController,
+                      keyboardType: TextInputType.number,
+                      validator: (val) => val == null || val.isEmpty
+                          ? 'Duração obrigatória'
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      dropdownColor: ThemeColors.darkBg,
+                      initialValue: _colorHex,
+                      decoration: const InputDecoration(
+                        labelText: 'Cor do Card',
+                        labelStyle: TextStyle(color: Colors.white70),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white30),
+                        ),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                      items: _colorOptions
+                          .map(
+                            (c) => DropdownMenuItem(
+                              value: c['hex'],
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 12,
+                                    height: 12,
+                                    decoration: BoxDecoration(
+                                      color: Color(
+                                        int.parse('FF${c['hex']!}', radix: 16),
+                                      ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(c['name']!),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (val) {
+                        if (val != null) setState(() => _colorHex = val);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              AppInput(
+                label: 'URL da Imagem',
+                placeholder: 'Ex: https://unsplash.com/...',
+                controller: _imageUrlController,
+              ),
+              const SizedBox(height: 12),
+              AppInput(
+                label: 'Descrição do Serviço',
+                placeholder: 'Ex: Detalhes do que está incluso...',
+                controller: _descriptionController,
+                maxLines: 2,
+              ),
+              const SizedBox(height: 12),
+              SwitchListTile(
+                title: const Text(
+                  'Serviço Ativo',
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+                value: _status,
+                activeThumbColor: ThemeColors.primary,
+                onChanged: (val) => setState(() => _status = val),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text(
+            'Cancelar',
+            style: TextStyle(color: Colors.white70),
+          ),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.primary),
+          onPressed: () {
+            if (_formKey.currentState?.validate() ?? false) {
+              final newSrv = Servico(
+                id: service?.id ?? '',
+                name: _nameController.text.trim(),
+                category: _category,
+                description: _descriptionController.text.trim(),
+                price: double.tryParse(_priceController.text.trim()) ?? 0.0,
+                durationMinutes:
+                    int.tryParse(_durationController.text.trim()) ?? 30,
+                imageUrl: _imageUrlController.text.isNotEmpty
+                    ? _imageUrlController.text.trim()
+                    : 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?q=80&width=150',
+                colorHex: _colorHex,
+                status: _status,
+              );
+
+              if (service == null) {
+                ref
+                    .read(servicosControllerProvider.notifier)
+                    .addServico(newSrv);
+              } else {
+                ref
+                    .read(servicosControllerProvider.notifier)
+                    .editServico(newSrv);
+              }
+              Navigator.of(context).pop();
+            }
+          },
+          child: const Text('Salvar', style: TextStyle(color: Colors.black)),
+        ),
+      ],
     );
   }
 }

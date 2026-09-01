@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
@@ -21,7 +20,7 @@ class ConfiguracoesPage extends ConsumerStatefulWidget {
 
 class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Controllers
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
@@ -30,6 +29,7 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
   late TextEditingController _instaController;
   late TextEditingController _faceController;
   late TextEditingController _pixController;
+  bool _initialized = false;
 
   @override
   void initState() {
@@ -60,26 +60,36 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
     final businessState = ref.watch(businessSettingsControllerProvider);
     final userState = ref.watch(authControllerProvider);
 
-    if (businessState is AppLoading || userState.isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator(color: ThemeColors.primary)));
+    if (businessState is AppLoading ||
+        userState.isLoading ||
+        businessState.data == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: ThemeColors.primary),
+        ),
+      );
     }
 
     final settings = businessState.data!;
     final user = userState.value;
 
-    // Load initial values only once or when settings change
-    _nameController.text = settings.name;
-    _phoneController.text = settings.phone;
-    _addressController.text = settings.address;
-    _logoController.text = settings.logoUrl;
-    _instaController.text = settings.instagram;
-    _faceController.text = settings.facebook;
-    _pixController.text = settings.pixKey;
+    if (!_initialized) {
+      _nameController.text = settings.name;
+      _phoneController.text = settings.phone;
+      _addressController.text = settings.address;
+      _logoController.text = settings.logoUrl;
+      _instaController.text = settings.instagram;
+      _faceController.text = settings.facebook;
+      _pixController.text = settings.pixKey;
+      _initialized = true;
+    }
 
     return AppPage(
       title: 'Configurações',
       userName: user?.name ?? 'Fábio Zvir',
-      userAvatarUrl: user?.avatarUrl ?? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&width=150',
+      userAvatarUrl:
+          user?.avatarUrl ??
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&width=150',
       child: Form(
         key: _formKey,
         child: Column(
@@ -88,7 +98,8 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
             // 1. Company Data
             AppSection(
               title: 'Dados da Barbearia',
-              subtitle: 'Nome da barbearia, canais sociais e configurações de PIX',
+              subtitle:
+                  'Nome da barbearia, canais sociais e configurações de PIX',
               child: AppCard(
                 child: Column(
                   children: [
@@ -96,50 +107,103 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                     AppBreakpoints.isMobile(context)
                         ? Column(
                             children: [
-                              AppInput(label: 'Nome Comercial', controller: _nameController),
+                              AppInput(
+                                label: 'Nome Comercial',
+                                controller: _nameController,
+                              ),
                               const SizedBox(height: 16),
-                              AppInput(label: 'Link do Logotipo (URL)', controller: _logoController),
+                              AppInput(
+                                label: 'Link do Logotipo (URL)',
+                                controller: _logoController,
+                              ),
                             ],
                           )
                         : Row(
                             children: [
-                              Expanded(child: AppInput(label: 'Nome Comercial', controller: _nameController)),
+                              Expanded(
+                                child: AppInput(
+                                  label: 'Nome Comercial',
+                                  controller: _nameController,
+                                ),
+                              ),
                               const SizedBox(width: 16),
-                              Expanded(child: AppInput(label: 'Link do Logotipo (URL)', controller: _logoController)),
+                              Expanded(
+                                child: AppInput(
+                                  label: 'Link do Logotipo (URL)',
+                                  controller: _logoController,
+                                ),
+                              ),
                             ],
                           ),
                     const SizedBox(height: 16),
                     AppBreakpoints.isMobile(context)
                         ? Column(
                             children: [
-                              AppInput(label: 'Telefone de Contato', controller: _phoneController),
+                              AppInput(
+                                label: 'Telefone de Contato',
+                                controller: _phoneController,
+                              ),
                               const SizedBox(height: 16),
-                              AppInput(label: 'Chave PIX Recebimento', controller: _pixController),
+                              AppInput(
+                                label: 'Chave PIX Recebimento',
+                                controller: _pixController,
+                              ),
                             ],
                           )
                         : Row(
                             children: [
-                              Expanded(child: AppInput(label: 'Telefone de Contato', controller: _phoneController)),
+                              Expanded(
+                                child: AppInput(
+                                  label: 'Telefone de Contato',
+                                  controller: _phoneController,
+                                ),
+                              ),
                               const SizedBox(width: 16),
-                              Expanded(child: AppInput(label: 'Chave PIX Recebimento', controller: _pixController)),
+                              Expanded(
+                                child: AppInput(
+                                  label: 'Chave PIX Recebimento',
+                                  controller: _pixController,
+                                ),
+                              ),
                             ],
                           ),
                     const SizedBox(height: 16),
-                    AppInput(label: 'Endereço Completo', controller: _addressController),
+                    AppInput(
+                      label: 'Endereço Completo',
+                      controller: _addressController,
+                    ),
                     const SizedBox(height: 16),
                     AppBreakpoints.isMobile(context)
                         ? Column(
                             children: [
-                              AppInput(label: 'Instagram', controller: _instaController, placeholder: '@usuario'),
+                              AppInput(
+                                label: 'Instagram',
+                                controller: _instaController,
+                                placeholder: '@usuario',
+                              ),
                               const SizedBox(height: 16),
-                              AppInput(label: 'Facebook Page', controller: _faceController),
+                              AppInput(
+                                label: 'Facebook Page',
+                                controller: _faceController,
+                              ),
                             ],
                           )
                         : Row(
                             children: [
-                              Expanded(child: AppInput(label: 'Instagram', controller: _instaController, placeholder: '@usuario')),
+                              Expanded(
+                                child: AppInput(
+                                  label: 'Instagram',
+                                  controller: _instaController,
+                                  placeholder: '@usuario',
+                                ),
+                              ),
                               const SizedBox(width: 16),
-                              Expanded(child: AppInput(label: 'Facebook Page', controller: _faceController)),
+                              Expanded(
+                                child: AppInput(
+                                  label: 'Facebook Page',
+                                  controller: _faceController,
+                                ),
+                              ),
                             ],
                           ),
                   ],
@@ -160,11 +224,23 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                         child: AppCard(
                           child: Column(
                             children: [
-                              _buildHourRow('Segunda a Sexta', settings.workingHours['Segunda a Sexta'] ?? '09:00 - 20:00'),
+                              _buildHourRow(
+                                'Segunda a Sexta',
+                                settings.workingHours['Segunda a Sexta'] ??
+                                    '09:00 - 20:00',
+                              ),
                               const Divider(height: 24),
-                              _buildHourRow('Sábado', settings.workingHours['Sábado'] ?? '09:00 - 18:00'),
+                              _buildHourRow(
+                                'Sábado',
+                                settings.workingHours['Sábado'] ??
+                                    '09:00 - 18:00',
+                              ),
                               const Divider(height: 24),
-                              _buildHourRow('Domingo', settings.workingHours['Domingo'] ?? 'Fechado', isOpen: false),
+                              _buildHourRow(
+                                'Domingo',
+                                settings.workingHours['Domingo'] ?? 'Fechado',
+                                isOpen: false,
+                              ),
                             ],
                           ),
                         ),
@@ -183,19 +259,43 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                                 initialValue: settings.slotInterval,
                                 decoration: const InputDecoration(
                                   labelText: 'Tempo entre Atendimentos',
-                                  labelStyle: TextStyle(color: Colors.white70, fontSize: 13),
-                                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
+                                  labelStyle: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 13,
+                                  ),
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.white30,
+                                    ),
+                                  ),
                                 ),
                                 style: const TextStyle(color: Colors.white),
                                 items: const [
-                                  DropdownMenuItem(value: '15', child: Text('15 Minutos')),
-                                  DropdownMenuItem(value: '30', child: Text('30 Minutos')),
-                                  DropdownMenuItem(value: '45', child: Text('45 Minutos')),
-                                  DropdownMenuItem(value: '60', child: Text('60 Minutos')),
+                                  DropdownMenuItem(
+                                    value: '15',
+                                    child: Text('15 Minutos'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: '30',
+                                    child: Text('30 Minutos'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: '45',
+                                    child: Text('45 Minutos'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: '60',
+                                    child: Text('60 Minutos'),
+                                  ),
                                 ],
                                 onChanged: (val) {
                                   if (val != null) {
-                                    ref.read(businessSettingsControllerProvider.notifier).updateSettings(
+                                    ref
+                                        .read(
+                                          businessSettingsControllerProvider
+                                              .notifier,
+                                        )
+                                        .updateSettings(
                                           settings.copyWith(slotInterval: val),
                                         );
                                   }
@@ -204,14 +304,26 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                               const SizedBox(height: 24),
                               SwitchListTile(
                                 contentPadding: EdgeInsets.zero,
-                                title: const Text('Tema Escuro (Dark Mode)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                                subtitle: const Text('Alterna a identidade visual da dashboard admin'),
+                                title: const Text(
+                                  'Tema Escuro (Dark Mode)',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: const Text(
+                                  'Alterna a identidade visual da dashboard admin',
+                                ),
                                 value: user?.theme == 'dark',
                                 activeThumbColor: ThemeColors.primary,
                                 onChanged: (val) {
                                   if (user != null) {
-                                    ref.read(authControllerProvider.notifier).updateUser(
-                                          user.copyWith(theme: val ? 'dark' : 'light'),
+                                    ref
+                                        .read(authControllerProvider.notifier)
+                                        .updateUser(
+                                          user.copyWith(
+                                            theme: val ? 'dark' : 'light',
+                                          ),
                                         );
                                   }
                                 },
@@ -233,11 +345,23 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                           child: AppCard(
                             child: Column(
                               children: [
-                                _buildHourRow('Segunda a Sexta', settings.workingHours['Segunda a Sexta'] ?? '09:00 - 20:00'),
+                                _buildHourRow(
+                                  'Segunda a Sexta',
+                                  settings.workingHours['Segunda a Sexta'] ??
+                                      '09:00 - 20:00',
+                                ),
                                 const Divider(height: 24),
-                                _buildHourRow('Sábado', settings.workingHours['Sábado'] ?? '09:00 - 18:00'),
+                                _buildHourRow(
+                                  'Sábado',
+                                  settings.workingHours['Sábado'] ??
+                                      '09:00 - 18:00',
+                                ),
                                 const Divider(height: 24),
-                                _buildHourRow('Domingo', settings.workingHours['Domingo'] ?? 'Fechado', isOpen: false),
+                                _buildHourRow(
+                                  'Domingo',
+                                  settings.workingHours['Domingo'] ?? 'Fechado',
+                                  isOpen: false,
+                                ),
                               ],
                             ),
                           ),
@@ -258,20 +382,46 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                                   initialValue: settings.slotInterval,
                                   decoration: const InputDecoration(
                                     labelText: 'Tempo entre Atendimentos',
-                                    labelStyle: TextStyle(color: Colors.white70, fontSize: 13),
-                                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
+                                    labelStyle: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 13,
+                                    ),
+                                    enabledBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Colors.white30,
+                                      ),
+                                    ),
                                   ),
                                   style: const TextStyle(color: Colors.white),
                                   items: const [
-                                    DropdownMenuItem(value: '15', child: Text('15 Minutos')),
-                                    DropdownMenuItem(value: '30', child: Text('30 Minutos')),
-                                    DropdownMenuItem(value: '45', child: Text('45 Minutos')),
-                                    DropdownMenuItem(value: '60', child: Text('60 Minutos')),
+                                    DropdownMenuItem(
+                                      value: '15',
+                                      child: Text('15 Minutos'),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: '30',
+                                      child: Text('30 Minutos'),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: '45',
+                                      child: Text('45 Minutos'),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: '60',
+                                      child: Text('60 Minutos'),
+                                    ),
                                   ],
                                   onChanged: (val) {
                                     if (val != null) {
-                                      ref.read(businessSettingsControllerProvider.notifier).updateSettings(
-                                            settings.copyWith(slotInterval: val),
+                                      ref
+                                          .read(
+                                            businessSettingsControllerProvider
+                                                .notifier,
+                                          )
+                                          .updateSettings(
+                                            settings.copyWith(
+                                              slotInterval: val,
+                                            ),
                                           );
                                     }
                                   },
@@ -279,14 +429,26 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                                 const SizedBox(height: 24),
                                 SwitchListTile(
                                   contentPadding: EdgeInsets.zero,
-                                  title: const Text('Tema Escuro (Dark Mode)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                                  subtitle: const Text('Alterna a identidade visual da dashboard admin'),
+                                  title: const Text(
+                                    'Tema Escuro (Dark Mode)',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  subtitle: const Text(
+                                    'Alterna a identidade visual da dashboard admin',
+                                  ),
                                   value: user?.theme == 'dark',
                                   activeThumbColor: ThemeColors.primary,
                                   onChanged: (val) {
                                     if (user != null) {
-                                      ref.read(authControllerProvider.notifier).updateUser(
-                                            user.copyWith(theme: val ? 'dark' : 'light'),
+                                      ref
+                                          .read(authControllerProvider.notifier)
+                                          .updateUser(
+                                            user.copyWith(
+                                              theme: val ? 'dark' : 'light',
+                                            ),
                                           );
                                     }
                                   },
@@ -308,13 +470,20 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                 child: Column(
                   children: [
                     SwitchListTile(
-                      title: const Text('WhatsApp Notificações Automáticas', style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: const Text('Envia lembretes automáticos de agendamentos e aniversários via WhatsApp API.'),
+                      title: const Text(
+                        'WhatsApp Notificações Automáticas',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: const Text(
+                        'Envia lembretes automáticos de agendamentos e aniversários via WhatsApp API.',
+                      ),
                       value: user?.whatsappNotifications ?? false,
                       activeThumbColor: ThemeColors.primary,
                       onChanged: (val) {
                         if (user != null) {
-                          ref.read(authControllerProvider.notifier).updateUser(
+                          ref
+                              .read(authControllerProvider.notifier)
+                              .updateUser(
                                 user.copyWith(whatsappNotifications: val),
                               );
                         }
@@ -322,12 +491,17 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                     ),
                     const Divider(height: 24),
                     SwitchListTile(
-                      title: const Text('Notificações de E-mail', style: TextStyle(fontWeight: FontWeight.bold)),
+                      title: const Text(
+                        'Notificações de E-mail',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       value: user?.emailNotifications ?? true,
                       activeThumbColor: ThemeColors.primary,
                       onChanged: (val) {
                         if (user != null) {
-                          ref.read(authControllerProvider.notifier).updateUser(
+                          ref
+                              .read(authControllerProvider.notifier)
+                              .updateUser(
                                 user.copyWith(emailNotifications: val),
                               );
                         }
@@ -335,12 +509,17 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                     ),
                     const Divider(height: 24),
                     SwitchListTile(
-                      title: const Text('Notificações Push (Navegador)', style: TextStyle(fontWeight: FontWeight.bold)),
+                      title: const Text(
+                        'Notificações Push (Navegador)',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       value: user?.pushNotifications ?? true,
                       activeThumbColor: ThemeColors.primary,
                       onChanged: (val) {
                         if (user != null) {
-                          ref.read(authControllerProvider.notifier).updateUser(
+                          ref
+                              .read(authControllerProvider.notifier)
+                              .updateUser(
                                 user.copyWith(pushNotifications: val),
                               );
                         }
@@ -369,10 +548,14 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                         facebook: _faceController.text.trim(),
                         pixKey: _pixController.text.trim(),
                       );
-                      ref.read(businessSettingsControllerProvider.notifier).updateSettings(updated);
+                      ref
+                          .read(businessSettingsControllerProvider.notifier)
+                          .updateSettings(updated);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Configurações atualizadas com sucesso!'),
+                          content: Text(
+                            'Configurações atualizadas com sucesso!',
+                          ),
                           backgroundColor: ThemeColors.success,
                         ),
                       );
@@ -383,7 +566,7 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
             ),
           ],
         ),
-      ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, end: 0, curve: Curves.easeOut),
+      ),
     );
   }
 
@@ -395,7 +578,9 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: isOpen ? ThemeColors.primary.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+            color: isOpen
+                ? ThemeColors.primary.withValues(alpha: 0.1)
+                : Colors.red.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
@@ -30,7 +29,8 @@ class DashboardPage extends ConsumerWidget {
     return AppPage(
       title: 'Dashboard',
       userName: 'Fábio Zvir',
-      userAvatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&width=150',
+      userAvatarUrl:
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&width=150',
       barberName: 'Sua Barbearia - Gerenciador',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -38,7 +38,11 @@ class DashboardPage extends ConsumerWidget {
           // Greeting & Intro
           const Text(
             'Olá, Fernando! 👋',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: 4),
           const Text(
@@ -66,16 +70,26 @@ class DashboardPage extends ConsumerWidget {
           // Bottom Lists: Upcoming Appointments & Critical Stock
           _buildBottomLists(appointmentsState, productsState, context),
         ],
-      ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, end: 0, curve: Curves.easeOut),
+      ),
     );
   }
 
-  Widget _buildStatCards(AppState<Map<String, dynamic>> state, BuildContext context) {
+  Widget _buildStatCards(
+    AppState<Map<String, dynamic>> state,
+    BuildContext context,
+  ) {
     if (state is AppLoading) {
-      return const Center(child: CircularProgressIndicator(color: ThemeColors.primary));
+      return const Center(
+        child: CircularProgressIndicator(color: ThemeColors.primary),
+      );
     }
     if (state is AppError) {
-      return Center(child: Text('Erro: ${(state as AppError).message}', style: const TextStyle(color: ThemeColors.danger)));
+      return Center(
+        child: Text(
+          'Erro: ${(state as AppError).message}',
+          style: const TextStyle(color: ThemeColors.danger),
+        ),
+      );
     }
 
     final stats = state.data ?? {};
@@ -102,7 +116,10 @@ class DashboardPage extends ConsumerWidget {
               child: AppStatCard(
                 title: 'AGENDAMENTOS HOJE',
                 value: appointmentsToday.toString(),
-                icon: const Icon(Icons.calendar_today_outlined, color: ThemeColors.primary),
+                icon: const Icon(
+                  Icons.calendar_today_outlined,
+                  color: ThemeColors.primary,
+                ),
                 trendText: '+12% que ontem',
                 positiveTrend: true,
               ),
@@ -112,7 +129,10 @@ class DashboardPage extends ConsumerWidget {
               child: AppStatCard(
                 title: 'FATURAMENTO HOJE',
                 value: 'R\$ ${dailyRevenue.toStringAsFixed(2)}',
-                icon: const Icon(Icons.monetization_on_outlined, color: ThemeColors.success),
+                icon: const Icon(
+                  Icons.monetization_on_outlined,
+                  color: ThemeColors.success,
+                ),
                 trendText: '+18% que ontem',
                 positiveTrend: true,
               ),
@@ -140,17 +160,24 @@ class DashboardPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildChartsRow(AppState<Map<String, dynamic>> summaryState, BuildContext context) {
+  Widget _buildChartsRow(
+    AppState<Map<String, dynamic>> summaryState,
+    BuildContext context,
+  ) {
     if (summaryState is! AppSuccess<Map<String, dynamic>>) {
       return const SizedBox.shrink();
     }
     final summary = summaryState.data;
     final revHistory = summary['revenueHistory'] as List<dynamic>? ?? [];
 
-    final chartPoints = revHistory.map((item) => AppChartDataPoint(
-      label: item['date'] as String,
-      value: (item['value'] as num).toDouble(),
-    )).toList();
+    final chartPoints = revHistory
+        .map(
+          (item) => AppChartDataPoint(
+            label: item['date'] as String,
+            value: (item['value'] as num).toDouble(),
+          ),
+        )
+        .toList();
 
     return SizedBox(
       height: 280,
@@ -168,12 +195,42 @@ class DashboardPage extends ConsumerWidget {
 
   Widget _buildManageCardsSection(BuildContext context) {
     final items = [
-      {'label': 'Serviços', 'icon': Icons.content_cut_outlined, 'path': '/servicos', 'desc': 'Gerenciar serviços, preços e duração.'},
-      {'label': 'Produtos', 'icon': Icons.shopping_bag_outlined, 'path': '/produtos', 'desc': 'Gerenciar produtos da loja.'},
-      {'label': 'Funcionários', 'icon': Icons.badge_outlined, 'path': '/funcionarios', 'desc': 'Gerenciar equipe e comissões.'},
-      {'label': 'Planos', 'icon': Icons.card_membership_outlined, 'path': '/planos', 'desc': 'Gerenciar planos e preços.'},
-      {'label': 'Clube', 'icon': Icons.stars_outlined, 'path': '/clube', 'desc': 'Gerenciar benefícios e descontos.'},
-      {'label': 'Categorias', 'icon': Icons.category_outlined, 'path': '/categorias', 'desc': 'Gerenciar categorias.'},
+      {
+        'label': 'Serviços',
+        'icon': Icons.content_cut_outlined,
+        'path': '/servicos',
+        'desc': 'Gerenciar serviços, preços e duração.',
+      },
+      {
+        'label': 'Produtos',
+        'icon': Icons.shopping_bag_outlined,
+        'path': '/produtos',
+        'desc': 'Gerenciar produtos da loja.',
+      },
+      {
+        'label': 'Funcionários',
+        'icon': Icons.badge_outlined,
+        'path': '/funcionarios',
+        'desc': 'Gerenciar equipe e comissões.',
+      },
+      {
+        'label': 'Planos',
+        'icon': Icons.card_membership_outlined,
+        'path': '/planos',
+        'desc': 'Gerenciar planos e preços.',
+      },
+      {
+        'label': 'Clube',
+        'icon': Icons.stars_outlined,
+        'path': '/clube',
+        'desc': 'Gerenciar benefícios e descontos.',
+      },
+      {
+        'label': 'Categorias',
+        'icon': Icons.category_outlined,
+        'path': '/categorias',
+        'desc': 'Gerenciar categorias.',
+      },
     ];
 
     return AppSection(
@@ -181,7 +238,9 @@ class DashboardPage extends ConsumerWidget {
       subtitle: 'Administre todos os cadastros base do sistema ERP',
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final crossCount = constraints.maxWidth > 960 ? 6 : (constraints.maxWidth > 600 ? 3 : 2);
+          final crossCount = constraints.maxWidth > 960
+              ? 6
+              : (constraints.maxWidth > 600 ? 3 : 2);
           return GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -197,17 +256,33 @@ class DashboardPage extends ConsumerWidget {
               return InkWell(
                 onTap: () => context.go(item['path'] as String),
                 child: AppCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 12.0,
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(item['icon'] as IconData, color: ThemeColors.primary, size: 28),
+                      Icon(
+                        item['icon'] as IconData,
+                        color: ThemeColors.primary,
+                        size: 28,
+                      ),
                       const SizedBox(height: 10),
-                      Text(item['label'] as String, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      Text(
+                        item['label'] as String,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         item['desc'] as String,
-                        style: const TextStyle(fontSize: 10, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey,
+                        ),
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -229,7 +304,9 @@ class DashboardPage extends ConsumerWidget {
       subtitle: 'Ações administrativas rápidas',
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final crossCount = constraints.maxWidth > 960 ? 5 : (constraints.maxWidth > 600 ? 3 : 2);
+          final crossCount = constraints.maxWidth > 960
+              ? 5
+              : (constraints.maxWidth > 600 ? 3 : 2);
           return GridView(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -295,11 +372,21 @@ class DashboardPage extends ConsumerWidget {
                       children: [
                         const Text(
                           'PRÓXIMOS AGENDAMENTOS',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
                         ),
                         TextButton(
                           onPressed: () => context.go('/agenda'),
-                          child: const Text('Ver todos', style: TextStyle(color: ThemeColors.primary, fontSize: 13)),
+                          child: const Text(
+                            'Ver todos',
+                            style: TextStyle(
+                              color: ThemeColors.primary,
+                              fontSize: 13,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -323,11 +410,21 @@ class DashboardPage extends ConsumerWidget {
                         children: [
                           const Text(
                             'ESTOQUE CRÍTICO',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
                           ),
                           TextButton(
                             onPressed: () => context.go('/estoque'),
-                            child: const Text('Ver estoque', style: TextStyle(color: ThemeColors.primary, fontSize: 13)),
+                            child: const Text(
+                              'Ver estoque',
+                              style: TextStyle(
+                                color: ThemeColors.primary,
+                                fontSize: 13,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -346,10 +443,15 @@ class DashboardPage extends ConsumerWidget {
 
   Widget _buildAppointmentsList(AppState<List<dynamic>> state) {
     if (state is AppLoading) {
-      return const Center(child: CircularProgressIndicator(color: ThemeColors.primary));
+      return const Center(
+        child: CircularProgressIndicator(color: ThemeColors.primary),
+      );
     }
     final list = state.data ?? [];
-    final current = list.where((apt) => apt.status == 'confirmed' || apt.status == 'pending').take(4).toList();
+    final current = list
+        .where((apt) => apt.status == 'confirmed' || apt.status == 'pending')
+        .take(4)
+        .toList();
 
     if (current.isEmpty) {
       return const Padding(
@@ -389,7 +491,10 @@ class DashboardPage extends ConsumerWidget {
                 children: [
                   Text(
                     apt.clientName,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -411,7 +516,9 @@ class DashboardPage extends ConsumerWidget {
 
   Widget _buildCriticalStockList(AppState<List<Produto>> state) {
     if (state is AppLoading) {
-      return const Center(child: CircularProgressIndicator(color: ThemeColors.primary));
+      return const Center(
+        child: CircularProgressIndicator(color: ThemeColors.primary),
+      );
     }
     final list = state.data ?? [];
     final critical = list.where((p) => p.stock <= p.minStock).toList();
@@ -419,7 +526,12 @@ class DashboardPage extends ConsumerWidget {
     if (critical.isEmpty) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 24),
-        child: Center(child: Text('Estoque OK', style: TextStyle(color: ThemeColors.success))),
+        child: Center(
+          child: Text(
+            'Estoque OK',
+            style: TextStyle(color: ThemeColors.success),
+          ),
+        ),
       );
     }
 
@@ -432,7 +544,11 @@ class DashboardPage extends ConsumerWidget {
         final prod = critical[index];
         return Row(
           children: [
-            const Icon(Icons.warning_amber_rounded, color: ThemeColors.danger, size: 20),
+            const Icon(
+              Icons.warning_amber_rounded,
+              color: ThemeColors.danger,
+              size: 20,
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
@@ -440,7 +556,10 @@ class DashboardPage extends ConsumerWidget {
                 children: [
                   Text(
                     prod.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

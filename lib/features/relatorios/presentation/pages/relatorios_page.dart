@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_section.dart';
@@ -19,29 +18,42 @@ class RelatoriosPage extends ConsumerWidget {
     return AppPage(
       title: 'Relatórios',
       userName: 'Fábio Zvir',
-      userAvatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&width=150',
+      userAvatarUrl:
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&width=150',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           AppSection(
             title: 'Centro de Relatórios Gerenciais',
-            subtitle: 'Gere relatórios analíticos completos e exporte em formatos Excel (XLSX) ou PDF',
+            subtitle:
+                'Gere relatórios analíticos completos e exporte em formatos Excel (XLSX) ou PDF',
             child: _buildContent(context, state, isDark),
           ),
         ],
-      ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, end: 0, curve: Curves.easeOut),
+      ),
     );
   }
 
-  Widget _buildContent(BuildContext context, AppState<List<Map<String, dynamic>>> state, bool isDark) {
+  Widget _buildContent(
+    BuildContext context,
+    AppState<List<Map<String, dynamic>>> state,
+    bool isDark,
+  ) {
     if (state is AppLoading) {
       return const Padding(
         padding: EdgeInsets.all(40.0),
-        child: Center(child: CircularProgressIndicator(color: ThemeColors.primary)),
+        child: Center(
+          child: CircularProgressIndicator(color: ThemeColors.primary),
+        ),
       );
     }
     if (state is AppError) {
-      return Center(child: Text('Erro: ${(state as AppError).message}', style: const TextStyle(color: ThemeColors.danger)));
+      return Center(
+        child: Text(
+          'Erro: ${(state as AppError).message}',
+          style: const TextStyle(color: ThemeColors.danger),
+        ),
+      );
     }
 
     final reports = state.data ?? [];
@@ -68,7 +80,9 @@ class RelatoriosPage extends ConsumerWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossCount = constraints.maxWidth > 960 ? 3 : (constraints.maxWidth > 600 ? 2 : 1);
+        final crossCount = constraints.maxWidth > 960
+            ? 3
+            : (constraints.maxWidth > 600 ? 2 : 1);
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -99,22 +113,30 @@ class RelatoriosPage extends ConsumerWidget {
                           color: color.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(
-                          icon,
-                          color: color,
-                          size: 24,
-                        ),
+                        child: Icon(icon, color: color, size: 24),
                       ),
                       Row(
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.picture_as_pdf, size: 20, color: Colors.red),
-                            onPressed: () => _exportMock(context, report['title'] as String, 'PDF'),
+                            icon: const Icon(
+                              Icons.picture_as_pdf,
+                              size: 20,
+                              color: Colors.red,
+                            ),
+                            onPressed: () => _exportMock(
+                              context,
+                              report['title'] as String,
+                              'PDF',
+                            ),
                             tooltip: 'Exportar PDF',
                           ),
                           IconButton(
                             icon: const Icon(Icons.download, size: 20),
-                            onPressed: () => _exportMock(context, report['title'] as String, 'Excel (XLSX)'),
+                            onPressed: () => _exportMock(
+                              context,
+                              report['title'] as String,
+                              'Excel (XLSX)',
+                            ),
                             tooltip: 'Exportar Excel',
                           ),
                         ],
@@ -124,7 +146,10 @@ class RelatoriosPage extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     report['title'] as String,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Expanded(
@@ -143,12 +168,20 @@ class RelatoriosPage extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.trending_up, color: ThemeColors.success, size: 14),
+                      const Icon(
+                        Icons.trending_up,
+                        color: ThemeColors.success,
+                        size: 14,
+                      ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           report['stats'] as String,
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
