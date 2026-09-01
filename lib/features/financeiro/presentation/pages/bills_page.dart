@@ -62,10 +62,17 @@ class _BillsPageState extends ConsumerState<BillsPage> {
 
   Widget _buildContent(AppState<List<Bill>> state, bool isDark) {
     if (state is AppLoading) {
-      return const Center(child: CircularProgressIndicator(color: ThemeColors.primary));
+      return const Center(
+        child: CircularProgressIndicator(color: ThemeColors.primary),
+      );
     }
     if (state is AppError) {
-      return Center(child: Text('Erro: ${(state as AppError).message}', style: const TextStyle(color: ThemeColors.danger)));
+      return Center(
+        child: Text(
+          'Erro: ${(state as AppError).message}',
+          style: const TextStyle(color: ThemeColors.danger),
+        ),
+      );
     }
 
     final data = state.data ?? [];
@@ -75,13 +82,21 @@ class _BillsPageState extends ConsumerState<BillsPage> {
       return Container(
         padding: const EdgeInsets.all(40),
         alignment: Alignment.center,
-        child: Text('Nenhuma comanda aberta no momento.', style: TextStyle(color: isDark ? Colors.white30 : Colors.grey)),
+        child: Text(
+          'Nenhuma comanda aberta no momento.',
+          style: TextStyle(color: isDark ? Colors.white30 : Colors.grey),
+        ),
       );
     }
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossCount = AppBreakpoints.gridColumns(context, desktopCols: 4, tabletCols: 2, mobileCols: 1);
+        final crossCount = AppBreakpoints.gridColumns(
+          context,
+          desktopCols: 4,
+          tabletCols: 2,
+          mobileCols: 1,
+        );
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -112,11 +127,17 @@ class _BillsPageState extends ConsumerState<BillsPage> {
               Expanded(
                 child: Text(
                   bill.clientName,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const AppStatusChip(label: 'Em Aberto', type: AppStatusType.warning),
+              const AppStatusChip(
+                label: 'Em Aberto',
+                type: AppStatusType.warning,
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -135,7 +156,11 @@ class _BillsPageState extends ConsumerState<BillsPage> {
             children: [
               Text(
                 'R\$ ${bill.total.toStringAsFixed(2)}',
-                style: const TextStyle(color: ThemeColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(
+                  color: ThemeColors.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
               Row(
                 children: [
@@ -145,7 +170,11 @@ class _BillsPageState extends ConsumerState<BillsPage> {
                     tooltip: 'Lançar Itens',
                   ),
                   IconButton(
-                    icon: const Icon(Icons.check_circle_outline, size: 18, color: ThemeColors.success),
+                    icon: const Icon(
+                      Icons.check_circle_outline,
+                      size: 18,
+                      color: ThemeColors.success,
+                    ),
                     onPressed: () => _showCheckoutDialog(context, bill),
                     tooltip: 'Fechar Conta',
                   ),
@@ -164,7 +193,10 @@ class _BillsPageState extends ConsumerState<BillsPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: ThemeColors.darkBg,
-        title: const Text('Abrir Nova Comanda', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Abrir Nova Comanda',
+          style: TextStyle(color: Colors.white),
+        ),
         content: AppInput(
           label: 'Nome do Cliente / Identificador',
           controller: _billNameController,
@@ -180,8 +212,10 @@ class _BillsPageState extends ConsumerState<BillsPage> {
             onPressed: () {
               if (_billNameController.text.isNotEmpty) {
                 final now = DateTime.now();
-                final todayStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-                final timeStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+                final todayStr =
+                    '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+                final timeStr =
+                    '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
 
                 final newBill = Bill(
                   id: '',
@@ -204,288 +238,144 @@ class _BillsPageState extends ConsumerState<BillsPage> {
   }
 
   void _showAddItemDialog(BuildContext context, Bill bill) {
-    final servicesState = ref.read(servicosControllerProvider);
-    final productsState = ref.read(produtosControllerProvider);
-    final employeesState = ref.read(funcionariosControllerProvider);
-
-    String? selectedType = 'service';
-    String? selectedItemId;
-    String? selectedProfessionalId;
-    int quantity = 1;
-
     showDialog(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          final List<DropdownMenuItem<String>> itemsToSelect = [];
-
-          if (selectedType == 'service' && servicesState is AppSuccess<List<Servico>>) {
-            final list = servicesState.data;
-            for (final item in list) {
-              itemsToSelect.add(DropdownMenuItem(value: item.id, child: Text('${item.name} - R\$ ${item.price.toStringAsFixed(2)}')));
-            }
-          } else if (selectedType == 'product' && productsState is AppSuccess<List<Produto>>) {
-            final list = productsState.data;
-            for (final item in list) {
-              itemsToSelect.add(DropdownMenuItem(value: item.id, child: Text('${item.name} - R\$ ${item.price.toStringAsFixed(2)}')));
-            }
-          }
-
-          final List<DropdownMenuItem<String>> professionalsToSelect = [];
-          if (employeesState is AppSuccess<List<Funcionario>>) {
-            final list = employeesState.data;
-            for (final emp in list) {
-              professionalsToSelect.add(DropdownMenuItem(value: emp.id, child: Text(emp.name)));
-            }
-          }
-
-          return AlertDialog(
-            backgroundColor: ThemeColors.darkBg,
-            title: Text('Lançar na comanda de ${bill.clientName}', style: const TextStyle(color: Colors.white, fontSize: 16)),
-            content: SizedBox(
-              width: 400,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RadioListTile<String>(
-                          title: const Text('Serviço', style: TextStyle(color: Colors.white, fontSize: 12)),
-                          value: 'service',
-                          groupValue: selectedType,
-                          activeColor: ThemeColors.primary,
-                          contentPadding: EdgeInsets.zero,
-                          onChanged: (val) {
-                            setDialogState(() {
-                              selectedType = val;
-                              selectedItemId = null;
-                            });
-                          },
-                        ),
-                      ),
-                      Expanded(
-                        child: RadioListTile<String>(
-                          title: const Text('Produto', style: TextStyle(color: Colors.white, fontSize: 12)),
-                          value: 'product',
-                          groupValue: selectedType,
-                          activeColor: ThemeColors.primary,
-                          contentPadding: EdgeInsets.zero,
-                          onChanged: (val) {
-                            setDialogState(() {
-                              selectedType = val;
-                              selectedItemId = null;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    dropdownColor: ThemeColors.darkBg,
-                    decoration: const InputDecoration(labelText: 'Selecione o item', labelStyle: TextStyle(color: Colors.grey)),
-                    style: const TextStyle(color: Colors.white),
-                    value: selectedItemId,
-                    items: itemsToSelect,
-                    onChanged: (val) => setDialogState(() => selectedItemId = val),
-                  ),
-                  const SizedBox(height: 12),
-                  if (selectedType == 'service') ...[
-                    DropdownButtonFormField<String>(
-                      dropdownColor: ThemeColors.darkBg,
-                      decoration: const InputDecoration(labelText: 'Barbeiro Responsável', labelStyle: TextStyle(color: Colors.grey)),
-                      style: const TextStyle(color: Colors.white),
-                      value: selectedProfessionalId,
-                      items: professionalsToSelect,
-                      onChanged: (val) => setDialogState(() => selectedProfessionalId = val),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Quantidade:', style: TextStyle(color: Colors.white)),
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.remove, color: Colors.white),
-                            onPressed: quantity > 1 ? () => setDialogState(() => quantity--) : null,
-                          ),
-                          Text('$quantity', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                          IconButton(
-                            icon: const Icon(Icons.add, color: Colors.white),
-                            onPressed: () => setDialogState(() => quantity++),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
-                onPressed: () => Navigator.pop(ctx),
-              ),
-              AppButton(
-                label: 'Lançar',
-                onPressed: () {
-                  if (selectedItemId != null) {
-                    String name = '';
-                    double price = 0.0;
-                    String? profName;
-
-                    if (selectedType == 'service' && servicesState is AppSuccess<List<Servico>>) {
-                      final list = servicesState.data;
-                      final s = list.firstWhere((x) => x.id == selectedItemId);
-                      name = s.name;
-                      price = s.price;
-                      if (selectedProfessionalId != null && employeesState is AppSuccess<List<Funcionario>>) {
-                        profName = employeesState.data.firstWhere((e) => e.id == selectedProfessionalId).name;
-                      }
-                    } else if (selectedType == 'product' && productsState is AppSuccess<List<Produto>>) {
-                      final list = productsState.data;
-                      final p = list.firstWhere((x) => x.id == selectedItemId);
-                      name = p.name;
-                      price = p.price;
-                    }
-
-                    final item = BillItem(
-                      id: selectedItemId!,
-                      name: name,
-                      type: selectedType!,
-                      price: price,
-                      quantity: quantity,
-                      professionalId: selectedProfessionalId,
-                      professionalName: profName,
-                    );
-
-                    final updated = bill.copyWith(
-                      items: [...bill.items, item],
-                    );
-
-                    ref.read(billControllerProvider.notifier).updateBill(updated);
-                    Navigator.pop(ctx);
-                  }
-                },
-              ),
-            ],
-          );
-        },
-      ),
+      builder: (ctx) => _AddBillItemDialog(bill: bill),
     );
   }
 
   void _showCheckoutDialog(BuildContext context, Bill bill) {
-    double discount = 0.0;
-    final discountController = TextEditingController(text: '0');
-
-    // Payments split map
-    double pixAmount = 0.0;
-    double cardAmount = 0.0;
-    double cashAmount = 0.0;
-
-    final pixController = TextEditingController(text: '0');
-    final cardController = TextEditingController(text: '0');
-    final cashController = TextEditingController(text: '0');
-
     showDialog(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          final subtotal = bill.subtotal;
-          final total = subtotal - discount;
+      builder: (ctx) => _CheckoutBillDialog(bill: bill),
+    );
+  }
+}
 
-          void updateValues() {
-            discount = double.tryParse(discountController.text) ?? 0.0;
-          }
+class _CheckoutBillDialog extends ConsumerStatefulWidget {
+  final Bill bill;
 
-          return AlertDialog(
-            backgroundColor: ThemeColors.darkBg,
-            title: Text('Fechar Comanda: ${bill.clientName}', style: const TextStyle(color: Colors.white, fontSize: 16)),
-            content: SizedBox(
-              width: 450,
-              child: SingleChildScrollView(
+  const _CheckoutBillDialog({required this.bill});
+
+  @override
+  ConsumerState<_CheckoutBillDialog> createState() =>
+      _CheckoutBillDialogState();
+}
+
+class _CheckoutBillDialogState extends ConsumerState<_CheckoutBillDialog> {
+  late final TextEditingController _discountController;
+  late final TextEditingController _pixController;
+  late final TextEditingController _cardController;
+  late final TextEditingController _cashController;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _discountController = TextEditingController(text: '0');
+    _pixController = TextEditingController(text: '0');
+    _cardController = TextEditingController(text: '0');
+    _cashController = TextEditingController(text: '0');
+  }
+
+  @override
+  void dispose() {
+    _discountController.dispose();
+    _pixController.dispose();
+    _cardController.dispose();
+    _cashController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final subtotal = widget.bill.subtotal;
+    final discount = double.tryParse(_discountController.text) ?? 0.0;
+    final total = (subtotal - discount).clamp(0.0, double.infinity);
+
+    final pixAmount = double.tryParse(_pixController.text) ?? 0.0;
+    final cardAmount = double.tryParse(_cardController.text) ?? 0.0;
+    final cashAmount = double.tryParse(_cashController.text) ?? 0.0;
+    final totalPaid = pixAmount + cardAmount + cashAmount;
+
+    return AlertDialog(
+      backgroundColor: ThemeColors.darkBg,
+      title: Text(
+        'Fechar Comanda: ${widget.bill.clientName}',
+        style: const TextStyle(color: Colors.white, fontSize: 16),
+      ),
+      content: SizedBox(
+        width: 450,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Invoice Summary
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: ThemeColors.surface,
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Invoice Summary
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(color: ThemeColors.surface, borderRadius: BorderRadius.circular(8)),
-                      child: Column(
+                    ...widget.bill.items.map(
+                      (it) => Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          ...bill.items.map((it) => Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('${it.quantity}x ${it.name}', style: const TextStyle(color: Colors.white70, fontSize: 12)),
-                              Text('R\$ ${it.total.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white70, fontSize: 12)),
-                            ],
-                          )),
-                          const Divider(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('Subtotal', style: TextStyle(color: Colors.grey, fontSize: 13)),
-                              Text('R\$ ${subtotal.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 13)),
-                            ],
+                          Text(
+                            '${it.quantity}x ${it.name}',
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
                           ),
-                          const SizedBox(height: 6),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('Total a Pagar', style: TextStyle(color: ThemeColors.primary, fontWeight: FontWeight.bold, fontSize: 15)),
-                              Text('R\$ ${total.toStringAsFixed(2)}', style: const TextStyle(color: ThemeColors.primary, fontWeight: FontWeight.bold, fontSize: 15)),
-                            ],
+                          Text(
+                            'R\$ ${it.total.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    AppInput(
-                      label: 'Desconto (R\$)',
-                      controller: discountController,
-                      onChanged: (val) {
-                        setDialogState(() {
-                          updateValues();
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    const Text('Divisão de Pagamento (Split)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                    const SizedBox(height: 8),
+                    const Divider(),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Expanded(
-                          child: AppInput(
-                            label: 'PIX (R\$)',
-                            controller: pixController,
-                            onChanged: (val) {
-                              pixAmount = double.tryParse(val) ?? 0.0;
-                            },
+                        const Text(
+                          'Subtotal',
+                          style: TextStyle(color: Colors.grey, fontSize: 13),
+                        ),
+                        Text(
+                          'R\$ ${subtotal.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: AppInput(
-                            label: 'Cartão (R\$)',
-                            controller: cardController,
-                            onChanged: (val) {
-                              cardAmount = double.tryParse(val) ?? 0.0;
-                            },
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Total a Pagar',
+                          style: TextStyle(
+                            color: ThemeColors.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: AppInput(
-                            label: 'Dinheiro (R\$)',
-                            controller: cashController,
-                            onChanged: (val) {
-                              cashAmount = double.tryParse(val) ?? 0.0;
-                            },
+                        Text(
+                          'R\$ ${total.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            color: ThemeColors.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
                           ),
                         ),
                       ],
@@ -493,34 +383,413 @@ class _BillsPageState extends ConsumerState<BillsPage> {
                   ],
                 ),
               ),
-            ),
-            actions: [
-              TextButton(
-                child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
-                onPressed: () => Navigator.pop(ctx),
+              const SizedBox(height: 16),
+              AppInput(
+                label: 'Desconto (R\$)',
+                controller: _discountController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                onChanged: (_) => setState(() => _errorMessage = null),
               ),
-              AppButton(
-                label: 'Finalizar Pagamento',
-                onPressed: () {
-                  updateValues();
-                  final List<PaymentSplit> payments = [];
-                  if (pixAmount > 0) payments.add(PaymentSplit(method: 'pix', amount: pixAmount));
-                  if (cardAmount > 0) payments.add(PaymentSplit(method: 'credit', amount: cardAmount));
-                  if (cashAmount > 0) payments.add(PaymentSplit(method: 'money', amount: cashAmount));
-
-                  // Fallback to cash if none specified
-                  if (payments.isEmpty) {
-                    payments.add(PaymentSplit(method: 'money', amount: total));
-                  }
-
-                  ref.read(billControllerProvider.notifier).checkoutBill(bill, payments, discount);
-                  Navigator.pop(ctx);
-                },
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Divisão de Pagamento (Split)',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _pixController.text = total.toStringAsFixed(2);
+                        _cardController.text = '0';
+                        _cashController.text = '0';
+                        _errorMessage = null;
+                      });
+                    },
+                    child: const Text(
+                      'Preencher Total no PIX',
+                      style: TextStyle(
+                        color: ThemeColors.primary,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppInput(
+                      label: 'PIX (R\$)',
+                      controller: _pixController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      onChanged: (_) => setState(() => _errorMessage = null),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: AppInput(
+                      label: 'Cartão (R\$)',
+                      controller: _cardController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      onChanged: (_) => setState(() => _errorMessage = null),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: AppInput(
+                      label: 'Dinheiro (R\$)',
+                      controller: _cashController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      onChanged: (_) => setState(() => _errorMessage = null),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: (totalPaid - total).abs() < 0.01
+                      ? ThemeColors.success.withValues(alpha: 0.1)
+                      : Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Total Informado no Split:',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade300,
+                      ),
+                    ),
+                    Text(
+                      'R\$ ${totalPaid.toStringAsFixed(2)} / R\$ ${total.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: (totalPaid - total).abs() < 0.01
+                            ? ThemeColors.success
+                            : ThemeColors.danger,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (_errorMessage != null) ...[
+                const SizedBox(height: 10),
+                Text(
+                  _errorMessage!,
+                  style: const TextStyle(
+                    color: ThemeColors.danger,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ],
-          );
-        },
+          ),
+        ),
       ),
+      actions: [
+        TextButton(
+          child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        AppButton(
+          label: 'Finalizar Pagamento',
+          onPressed: () {
+            if (discount > subtotal) {
+              setState(
+                () => _errorMessage =
+                    'O desconto não pode ser maior que o subtotal.',
+              );
+              return;
+            }
+
+            final List<PaymentSplit> payments = [];
+            if (pixAmount > 0) {
+              payments.add(PaymentSplit(method: 'pix', amount: pixAmount));
+            }
+            if (cardAmount > 0) {
+              payments.add(PaymentSplit(method: 'credit', amount: cardAmount));
+            }
+            if (cashAmount > 0) {
+              payments.add(PaymentSplit(method: 'money', amount: cashAmount));
+            }
+
+            // If no split provided, default to money full total
+            if (payments.isEmpty) {
+              payments.add(PaymentSplit(method: 'money', amount: total));
+            } else {
+              // Double check split sum matches total due
+              if ((totalPaid - total).abs() > 0.01) {
+                setState(
+                  () => _errorMessage =
+                      'A soma das formas de pagamento (R\$ ${totalPaid.toStringAsFixed(2)}) não confere com o total (R\$ ${total.toStringAsFixed(2)}).',
+                );
+                return;
+              }
+            }
+
+            ref
+                .read(billControllerProvider.notifier)
+                .checkoutBill(widget.bill, payments, discount);
+            Navigator.pop(context);
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _AddBillItemDialog extends ConsumerStatefulWidget {
+  final Bill bill;
+
+  const _AddBillItemDialog({required this.bill});
+
+  @override
+  ConsumerState<_AddBillItemDialog> createState() => _AddBillItemDialogState();
+}
+
+class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
+  String _selectedType = 'service';
+  String? _selectedItemId;
+  String? _selectedProfessionalId;
+  int _quantity = 1;
+
+  @override
+  Widget build(BuildContext context) {
+    final servicesState = ref.watch(servicosControllerProvider);
+    final productsState = ref.watch(produtosControllerProvider);
+    final employeesState = ref.watch(funcionariosControllerProvider);
+
+    final List<DropdownMenuItem<String>> itemsToSelect = [];
+
+    if (_selectedType == 'service' &&
+        servicesState is AppSuccess<List<Servico>>) {
+      for (final item in servicesState.data) {
+        itemsToSelect.add(
+          DropdownMenuItem(
+            value: item.id,
+            child: Text('${item.name} - R\$ ${item.price.toStringAsFixed(2)}'),
+          ),
+        );
+      }
+    } else if (_selectedType == 'product' &&
+        productsState is AppSuccess<List<Produto>>) {
+      for (final item in productsState.data) {
+        itemsToSelect.add(
+          DropdownMenuItem(
+            value: item.id,
+            child: Text('${item.name} - R\$ ${item.price.toStringAsFixed(2)}'),
+          ),
+        );
+      }
+    }
+
+    final List<DropdownMenuItem<String>> professionalsToSelect = [];
+    if (employeesState is AppSuccess<List<Funcionario>>) {
+      for (final emp in employeesState.data) {
+        professionalsToSelect.add(
+          DropdownMenuItem(value: emp.id, child: Text(emp.name)),
+        );
+      }
+    }
+
+    return AlertDialog(
+      backgroundColor: ThemeColors.darkBg,
+      title: Text(
+        'Lançar na comanda de ${widget.bill.clientName}',
+        style: const TextStyle(color: Colors.white, fontSize: 16),
+      ),
+      content: SizedBox(
+        width: 400,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: ChoiceChip(
+                    label: const Center(child: Text('Serviço')),
+                    selected: _selectedType == 'service',
+                    selectedColor: ThemeColors.primary,
+                    labelStyle: TextStyle(
+                      color: _selectedType == 'service'
+                          ? Colors.black
+                          : Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    onSelected: (selected) {
+                      if (selected) {
+                        setState(() {
+                          _selectedType = 'service';
+                          _selectedItemId = null;
+                        });
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ChoiceChip(
+                    label: const Center(child: Text('Produto')),
+                    selected: _selectedType == 'product',
+                    selectedColor: ThemeColors.primary,
+                    labelStyle: TextStyle(
+                      color: _selectedType == 'product'
+                          ? Colors.black
+                          : Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    onSelected: (selected) {
+                      if (selected) {
+                        setState(() {
+                          _selectedType = 'product';
+                          _selectedItemId = null;
+                        });
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              key: ValueKey('item_$_selectedType'),
+              dropdownColor: ThemeColors.darkBg,
+              decoration: const InputDecoration(
+                labelText: 'Selecione o item',
+                labelStyle: TextStyle(color: Colors.grey),
+              ),
+              style: const TextStyle(color: Colors.white),
+              initialValue: _selectedItemId,
+              items: itemsToSelect,
+              onChanged: (val) => setState(() => _selectedItemId = val),
+            ),
+            const SizedBox(height: 12),
+            if (_selectedType == 'service') ...[
+              DropdownButtonFormField<String>(
+                dropdownColor: ThemeColors.darkBg,
+                decoration: const InputDecoration(
+                  labelText: 'Barbeiro Responsável',
+                  labelStyle: TextStyle(color: Colors.grey),
+                ),
+                style: const TextStyle(color: Colors.white),
+                initialValue: _selectedProfessionalId,
+                items: professionalsToSelect,
+                onChanged: (val) =>
+                    setState(() => _selectedProfessionalId = val),
+              ),
+              const SizedBox(height: 12),
+            ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Quantidade:',
+                  style: TextStyle(color: Colors.white),
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.remove, color: Colors.white),
+                      onPressed: _quantity > 1
+                          ? () => setState(() => _quantity--)
+                          : null,
+                    ),
+                    Text(
+                      '$_quantity',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add, color: Colors.white),
+                      onPressed: () => setState(() => _quantity++),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        AppButton(
+          label: 'Lançar',
+          onPressed: () {
+            if (_selectedItemId != null) {
+              String name = '';
+              double price = 0.0;
+              String? profName;
+
+              if (_selectedType == 'service' &&
+                  servicesState is AppSuccess<List<Servico>>) {
+                final s = servicesState.data.firstWhere(
+                  (x) => x.id == _selectedItemId,
+                );
+                name = s.name;
+                price = s.price;
+                if (_selectedProfessionalId != null &&
+                    employeesState is AppSuccess<List<Funcionario>>) {
+                  profName = employeesState.data
+                      .firstWhere((e) => e.id == _selectedProfessionalId)
+                      .name;
+                }
+              } else if (_selectedType == 'product' &&
+                  productsState is AppSuccess<List<Produto>>) {
+                final p = productsState.data.firstWhere(
+                  (x) => x.id == _selectedItemId,
+                );
+                name = p.name;
+                price = p.price;
+              }
+
+              final item = BillItem(
+                id: _selectedItemId!,
+                name: name,
+                type: _selectedType,
+                price: price,
+                quantity: _quantity,
+                professionalId: _selectedProfessionalId,
+                professionalName: profName,
+              );
+
+              final updated = widget.bill.copyWith(
+                items: [...widget.bill.items, item],
+              );
+              ref.read(billControllerProvider.notifier).updateBill(updated);
+              Navigator.pop(context);
+            }
+          },
+        ),
+      ],
     );
   }
 }

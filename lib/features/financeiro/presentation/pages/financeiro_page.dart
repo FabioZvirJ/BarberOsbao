@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
@@ -38,13 +37,18 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
     return AppPage(
       title: 'Financeiro',
       userName: 'Fábio Zvir',
-      userAvatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&width=150',
+      userAvatarUrl:
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&width=150',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Module Selection Bar
           AppFilters(
-            options: const ['Relatórios', 'Comandas & PDV', 'Operação de Caixa'],
+            options: const [
+              'Relatórios',
+              'Comandas & PDV',
+              'Operação de Caixa',
+            ],
             selectedOption: _selectedModule,
             onSelected: (val) => setState(() => _selectedModule = val),
           ),
@@ -71,7 +75,12 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 AppFilters(
-                  options: const ['Fluxo de Caixa', 'Receitas', 'Despesas', 'Comissões'],
+                  options: const [
+                    'Fluxo de Caixa',
+                    'Receitas',
+                    'Despesas',
+                    'Comissões',
+                  ],
                   selectedOption: _selectedTab,
                   onSelected: (val) => setState(() => _selectedTab = val),
                 ),
@@ -84,7 +93,9 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Planilha financeira exportada com sucesso!'),
+                            content: Text(
+                              'Planilha financeira exportada com sucesso!',
+                            ),
                             backgroundColor: ThemeColors.success,
                           ),
                         );
@@ -110,16 +121,23 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
             ),
           ],
         ],
-      ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, end: 0, curve: Curves.easeOut),
+      ),
     );
   }
 
   Widget _buildStatCards(AppState<Map<String, dynamic>> state) {
     if (state is AppLoading) {
-      return const Center(child: CircularProgressIndicator(color: ThemeColors.primary));
+      return const Center(
+        child: CircularProgressIndicator(color: ThemeColors.primary),
+      );
     }
     if (state is AppError) {
-      return Center(child: Text('Erro: ${(state as AppError).message}', style: const TextStyle(color: ThemeColors.danger)));
+      return Center(
+        child: Text(
+          'Erro: ${(state as AppError).message}',
+          style: const TextStyle(color: ThemeColors.danger),
+        ),
+      );
     }
 
     final summary = state.data ?? {};
@@ -132,7 +150,9 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossCount = constraints.maxWidth > 960 ? 6 : (constraints.maxWidth > 600 ? 3 : 2);
+        final crossCount = constraints.maxWidth > 960
+            ? 6
+            : (constraints.maxWidth > 600 ? 3 : 2);
         return GridView(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -156,7 +176,10 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
             AppStatCard(
               title: 'RECEITA MÊS',
               value: 'R\$ ${monthlyRev.toStringAsFixed(2)}',
-              icon: const Icon(Icons.calendar_month, color: ThemeColors.success),
+              icon: const Icon(
+                Icons.calendar_month,
+                color: ThemeColors.success,
+              ),
             ),
             AppStatCard(
               title: 'DESPESAS',
@@ -166,12 +189,20 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
             AppStatCard(
               title: 'COMISSÕES A PAGAR',
               value: 'R\$ ${commissions.toStringAsFixed(2)}',
-              icon: const Icon(Icons.people_outline, color: ThemeColors.warning),
+              icon: const Icon(
+                Icons.people_outline,
+                color: ThemeColors.warning,
+              ),
             ),
             AppStatCard(
               title: 'LUCRO LÍQUIDO',
               value: 'R\$ ${netProfit.toStringAsFixed(2)}',
-              icon: Icon(Icons.account_balance, color: netProfit >= 0 ? ThemeColors.success : ThemeColors.danger),
+              icon: Icon(
+                Icons.account_balance,
+                color: netProfit >= 0
+                    ? ThemeColors.success
+                    : ThemeColors.danger,
+              ),
             ),
           ],
         );
@@ -187,15 +218,23 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
     final revHistory = summary['revenueHistory'] as List<dynamic>? ?? [];
     final expHistory = summary['expenseHistory'] as List<dynamic>? ?? [];
 
-    final chartPoints = revHistory.map((item) => AppChartDataPoint(
-      label: item['date'] as String,
-      value: (item['value'] as num).toDouble(),
-    )).toList();
+    final chartPoints = revHistory
+        .map(
+          (item) => AppChartDataPoint(
+            label: item['date'] as String,
+            value: (item['value'] as num).toDouble(),
+          ),
+        )
+        .toList();
 
-    final expensePoints = expHistory.map((item) => AppChartDataPoint(
-      label: item['date'] as String,
-      value: (item['value'] as num).toDouble(),
-    )).toList();
+    final expensePoints = expHistory
+        .map(
+          (item) => AppChartDataPoint(
+            label: item['date'] as String,
+            value: (item['value'] as num).toDouble(),
+          ),
+        )
+        .toList();
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -237,13 +276,20 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
     if (state is AppLoading) {
       return const Padding(
         padding: EdgeInsets.all(40.0),
-        child: Center(child: CircularProgressIndicator(color: ThemeColors.primary)),
+        child: Center(
+          child: CircularProgressIndicator(color: ThemeColors.primary),
+        ),
       );
     }
     if (state is AppError) {
       return Padding(
         padding: const EdgeInsets.all(40.0),
-        child: Center(child: Text('Erro ao buscar transações.', style: const TextStyle(color: ThemeColors.danger))),
+        child: Center(
+          child: Text(
+            'Erro ao buscar transações.',
+            style: const TextStyle(color: ThemeColors.danger),
+          ),
+        ),
       );
     }
 
@@ -259,7 +305,10 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
       return Container(
         padding: const EdgeInsets.all(40),
         alignment: Alignment.center,
-        child: Text('Nenhuma transação encontrada.', style: TextStyle(color: isDark ? Colors.white30 : Colors.grey)),
+        child: Text(
+          'Nenhuma transação encontrada.',
+          style: TextStyle(color: isDark ? Colors.white30 : Colors.grey),
+        ),
       );
     }
 
@@ -278,7 +327,10 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
         final isIncome = entry.type == 'income';
         return AppTableRow(
           cells: [
-            Text(entry.description, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              entry.description,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             Text(entry.category),
             Text(entry.paymentMethod),
             Text(entry.date.split('-').reversed.join('/')),
@@ -295,7 +347,9 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
             ),
             AppStatusChip(
               label: entry.status == 'paid' ? 'Pago' : 'Pendente',
-              type: entry.status == 'paid' ? AppStatusType.success : AppStatusType.warning,
+              type: entry.status == 'paid'
+                  ? AppStatusType.success
+                  : AppStatusType.warning,
             ),
           ],
         );
@@ -304,183 +358,265 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
   }
 
   void _showFormDialog(BuildContext context) {
-    final formKey = GlobalKey<FormState>();
-    final descriptionController = TextEditingController();
-    final amountController = TextEditingController();
-    final dateController = TextEditingController(text: '2026-07-09');
-    
-    String type = 'income';
-    String category = 'Serviço';
-    String paymentMethod = 'PIX';
-    String status = 'paid';
-
     showDialog(
       context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            final categories = type == 'income'
-                ? ['Serviço', 'Produto', 'Assinatura', 'Outros']
-                : ['Aluguel', 'Utilidades', 'Insumos', 'Comissão', 'Marketing', 'Outros'];
+      builder: (ctx) => const _NewTransactionDialog(),
+    );
+  }
+}
 
-            return AlertDialog(
-              backgroundColor: ThemeColors.darkBg,
-              title: const Text('Lançar Nova Transação', style: TextStyle(color: Colors.white)),
-              content: SingleChildScrollView(
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      DropdownButtonFormField<String>(
-                        dropdownColor: ThemeColors.darkBg,
-                        initialValue: type,
-                        decoration: const InputDecoration(
-                          labelText: 'Tipo de Lançamento',
-                          labelStyle: TextStyle(color: Colors.white70),
-                          enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
-                        ),
-                        style: const TextStyle(color: Colors.white),
-                        items: const [
-                          DropdownMenuItem(value: 'income', child: Text('Receita (+)')),
-                          DropdownMenuItem(value: 'expense', child: Text('Despesa (-)')),
-                        ],
-                        onChanged: (val) {
-                          if (val != null) {
-                            setState(() {
-                              type = val;
-                              category = val == 'income' ? 'Serviço' : 'Insumos';
-                            });
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      AppInput(
-                        label: 'Descrição',
-                        placeholder: 'Ex: Conta de internet',
-                        controller: descriptionController,
-                        validator: (val) => val == null || val.isEmpty ? 'Descrição obrigatória' : null,
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: AppInput(
-                              label: 'Valor (R\$)',
-                              placeholder: 'Ex: 120.00',
-                              controller: amountController,
-                              keyboardType: TextInputType.number,
-                              validator: (val) => val == null || val.isEmpty ? 'Valor obrigatório' : null,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              dropdownColor: ThemeColors.darkBg,
-                              initialValue: category,
-                              decoration: const InputDecoration(
-                                labelText: 'Categoria',
-                                labelStyle: TextStyle(color: Colors.white70),
-                                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
-                              ),
-                              style: const TextStyle(color: Colors.white),
-                              items: categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                              onChanged: (val) {
-                                if (val != null) setState(() => category = val);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              dropdownColor: ThemeColors.darkBg,
-                              initialValue: paymentMethod,
-                              decoration: const InputDecoration(
-                                labelText: 'Forma de Pagamento',
-                                labelStyle: TextStyle(color: Colors.white70),
-                                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
-                              ),
-                              style: const TextStyle(color: Colors.white),
-                              items: const [
-                                DropdownMenuItem(value: 'PIX', child: Text('PIX')),
-                                DropdownMenuItem(value: 'Cartão de Crédito', child: Text('Cartão de Crédito')),
-                                DropdownMenuItem(value: 'Cartão de Débito', child: Text('Cartão de Débito')),
-                                DropdownMenuItem(value: 'Dinheiro', child: Text('Dinheiro')),
-                                DropdownMenuItem(value: 'Boleto', child: Text('Boleto')),
-                                DropdownMenuItem(value: 'Transferência', child: Text('Transferência')),
-                              ],
-                              onChanged: (val) {
-                                if (val != null) setState(() => paymentMethod = val);
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              dropdownColor: ThemeColors.darkBg,
-                              initialValue: status,
-                              decoration: const InputDecoration(
-                                labelText: 'Status',
-                                labelStyle: TextStyle(color: Colors.white70),
-                                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
-                              ),
-                              style: const TextStyle(color: Colors.white),
-                              items: const [
-                                DropdownMenuItem(value: 'paid', child: Text('Pago / Recebido')),
-                                DropdownMenuItem(value: 'pending', child: Text('Pendente')),
-                              ],
-                              onChanged: (val) {
-                                if (val != null) setState(() => status = val);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      AppInput(
-                        label: 'Data (AAAA-MM-DD)',
-                        placeholder: 'Ex: 2026-07-09',
-                        controller: dateController,
-                        validator: (val) => val == null || val.isEmpty ? 'Data obrigatória' : null,
-                      ),
-                    ],
+class _NewTransactionDialog extends ConsumerStatefulWidget {
+  const _NewTransactionDialog();
+
+  @override
+  ConsumerState<_NewTransactionDialog> createState() =>
+      _NewTransactionDialogState();
+}
+
+class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _descriptionController;
+  late final TextEditingController _amountController;
+  late final TextEditingController _dateController;
+
+  String _type = 'income';
+  String _category = 'Serviço';
+  String _paymentMethod = 'PIX';
+  String _status = 'paid';
+
+  @override
+  void initState() {
+    super.initState();
+    _descriptionController = TextEditingController();
+    _amountController = TextEditingController();
+    _dateController = TextEditingController(text: '2026-07-09');
+  }
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    _amountController.dispose();
+    _dateController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final categories = _type == 'income'
+        ? ['Serviço', 'Produto', 'Assinatura', 'Outros']
+        : [
+            'Aluguel',
+            'Utilidades',
+            'Insumos',
+            'Comissão',
+            'Marketing',
+            'Outros',
+          ];
+
+    return AlertDialog(
+      backgroundColor: ThemeColors.darkBg,
+      title: const Text(
+        'Lançar Nova Transação',
+        style: TextStyle(color: Colors.white),
+      ),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButtonFormField<String>(
+                dropdownColor: ThemeColors.darkBg,
+                initialValue: _type,
+                decoration: const InputDecoration(
+                  labelText: 'Tipo de Lançamento',
+                  labelStyle: TextStyle(color: Colors.white70),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white30),
                   ),
                 ),
+                style: const TextStyle(color: Colors.white),
+                items: const [
+                  DropdownMenuItem(value: 'income', child: Text('Receita (+)')),
+                  DropdownMenuItem(
+                    value: 'expense',
+                    child: Text('Despesa (-)'),
+                  ),
+                ],
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() {
+                      _type = val;
+                      _category = val == 'income' ? 'Serviço' : 'Insumos';
+                    });
+                  }
+                },
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.primary),
-                  onPressed: () {
-                    if (formKey.currentState?.validate() ?? false) {
-                      final newT = TransacaoFinanceira(
-                        id: '',
-                        type: type,
-                        description: descriptionController.text.trim(),
-                        amount: double.parse(amountController.text.trim()),
-                        category: category,
-                        date: dateController.text.trim(),
-                        paymentMethod: paymentMethod,
-                        status: status,
-                      );
-                      ref.read(transacoesControllerProvider.notifier).addTransacao(newT);
-                      Navigator.of(ctx).pop();
-                    }
-                  },
-                  child: const Text('Confirmar', style: TextStyle(color: Colors.black)),
-                ),
-              ],
-            );
+              const SizedBox(height: 12),
+              AppInput(
+                label: 'Descrição',
+                placeholder: 'Ex: Conta de internet',
+                controller: _descriptionController,
+                validator: (val) =>
+                    val == null || val.isEmpty ? 'Descrição obrigatória' : null,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppInput(
+                      label: 'Valor (R\$)',
+                      placeholder: 'Ex: 120.00',
+                      controller: _amountController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      validator: (val) => val == null || val.isEmpty
+                          ? 'Valor obrigatório'
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      dropdownColor: ThemeColors.darkBg,
+                      initialValue: _category,
+                      decoration: const InputDecoration(
+                        labelText: 'Categoria',
+                        labelStyle: TextStyle(color: Colors.white70),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white30),
+                        ),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                      items: categories
+                          .map(
+                            (c) => DropdownMenuItem(value: c, child: Text(c)),
+                          )
+                          .toList(),
+                      onChanged: (val) {
+                        if (val != null) setState(() => _category = val);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      dropdownColor: ThemeColors.darkBg,
+                      initialValue: _paymentMethod,
+                      decoration: const InputDecoration(
+                        labelText: 'Forma de Pagamento',
+                        labelStyle: TextStyle(color: Colors.white70),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white30),
+                        ),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                      items: const [
+                        DropdownMenuItem(value: 'PIX', child: Text('PIX')),
+                        DropdownMenuItem(
+                          value: 'Cartão de Crédito',
+                          child: Text('Cartão de Crédito'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Cartão de Débito',
+                          child: Text('Cartão de Débito'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Dinheiro',
+                          child: Text('Dinheiro'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Boleto',
+                          child: Text('Boleto'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Transferência',
+                          child: Text('Transferência'),
+                        ),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) setState(() => _paymentMethod = val);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      dropdownColor: ThemeColors.darkBg,
+                      initialValue: _status,
+                      decoration: const InputDecoration(
+                        labelText: 'Status',
+                        labelStyle: TextStyle(color: Colors.white70),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white30),
+                        ),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'paid',
+                          child: Text('Pago / Recebido'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'pending',
+                          child: Text('Pendente'),
+                        ),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) setState(() => _status = val);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              AppInput(
+                label: 'Data (AAAA-MM-DD)',
+                placeholder: 'Ex: 2026-07-09',
+                controller: _dateController,
+                validator: (val) =>
+                    val == null || val.isEmpty ? 'Data obrigatória' : null,
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text(
+            'Cancelar',
+            style: TextStyle(color: Colors.white70),
+          ),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.primary),
+          onPressed: () {
+            if (_formKey.currentState?.validate() ?? false) {
+              final newT = TransacaoFinanceira(
+                id: '',
+                type: _type,
+                description: _descriptionController.text.trim(),
+                amount: double.tryParse(_amountController.text.trim()) ?? 0.0,
+                category: _category,
+                date: _dateController.text.trim(),
+                paymentMethod: _paymentMethod,
+                status: _status,
+              );
+              ref
+                  .read(transacoesControllerProvider.notifier)
+                  .addTransacao(newT);
+              Navigator.of(context).pop();
+            }
           },
-        );
-      },
+          child: const Text('Confirmar', style: TextStyle(color: Colors.black)),
+        ),
+      ],
     );
   }
 }

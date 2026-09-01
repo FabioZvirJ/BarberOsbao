@@ -8,7 +8,8 @@ final financeiroRepositoryProvider = Provider<FinanceiroRepository>((ref) {
   return MockFinanceiroRepository();
 });
 
-class TransacoesController extends Notifier<AppState<List<TransacaoFinanceira>>> {
+class TransacoesController
+    extends Notifier<AppState<List<TransacaoFinanceira>>> {
   late final FinanceiroRepository _repository;
 
   @override
@@ -39,12 +40,21 @@ class TransacoesController extends Notifier<AppState<List<TransacaoFinanceira>>>
   }
 
   Future<void> addTransacao(TransacaoFinanceira transacao) async {
+    await addTransacoesBatch([transacao]);
+  }
+
+  Future<void> addTransacoesBatch(List<TransacaoFinanceira> transacoes) async {
+    if (transacoes.isEmpty) return;
     try {
       final currentData = state.data ?? [];
-      final created = await _repository.createTransacao(transacao);
-      state = AppSuccess([created, ...currentData]);
-      
-      // Recalculate summary metrics
+      final List<TransacaoFinanceira> createdList = [];
+      for (final tx in transacoes) {
+        final created = await _repository.createTransacao(tx);
+        createdList.add(created);
+      }
+      state = AppSuccess([...createdList.reversed, ...currentData]);
+
+      // Recalculate summary metrics once
       ref.read(financeSummaryControllerProvider.notifier).loadSummary();
     } catch (e) {
       state = AppError(e.toString());
@@ -52,12 +62,14 @@ class TransacoesController extends Notifier<AppState<List<TransacaoFinanceira>>>
   }
 }
 
-final transacoesControllerProvider = NotifierProvider<TransacoesController, AppState<List<TransacaoFinanceira>>>(
-  () => TransacoesController(),
-);
+final transacoesControllerProvider =
+    NotifierProvider<TransacoesController, AppState<List<TransacaoFinanceira>>>(
+      () => TransacoesController(),
+    );
 
 // Summary controller
-class FinanceSummaryController extends Notifier<AppState<Map<String, dynamic>>> {
+class FinanceSummaryController
+    extends Notifier<AppState<Map<String, dynamic>>> {
   late final FinanceiroRepository _repository;
 
   @override
@@ -84,6 +96,7 @@ class FinanceSummaryController extends Notifier<AppState<Map<String, dynamic>>> 
   }
 }
 
-final financeSummaryControllerProvider = NotifierProvider<FinanceSummaryController, AppState<Map<String, dynamic>>>(
-  () => FinanceSummaryController(),
-);
+final financeSummaryControllerProvider =
+    NotifierProvider<FinanceSummaryController, AppState<Map<String, dynamic>>>(
+      () => FinanceSummaryController(),
+    );
