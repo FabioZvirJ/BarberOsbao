@@ -11,7 +11,7 @@ class ThemeColors {
   static const Color success = Color(0xFF22C55E);
   static const Color warning = Color(0xFFF59E0B);
   static const Color danger = Color(0xFFEF4444);
-  
+
   static const Color darkBackground = Color(0xFF111111);
   static const Color darkBg = Color(0xFF111111);
   static const Color darkSurface = Color(0xFF1A1A1A);
@@ -35,8 +35,11 @@ class ThemeColors {
     ),
   ];
 
+  static ThemeData? _lightTheme;
+  static ThemeData? _darkTheme;
+
   static ThemeData getLightTheme() {
-    return ThemeData(
+    return _lightTheme ??= ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
       primaryColor: primary,
@@ -55,7 +58,7 @@ class ThemeColors {
   }
 
   static ThemeData getDarkTheme() {
-    return ThemeData(
+    return _darkTheme ??= ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       primaryColor: primary,

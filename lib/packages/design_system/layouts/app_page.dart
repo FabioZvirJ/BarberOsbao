@@ -28,8 +28,9 @@ class AppPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
+    return Material(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: Column(
         children: [
           AppHeader(
             userName: userName,
