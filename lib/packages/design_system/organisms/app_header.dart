@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_avatar.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
+import 'package:barber_osbao/packages/core/auth/application/auth_controller.dart';
 
-class AppHeader extends StatelessWidget {
+class AppHeader extends ConsumerWidget {
   final String userName;
   final String userAvatarUrl;
   final String barberName;
@@ -30,17 +32,17 @@ class AppHeader extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
       decoration: BoxDecoration(
         color: isDark ? ThemeColors.darkBackground : Colors.white,
         border: Border(
           bottom: BorderSide(
-            color: isDark ? ThemeColors.darkBorder : Colors.grey.shade100,
-            width: 1.5,
+            color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
+            width: 1.0,
           ),
         ),
       ),
@@ -57,21 +59,21 @@ class AppHeader extends StatelessWidget {
                   Text(
                     '${getGreeting()}, ',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       color: isDark ? Colors.white60 : Colors.black54,
                     ),
                   ),
                   Text(
                     userName,
                     style: const TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.bold,
                       color: ThemeColors.primary,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 3),
               Text(
                 barberName,
                 style: const TextStyle(
@@ -89,33 +91,161 @@ class AppHeader extends StatelessWidget {
               if (onSearch != null) ...[
                 SizedBox(
                   width: 240,
-                  height: 40,
+                  height: 38,
                   child: TextField(
                     onChanged: onSearch,
                     decoration: InputDecoration(
                       hintText: 'Pesquisar...',
-                      prefixIcon: const Icon(Icons.search, size: 18, color: Colors.grey),
+                      hintStyle: TextStyle(
+                        fontSize: 13,
+                        color: isDark ? Colors.white38 : Colors.grey.shade500,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        size: 18,
+                        color: Colors.grey,
+                      ),
                       filled: true,
-                      fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade100,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      fillColor: isDark
+                          ? ThemeColors.darkSurface
+                          : Colors.grey.shade100,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                      ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(100),
+                        borderRadius: BorderRadius.circular(6),
                         borderSide: BorderSide.none,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 24),
+                const SizedBox(width: 16),
               ],
-              GestureDetector(
-                onTap: onProfileTap,
+
+              // Quick Theme Toggle Button
+              IconButton(
+                icon: Icon(
+                  isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                  size: 20,
+                  color: isDark ? ThemeColors.primary : Colors.grey.shade800,
+                ),
+                tooltip: isDark
+                    ? 'Mudar para Tema Claro'
+                    : 'Mudar para Tema Escuro',
+                style: IconButton.styleFrom(
+                  backgroundColor: isDark
+                      ? ThemeColors.darkSurface
+                      : Colors.grey.shade100,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                onPressed: () {
+                  ref.read(authControllerProvider.notifier).toggleTheme();
+                },
+              ),
+              const SizedBox(width: 14),
+
+              // Profile Avatar Menu
+              PopupMenuButton<String>(
+                offset: const Offset(0, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side: BorderSide(
+                    color: isDark
+                        ? ThemeColors.darkBorder
+                        : Colors.grey.shade200,
+                  ),
+                ),
+                color: isDark ? ThemeColors.darkSurface : Colors.white,
+                tooltip: 'Menu de Usuário',
+                onSelected: (value) {
+                  if (value == 'theme') {
+                    ref.read(authControllerProvider.notifier).toggleTheme();
+                  } else if (value == 'logout') {
+                    ref.read(authControllerProvider.notifier).logout();
+                  } else if (onProfileTap != null) {
+                    onProfileTap!();
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    enabled: false,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          userName,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          barberName,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const Divider(),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'theme',
+                    child: Row(
+                      children: [
+                        Icon(
+                          isDark
+                              ? Icons.light_mode_outlined
+                              : Icons.dark_mode_outlined,
+                          size: 18,
+                          color: isDark
+                              ? ThemeColors.primary
+                              : Colors.grey.shade800,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          isDark ? 'Tema Claro' : 'Tema Escuro',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'logout',
+                    child: const Row(
+                      children: [
+                        Icon(Icons.logout, size: 18, color: ThemeColors.danger),
+                        SizedBox(width: 10),
+                        Text(
+                          'Sair da Conta',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: ThemeColors.danger,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 child: MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: Row(
                     children: [
-                      AppAvatar(url: userAvatarUrl, size: 40),
-                      const SizedBox(width: 12),
-                      const Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.grey),
+                      AppAvatar(url: userAvatarUrl, size: 38),
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.keyboard_arrow_down,
+                        size: 18,
+                        color: isDark ? Colors.grey : Colors.grey.shade600,
+                      ),
                     ],
                   ),
                 ),
