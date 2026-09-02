@@ -9,6 +9,7 @@ import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_image_upload.dart';
+import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/clube/domain/models/beneficio_clube.dart';
 import 'package:barber_osbao/features/clube/presentation/controllers/clube_controller.dart';
@@ -421,107 +422,30 @@ class _ClubeFormDialogState extends ConsumerState<_ClubeFormDialog> {
     final benefit = widget.benefit;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AlertDialog(
-      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      title: Text(
-        benefit == null ? 'Criar Recompensa' : 'Editar Recompensa',
-        style: TextStyle(
-          color: isDark ? Colors.white : Colors.black87,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppInput(
-                label: 'Nome da Recompensa',
-                placeholder: 'Ex: Cerveja IPA Gelada',
-                controller: _nameController,
-                validator: (val) =>
-                    val == null || val.isEmpty ? 'Nome obrigatório' : null,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Pontos Necessários',
-                      placeholder: 'Ex: 100',
-                      controller: _pointsController,
-                      keyboardType: TextInputType.number,
-                      validator: (val) =>
-                          val == null || val.isEmpty ? 'Obrigatório' : null,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppInput(
-                      label: 'Validade (AAAA-MM-DD)',
-                      placeholder: 'Ex: 2026-12-31',
-                      controller: _expirationController,
-                      validator: (val) =>
-                          val == null || val.isEmpty ? 'Obrigatório' : null,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              AppInput(
-                label: 'Valor/Benefício Concedido',
-                placeholder: 'Ex: 1 Dose Grátis de IPA',
-                controller: _benefitValueController,
-                validator: (val) => val == null || val.isEmpty
-                    ? 'Valor de benefício obrigatório'
-                    : null,
-              ),
-              const SizedBox(height: 12),
-              AppImageUpload(
-                label: 'Imagem do Benefício',
-                controller: _imageUrlController,
-                height: 130,
-                helperText: 'Upload do arquivo ou informe o link',
-              ),
-              const SizedBox(height: 12),
-              AppInput(
-                label: 'Descrição Detalhada',
-                placeholder: 'Ex: Condições de resgate no salão...',
-                controller: _descriptionController,
-                maxLines: 2,
-              ),
-              const SizedBox(height: 12),
-              SwitchListTile(
-                title: Text(
-                  'Recompensa Ativa',
-                  style: TextStyle(
-                    color: isDark ? Colors.white70 : Colors.black87,
-                    fontSize: 14,
-                  ),
-                ),
-                value: _active,
-                activeThumbColor: ThemeColors.primary,
-                onChanged: (val) => setState(() => _active = val),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return AppResponsiveDialog(
+      title: benefit == null ? 'Criar Recompensa' : 'Editar Recompensa',
+      subtitle: benefit == null
+          ? 'Cadastre um benefício ou prêmio para o Clube do Assinante'
+          : 'Atualize os requisitos de pontos e detalhes da recompensa',
+      maxWidth: 640,
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
             'Cancelar',
-            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            style: TextStyle(
+              color: isDark ? Colors.white70 : Colors.black54,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
+        const SizedBox(width: 8),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: ThemeColors.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
           onPressed: () {
@@ -553,11 +477,111 @@ class _ClubeFormDialogState extends ConsumerState<_ClubeFormDialog> {
             }
           },
           child: const Text(
-            'Salvar',
+            'Salvar Recompensa',
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
         ),
       ],
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppInput(
+              label: 'Nome da Recompensa',
+              placeholder: 'Ex: Cerveja IPA Artesanal Gelada',
+              controller: _nameController,
+              validator: (val) =>
+                  val == null || val.isEmpty ? 'Nome obrigatório' : null,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'Pontos Necessários',
+                    placeholder: 'Ex: 100',
+                    controller: _pointsController,
+                    keyboardType: TextInputType.number,
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: AppInput(
+                    label: 'Validade (AAAA-MM-DD)',
+                    placeholder: 'Ex: 2026-12-31',
+                    controller: _expirationController,
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            AppInput(
+              label: 'Valor/Benefício Concedido',
+              placeholder: 'Ex: 1 Dose Grátis de IPA',
+              controller: _benefitValueController,
+              validator: (val) => val == null || val.isEmpty
+                  ? 'Valor de benefício obrigatório'
+                  : null,
+            ),
+            const SizedBox(height: 16),
+            AppImageUpload(
+              label: 'Imagem do Benefício',
+              controller: _imageUrlController,
+              height: 140,
+              helperText: 'Upload do arquivo ou informe o link',
+            ),
+            const SizedBox(height: 16),
+            AppInput(
+              label: 'Descrição Detalhada',
+              placeholder:
+                  'Ex: Condições de resgate no salão e disponibilidade...',
+              controller: _descriptionController,
+              maxLines: 2,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.03)
+                    : Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
+                ),
+              ),
+              child: SwitchListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                title: Text(
+                  'Recompensa Ativa',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  'Disponível para resgate imediato por membros do clube',
+                  style: TextStyle(
+                    color: isDark ? Colors.white54 : Colors.black45,
+                    fontSize: 12,
+                  ),
+                ),
+                value: _active,
+                activeThumbColor: ThemeColors.primary,
+                onChanged: (val) => setState(() => _active = val),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

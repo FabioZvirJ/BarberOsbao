@@ -11,6 +11,7 @@ import 'package:barber_osbao/packages/design_system/molecules/app_chart_card.dar
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
+import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/financeiro/domain/models/transacao.dart';
 import 'package:barber_osbao/features/financeiro/presentation/controllers/financeiro_controller.dart';
@@ -415,353 +416,28 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AlertDialog(
-      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      title: Text(
-        'Lançar Nova Transação',
-        style: TextStyle(
-          color: isDark ? Colors.white : Colors.black87,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Tipo de Lançamento',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white70 : Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 6),
-              DropdownButtonFormField<String>(
-                dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
-                initialValue: _type,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: isDark
-                      ? ThemeColors.darkSurface
-                      : Colors.grey.shade50,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDark
-                          ? ThemeColors.darkBorder
-                          : Colors.grey.shade300,
-                      width: 1.0,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDark
-                          ? ThemeColors.darkBorder
-                          : Colors.grey.shade300,
-                      width: 1.0,
-                    ),
-                  ),
-                ),
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black87,
-                  fontSize: 14,
-                ),
-                items: const [
-                  DropdownMenuItem(value: 'income', child: Text('Receita (+)')),
-                  DropdownMenuItem(
-                    value: 'expense',
-                    child: Text('Despesa (-)'),
-                  ),
-                ],
-                onChanged: (val) {
-                  if (val != null) {
-                    setState(() {
-                      _type = val;
-                      _category = val == 'income' ? 'Serviço' : 'Insumos';
-                    });
-                  }
-                },
-              ),
-              const SizedBox(height: 12),
-              AppInput(
-                label: 'Descrição',
-                placeholder: 'Ex: Conta de internet',
-                controller: _descriptionController,
-                validator: (val) =>
-                    val == null || val.isEmpty ? 'Descrição obrigatória' : null,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Valor (R\$)',
-                      placeholder: 'Ex: 120.00',
-                      controller: _amountController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      validator: (val) => val == null || val.isEmpty
-                          ? 'Valor obrigatório'
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Categoria',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        DropdownButtonFormField<String>(
-                          dropdownColor: isDark
-                              ? ThemeColors.darkSurface
-                              : Colors.white,
-                          initialValue: _category,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: isDark
-                                ? ThemeColors.darkSurface
-                                : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 14,
-                          ),
-                          items: categories
-                              .map(
-                                (c) =>
-                                    DropdownMenuItem(value: c, child: Text(c)),
-                              )
-                              .toList(),
-                          onChanged: (val) {
-                            if (val != null) setState(() => _category = val);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Forma de Pagamento',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        DropdownButtonFormField<String>(
-                          dropdownColor: isDark
-                              ? ThemeColors.darkSurface
-                              : Colors.white,
-                          initialValue: _paymentMethod,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: isDark
-                                ? ThemeColors.darkSurface
-                                : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 14,
-                          ),
-                          items: const [
-                            DropdownMenuItem(value: 'PIX', child: Text('PIX')),
-                            DropdownMenuItem(
-                              value: 'Cartão de Crédito',
-                              child: Text('Cartão de Crédito'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Cartão de Débito',
-                              child: Text('Cartão de Débito'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Dinheiro',
-                              child: Text('Dinheiro'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Boleto',
-                              child: Text('Boleto'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Transferência',
-                              child: Text('Transferência'),
-                            ),
-                          ],
-                          onChanged: (val) {
-                            if (val != null) {
-                              setState(() => _paymentMethod = val);
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Status',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        DropdownButtonFormField<String>(
-                          dropdownColor: isDark
-                              ? ThemeColors.darkSurface
-                              : Colors.white,
-                          initialValue: _status,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: isDark
-                                ? ThemeColors.darkSurface
-                                : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 14,
-                          ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'paid',
-                              child: Text('Pago / Recebido'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'pending',
-                              child: Text('Pendente'),
-                            ),
-                          ],
-                          onChanged: (val) {
-                            if (val != null) setState(() => _status = val);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              AppInput(
-                label: 'Data (AAAA-MM-DD)',
-                placeholder: 'Ex: 2026-07-09',
-                controller: _dateController,
-                validator: (val) =>
-                    val == null || val.isEmpty ? 'Data obrigatória' : null,
-              ),
-            ],
-          ),
-        ),
-      ),
+    return AppResponsiveDialog(
+      title: 'Lançar Nova Transação',
+      subtitle: 'Registre uma entrada de receita ou saída de despesa do caixa',
+      maxWidth: 620,
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
             'Cancelar',
-            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            style: TextStyle(
+              color: isDark ? Colors.white70 : Colors.black54,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
+        const SizedBox(width: 8),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: ThemeColors.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
           onPressed: () {
@@ -783,11 +459,340 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
             }
           },
           child: const Text(
-            'Confirmar',
+            'Confirmar Lançamento',
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
         ),
       ],
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Tipo de Lançamento',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                DropdownButtonFormField<String>(
+                  dropdownColor: isDark
+                      ? ThemeColors.darkSurface
+                      : Colors.white,
+                  initialValue: _type,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: isDark
+                        ? ThemeColors.darkSurface
+                        : Colors.grey.shade50,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? ThemeColors.darkBorder
+                            : Colors.grey.shade300,
+                        width: 1.0,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? ThemeColors.darkBorder
+                            : Colors.grey.shade300,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'income',
+                      child: Text('Receita (+)'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'expense',
+                      child: Text('Despesa (-)'),
+                    ),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() {
+                        _type = val;
+                        _category = val == 'income' ? 'Serviço' : 'Insumos';
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            AppInput(
+              label: 'Descrição',
+              placeholder: 'Ex: Conta de internet ou pagamento avulso...',
+              controller: _descriptionController,
+              validator: (val) =>
+                  val == null || val.isEmpty ? 'Descrição obrigatória' : null,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'Valor (R\$)',
+                    placeholder: 'Ex: 120.00',
+                    controller: _amountController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Valor obrigatório' : null,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Categoria',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      DropdownButtonFormField<String>(
+                        dropdownColor: isDark
+                            ? ThemeColors.darkSurface
+                            : Colors.white,
+                        initialValue: _category,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.grey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 14,
+                        ),
+                        items: categories
+                            .map(
+                              (c) => DropdownMenuItem(value: c, child: Text(c)),
+                            )
+                            .toList(),
+                        onChanged: (val) {
+                          if (val != null) setState(() => _category = val);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Forma de Pagamento',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      DropdownButtonFormField<String>(
+                        dropdownColor: isDark
+                            ? ThemeColors.darkSurface
+                            : Colors.white,
+                        initialValue: _paymentMethod,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.grey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 14,
+                        ),
+                        items: const [
+                          DropdownMenuItem(value: 'PIX', child: Text('PIX')),
+                          DropdownMenuItem(
+                            value: 'Cartão de Crédito',
+                            child: Text('Cartão de Crédito'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Cartão de Débito',
+                            child: Text('Cartão de Débito'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Dinheiro',
+                            child: Text('Dinheiro'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Boleto',
+                            child: Text('Boleto'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Transferência',
+                            child: Text('Transferência'),
+                          ),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() => _paymentMethod = val);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Status',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      DropdownButtonFormField<String>(
+                        dropdownColor: isDark
+                            ? ThemeColors.darkSurface
+                            : Colors.white,
+                        initialValue: _status,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.grey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 14,
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'paid',
+                            child: Text('Pago / Recebido'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'pending',
+                            child: Text('Pendente'),
+                          ),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) setState(() => _status = val);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            AppInput(
+              label: 'Data (AAAA-MM-DD)',
+              placeholder: 'Ex: 2026-07-09',
+              controller: _dateController,
+              validator: (val) =>
+                  val == null || val.isEmpty ? 'Data obrigatória' : null,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

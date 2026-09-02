@@ -7,6 +7,7 @@ import 'package:barber_osbao/packages/design_system/organisms/app_table.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
+import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_stat_card.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/financeiro/domain/models/cash_shift.dart';
@@ -288,43 +289,26 @@ class _CashPageState extends ConsumerState<CashPage> {
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: Text(
-          type == 'withdraw'
-              ? 'Registrar Sangria (Retirada)'
-              : 'Registrar Suprimento (Troco)',
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black87,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppInput(
-              label: 'Valor (R\$)',
-              controller: _amountController,
-              placeholder: 'Ex: 50.00',
-            ),
-            const SizedBox(height: 12),
-            AppInput(
-              label: 'Motivo / Descrição',
-              controller: _descriptionController,
-              placeholder: 'Ex: Pagamento motoboy ou troco inicial',
-            ),
-          ],
-        ),
+      builder: (ctx) => AppResponsiveDialog(
+        title: type == 'withdraw'
+            ? 'Registrar Sangria (Retirada)'
+            : 'Registrar Suprimento (Troco)',
+        subtitle: type == 'withdraw'
+            ? 'Retirada pontual de valores em dinheiro do caixa'
+            : 'Entrada de valor adicional para troco no caixa',
+        maxWidth: 500,
         actions: [
           TextButton(
             child: Text(
               'Cancelar',
-              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+              style: TextStyle(
+                color: isDark ? Colors.white70 : Colors.black54,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             onPressed: () => Navigator.pop(ctx),
           ),
+          const SizedBox(width: 8),
           AppButton(
             label: 'Registrar',
             onPressed: () {
@@ -344,6 +328,25 @@ class _CashPageState extends ConsumerState<CashPage> {
             },
           ),
         ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppInput(
+              label: 'Valor (R\$)',
+              controller: _amountController,
+              placeholder: 'Ex: 50.00',
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+            ),
+            const SizedBox(height: 16),
+            AppInput(
+              label: 'Motivo / Descrição',
+              controller: _descriptionController,
+              placeholder: 'Ex: Pagamento motoboy ou troco inicial',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -372,116 +375,23 @@ class _CashPageState extends ConsumerState<CashPage> {
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: Text(
-          'Confirmar Fechamento de Caixa',
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black87,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: SizedBox(
-          width: 400,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isDark ? ThemeColors.darkBg : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Saldo Inicial de Abertura',
-                          style: TextStyle(
-                            color: isDark ? Colors.grey : Colors.grey.shade600,
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          'R\$ ${cash.initialBalance.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Total de Movimentações em Dinheiro',
-                          style: TextStyle(
-                            color: isDark ? Colors.grey : Colors.grey.shade600,
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          'R\$ ${moneyEntries.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Divider(
-                      color: isDark ? Colors.white10 : Colors.grey.shade300,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Saldo de Caixa Esperado',
-                          style: TextStyle(
-                            color: ThemeColors.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                        Text(
-                          'R\$ ${totalExpected.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            color: ThemeColors.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              AppInput(
-                label: 'Valor Físico Contado em Dinheiro (R\$)',
-                controller: reportController,
-                placeholder: 'Ex: 230.00',
-              ),
-            ],
-          ),
-        ),
+      builder: (ctx) => AppResponsiveDialog(
+        title: 'Confirmar Fechamento de Caixa',
+        subtitle:
+            'Confira os totais apurados e informe o valor físico em gaveta',
+        maxWidth: 520,
         actions: [
           TextButton(
             child: Text(
               'Cancelar',
-              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+              style: TextStyle(
+                color: isDark ? Colors.white70 : Colors.black54,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             onPressed: () => Navigator.pop(ctx),
           ),
+          const SizedBox(width: 8),
           AppButton(
             label: 'Confirmar Fechamento',
             onPressed: () {
@@ -493,6 +403,101 @@ class _CashPageState extends ConsumerState<CashPage> {
             },
           ),
         ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: isDark ? ThemeColors.darkBg : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Saldo Inicial de Abertura',
+                        style: TextStyle(
+                          color: isDark ? Colors.grey : Colors.grey.shade600,
+                          fontSize: 13,
+                        ),
+                      ),
+                      Text(
+                        'R\$ ${cash.initialBalance.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total de Movimentações em Dinheiro',
+                        style: TextStyle(
+                          color: isDark ? Colors.grey : Colors.grey.shade600,
+                          fontSize: 13,
+                        ),
+                      ),
+                      Text(
+                        'R\$ ${moneyEntries.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Divider(
+                    color: isDark ? Colors.white10 : Colors.grey.shade300,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Saldo de Caixa Esperado',
+                        style: TextStyle(
+                          color: ThemeColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        'R\$ ${totalExpected.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          color: ThemeColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            AppInput(
+              label: 'Valor Físico Contado em Dinheiro (R\$)',
+              controller: reportController,
+              placeholder: 'Ex: 230.00',
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

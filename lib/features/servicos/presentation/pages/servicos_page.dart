@@ -11,6 +11,7 @@ import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_image_upload.dart';
+import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/servicos/domain/models/servico.dart';
 import 'package:barber_osbao/features/servicos/presentation/controllers/servicos_controller.dart';
@@ -430,255 +431,30 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
     final service = widget.service;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AlertDialog(
-      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      title: Text(
-        service == null ? 'Criar Serviço' : 'Editar Serviço',
-        style: TextStyle(
-          color: isDark ? Colors.white : Colors.black87,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppInput(
-                label: 'Nome do Serviço',
-                placeholder: 'Ex: Barboterapia Completa',
-                controller: _nameController,
-                validator: (val) =>
-                    val == null || val.isEmpty ? 'Nome obrigatório' : null,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Categoria',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        DropdownButtonFormField<String>(
-                          dropdownColor: isDark
-                              ? ThemeColors.darkSurface
-                              : Colors.white,
-                          initialValue: _category,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: isDark
-                                ? ThemeColors.darkSurface
-                                : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 14,
-                          ),
-                          items: widget.categories
-                              .map(
-                                (c) =>
-                                    DropdownMenuItem(value: c, child: Text(c)),
-                              )
-                              .toList(),
-                          onChanged: (val) {
-                            if (val != null) setState(() => _category = val);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppInput(
-                      label: 'Preço (R\$)',
-                      placeholder: 'Ex: 45.00',
-                      controller: _priceController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      validator: (val) => val == null || val.isEmpty
-                          ? 'Preço obrigatório'
-                          : null,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Duração (minutos)',
-                      placeholder: 'Ex: 30',
-                      controller: _durationController,
-                      keyboardType: TextInputType.number,
-                      validator: (val) => val == null || val.isEmpty
-                          ? 'Duração obrigatória'
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Cor do Card',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        DropdownButtonFormField<String>(
-                          dropdownColor: isDark
-                              ? ThemeColors.darkSurface
-                              : Colors.white,
-                          initialValue: _colorHex,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: isDark
-                                ? ThemeColors.darkSurface
-                                : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 14,
-                          ),
-                          items: _colorOptions
-                              .map(
-                                (c) => DropdownMenuItem(
-                                  value: c['hex'],
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 12,
-                                        height: 12,
-                                        decoration: BoxDecoration(
-                                          color: Color(
-                                            int.parse(
-                                              'FF${c['hex']!}',
-                                              radix: 16,
-                                            ),
-                                          ),
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(c['name']!),
-                                    ],
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (val) {
-                            if (val != null) setState(() => _colorHex = val);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              AppImageUpload(
-                label: 'Foto do Serviço',
-                controller: _imageUrlController,
-                height: 130,
-                helperText: 'Upload do arquivo ou informe o link',
-              ),
-              const SizedBox(height: 12),
-              AppInput(
-                label: 'Descrição do Serviço',
-                placeholder: 'Ex: Detalhes do que está incluso...',
-                controller: _descriptionController,
-                maxLines: 2,
-              ),
-              const SizedBox(height: 12),
-              SwitchListTile(
-                title: Text(
-                  'Serviço Ativo',
-                  style: TextStyle(
-                    color: isDark ? Colors.white70 : Colors.black87,
-                    fontSize: 14,
-                  ),
-                ),
-                value: _status,
-                activeThumbColor: ThemeColors.primary,
-                onChanged: (val) => setState(() => _status = val),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return AppResponsiveDialog(
+      title: service == null ? 'Criar Serviço' : 'Editar Serviço',
+      subtitle: service == null
+          ? 'Preencha os dados abaixo para cadastrar um novo serviço'
+          : 'Atualize as informações do serviço selecionado',
+      maxWidth: 640,
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
             'Cancelar',
-            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            style: TextStyle(
+              color: isDark ? Colors.white70 : Colors.black54,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
+        const SizedBox(width: 8),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: ThemeColors.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
           onPressed: () {
@@ -711,11 +487,256 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
             }
           },
           child: const Text(
-            'Salvar',
+            'Salvar Serviço',
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
         ),
       ],
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppInput(
+              label: 'Nome do Serviço',
+              placeholder: 'Ex: Barboterapia Completa',
+              controller: _nameController,
+              validator: (val) =>
+                  val == null || val.isEmpty ? 'Nome obrigatório' : null,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Categoria',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      DropdownButtonFormField<String>(
+                        dropdownColor: isDark
+                            ? ThemeColors.darkSurface
+                            : Colors.white,
+                        initialValue: _category,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.grey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 14,
+                        ),
+                        items: widget.categories
+                            .map(
+                              (c) => DropdownMenuItem(value: c, child: Text(c)),
+                            )
+                            .toList(),
+                        onChanged: (val) {
+                          if (val != null) setState(() => _category = val);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: AppInput(
+                    label: 'Preço (R\$)',
+                    placeholder: 'Ex: 45.00',
+                    controller: _priceController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Preço obrigatório' : null,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'Duração (minutos)',
+                    placeholder: 'Ex: 30',
+                    controller: _durationController,
+                    keyboardType: TextInputType.number,
+                    validator: (val) => val == null || val.isEmpty
+                        ? 'Duração obrigatória'
+                        : null,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Cor do Card',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      DropdownButtonFormField<String>(
+                        dropdownColor: isDark
+                            ? ThemeColors.darkSurface
+                            : Colors.white,
+                        initialValue: _colorHex,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.grey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 14,
+                        ),
+                        items: _colorOptions
+                            .map(
+                              (c) => DropdownMenuItem(
+                                value: c['hex'],
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 12,
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        color: Color(
+                                          int.parse(
+                                            'FF${c['hex']!}',
+                                            radix: 16,
+                                          ),
+                                        ),
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(c['name']!),
+                                  ],
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (val) {
+                          if (val != null) setState(() => _colorHex = val);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            AppImageUpload(
+              label: 'Foto do Serviço',
+              controller: _imageUrlController,
+              height: 140,
+              helperText: 'Upload do arquivo ou informe o link',
+            ),
+            const SizedBox(height: 16),
+            AppInput(
+              label: 'Descrição do Serviço',
+              placeholder: 'Ex: Detalhes do que está incluso...',
+              controller: _descriptionController,
+              maxLines: 2,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.03)
+                    : Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
+                ),
+              ),
+              child: SwitchListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                title: Text(
+                  'Serviço Ativo',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  'Disponível para agendamentos e comandas',
+                  style: TextStyle(
+                    color: isDark ? Colors.white54 : Colors.black45,
+                    fontSize: 12,
+                  ),
+                ),
+                value: _status,
+                activeThumbColor: ThemeColors.primary,
+                onChanged: (val) => setState(() => _status = val),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -9,6 +9,7 @@ import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_card.dart';
+import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/planos/domain/models/plano.dart';
 import 'package:barber_osbao/features/planos/presentation/controllers/planos_controller.dart';
@@ -490,275 +491,30 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
     final plan = widget.plan;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AlertDialog(
-      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      title: Text(
-        plan == null ? 'Criar Novo Plano' : 'Editar Plano',
-        style: TextStyle(
-          color: isDark ? Colors.white : Colors.black87,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              AppInput(
-                label: 'Nome do Plano',
-                placeholder: 'Ex: Plano Imperial',
-                controller: _nameController,
-                validator: (val) =>
-                    val == null || val.isEmpty ? 'Nome obrigatório' : null,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Valor Recorrente (R\$)',
-                      placeholder: 'Ex: 139.90',
-                      controller: _priceController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      validator: (val) => val == null || val.isEmpty
-                          ? 'Valor obrigatório'
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Cobrança',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        DropdownButtonFormField<String>(
-                          dropdownColor: isDark
-                              ? ThemeColors.darkSurface
-                              : Colors.white,
-                          initialValue: _period,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: isDark
-                                ? ThemeColors.darkSurface
-                                : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 14,
-                          ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'mensal',
-                              child: Text('Mensal'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'trimestral',
-                              child: Text('Trimestral'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'semestral',
-                              child: Text('Semestral'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'anual',
-                              child: Text('Anual'),
-                            ),
-                          ],
-                          onChanged: (val) {
-                            if (val != null) setState(() => _period = val);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Qtd de Cortes (9999 = Ilimitado)',
-                      placeholder: 'Ex: 4',
-                      controller: _cutsController,
-                      keyboardType: TextInputType.number,
-                      validator: (val) => val == null || val.isEmpty
-                          ? 'Qtd de cortes obrigatória'
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppInput(
-                      label: 'Desconto em Produtos (%)',
-                      placeholder: 'Ex: 10',
-                      controller: _discountController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      validator: (val) => val == null || val.isEmpty
-                          ? 'Desconto obrigatório'
-                          : null,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              SwitchListTile(
-                title: Text(
-                  'Destacar Plano (Recomendado)',
-                  style: TextStyle(
-                    color: isDark ? Colors.white70 : Colors.black87,
-                    fontSize: 14,
-                  ),
-                ),
-                value: _recommended,
-                activeThumbColor: ThemeColors.primary,
-                onChanged: (val) => setState(() => _recommended = val),
-              ),
-              SwitchListTile(
-                title: Text(
-                  'Plano Ativo',
-                  style: TextStyle(
-                    color: isDark ? Colors.white70 : Colors.black87,
-                    fontSize: 14,
-                  ),
-                ),
-                value: _status,
-                activeThumbColor: ThemeColors.primary,
-                onChanged: (val) => setState(() => _status = val),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Benefícios Adicionais',
-                style: TextStyle(
-                  color: isDark ? Colors.white70 : Colors.black87,
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Novo Benefício',
-                      placeholder: 'Ex: Cerveja grátis por visita',
-                      controller: _benefitInputController,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.add_circle,
-                      color: ThemeColors.primary,
-                      size: 36,
-                    ),
-                    onPressed: () {
-                      final text = _benefitInputController.text.trim();
-                      if (text.isNotEmpty) {
-                        setState(() {
-                          _benefits.add(text);
-                          _benefitInputController.clear();
-                        });
-                      }
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              if (_benefits.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text(
-                    'Nenhum benefício adicionado.',
-                    style: TextStyle(
-                      color: isDark ? Colors.white30 : Colors.grey,
-                      fontSize: 12,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                )
-              else
-                ..._benefits.asMap().entries.map((entry) {
-                  final idx = entry.key;
-                  final b = entry.value;
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(
-                      Icons.check,
-                      color: ThemeColors.primary,
-                      size: 16,
-                    ),
-                    title: Text(
-                      b,
-                      style: TextStyle(
-                        color: isDark ? Colors.white : Colors.black87,
-                        fontSize: 13,
-                      ),
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(
-                        Icons.remove_circle_outline,
-                        color: ThemeColors.danger,
-                        size: 18,
-                      ),
-                      onPressed: () => setState(() => _benefits.removeAt(idx)),
-                    ),
-                  );
-                }),
-            ],
-          ),
-        ),
-      ),
+    return AppResponsiveDialog(
+      title: plan == null ? 'Criar Novo Plano' : 'Editar Plano',
+      subtitle: plan == null
+          ? 'Cadastre um plano de assinatura para clientes da barbearia'
+          : 'Atualize os valores, periodicidade e benefícios do plano',
+      maxWidth: 640,
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
             'Cancelar',
-            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            style: TextStyle(
+              color: isDark ? Colors.white70 : Colors.black54,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
+        const SizedBox(width: 8),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: ThemeColors.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
           onPressed: () {
@@ -786,11 +542,298 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
             }
           },
           child: const Text(
-            'Salvar',
+            'Salvar Plano',
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
         ),
       ],
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppInput(
+              label: 'Nome do Plano',
+              placeholder: 'Ex: Plano Imperial',
+              controller: _nameController,
+              validator: (val) =>
+                  val == null || val.isEmpty ? 'Nome obrigatório' : null,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'Valor Recorrente (R\$)',
+                    placeholder: 'Ex: 139.90',
+                    controller: _priceController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Valor obrigatório' : null,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Cobrança',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      DropdownButtonFormField<String>(
+                        dropdownColor: isDark
+                            ? ThemeColors.darkSurface
+                            : Colors.white,
+                        initialValue: _period,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.grey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 14,
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'mensal',
+                            child: Text('Mensal'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'trimestral',
+                            child: Text('Trimestral'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'semestral',
+                            child: Text('Semestral'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'anual',
+                            child: Text('Anual'),
+                          ),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) setState(() => _period = val);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'Qtd de Cortes (9999 = Ilimitado)',
+                    placeholder: 'Ex: 4',
+                    controller: _cutsController,
+                    keyboardType: TextInputType.number,
+                    validator: (val) => val == null || val.isEmpty
+                        ? 'Qtd de cortes obrigatória'
+                        : null,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: AppInput(
+                    label: 'Desconto em Produtos (%)',
+                    placeholder: 'Ex: 10',
+                    controller: _discountController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    validator: (val) => val == null || val.isEmpty
+                        ? 'Desconto obrigatório'
+                        : null,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.03)
+                    : Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
+                ),
+              ),
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    title: Text(
+                      'Destacar Plano (Recomendado)',
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'Exibe badge dourada de mais popular na vitrine',
+                      style: TextStyle(
+                        color: isDark ? Colors.white54 : Colors.black45,
+                        fontSize: 12,
+                      ),
+                    ),
+                    value: _recommended,
+                    activeThumbColor: ThemeColors.primary,
+                    onChanged: (val) => setState(() => _recommended = val),
+                  ),
+                  Divider(
+                    height: 1,
+                    color: isDark
+                        ? ThemeColors.darkBorder
+                        : Colors.grey.shade200,
+                  ),
+                  SwitchListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    title: Text(
+                      'Plano Ativo',
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'Disponível para novas adesões de clientes',
+                      style: TextStyle(
+                        color: isDark ? Colors.white54 : Colors.black45,
+                        fontSize: 12,
+                      ),
+                    ),
+                    value: _status,
+                    activeThumbColor: ThemeColors.primary,
+                    onChanged: (val) => setState(() => _status = val),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Benefícios Adicionais',
+              style: TextStyle(
+                color: isDark ? Colors.white70 : Colors.black87,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'Novo Benefício',
+                    placeholder: 'Ex: Cerveja grátis por visita',
+                    controller: _benefitInputController,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(
+                    Icons.add_circle,
+                    color: ThemeColors.primary,
+                    size: 36,
+                  ),
+                  onPressed: () {
+                    final text = _benefitInputController.text.trim();
+                    if (text.isNotEmpty) {
+                      setState(() {
+                        _benefits.add(text);
+                        _benefitInputController.clear();
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (_benefits.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  'Nenhum benefício adicionado.',
+                  style: TextStyle(
+                    color: isDark ? Colors.white30 : Colors.grey,
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              )
+            else
+              ..._benefits.asMap().entries.map((entry) {
+                final idx = entry.key;
+                final b = entry.value;
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(
+                    Icons.check,
+                    color: ThemeColors.primary,
+                    size: 16,
+                  ),
+                  title: Text(
+                    b,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontSize: 13,
+                    ),
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(
+                      Icons.remove_circle_outline,
+                      color: ThemeColors.danger,
+                      size: 18,
+                    ),
+                    onPressed: () => setState(() => _benefits.removeAt(idx)),
+                  ),
+                );
+              }),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -10,6 +10,7 @@ import 'package:barber_osbao/packages/design_system/molecules/app_search_bar.dar
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
+import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/agenda/domain/models/agendamento.dart';
 import 'package:barber_osbao/features/agenda/presentation/controllers/agenda_controller.dart';
@@ -726,400 +727,30 @@ class _AppointmentFormDialogState
     final appointment = widget.appointment;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AlertDialog(
-      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      title: Text(
-        appointment == null ? 'Novo Agendamento' : 'Editar Agendamento',
-        style: TextStyle(
-          color: isDark ? Colors.white : Colors.black87,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (_conflictError != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: ThemeColors.danger.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: ThemeColors.danger.withValues(alpha: 0.4),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        color: ThemeColors.danger,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _conflictError!,
-                          style: const TextStyle(
-                            color: ThemeColors.danger,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-              Text(
-                'Cliente',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white70 : Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 6),
-              DropdownButtonFormField<String>(
-                dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
-                initialValue: _selectedClient,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: isDark
-                      ? ThemeColors.darkSurface
-                      : Colors.grey.shade50,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 12,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDark
-                          ? ThemeColors.darkBorder
-                          : Colors.grey.shade300,
-                      width: 1.0,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDark
-                          ? ThemeColors.darkBorder
-                          : Colors.grey.shade300,
-                      width: 1.0,
-                    ),
-                  ),
-                ),
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black87,
-                  fontSize: 14,
-                ),
-                items: _clients
-                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
-                    .toList(),
-                onChanged: (val) {
-                  if (val != null) setState(() => _selectedClient = val);
-                },
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Barbeiro',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        DropdownButtonFormField<String>(
-                          dropdownColor: isDark
-                              ? ThemeColors.darkSurface
-                              : Colors.white,
-                          initialValue: _selectedBarber,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: isDark
-                                ? ThemeColors.darkSurface
-                                : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 14,
-                          ),
-                          items: _barbers
-                              .map(
-                                (b) =>
-                                    DropdownMenuItem(value: b, child: Text(b)),
-                              )
-                              .toList(),
-                          onChanged: (val) {
-                            if (val != null) {
-                              setState(() {
-                                _selectedBarber = val;
-                                _conflictError = null;
-                              });
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Serviço Principal',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        DropdownButtonFormField<String>(
-                          dropdownColor: isDark
-                              ? ThemeColors.darkSurface
-                              : Colors.white,
-                          initialValue: _selectedService,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: isDark
-                                ? ThemeColors.darkSurface
-                                : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 14,
-                          ),
-                          items: _services
-                              .map(
-                                (s) =>
-                                    DropdownMenuItem(value: s, child: Text(s)),
-                              )
-                              .toList(),
-                          onChanged: (val) {
-                            if (val != null) {
-                              setState(() {
-                                _selectedService = val;
-                                if (val.contains('Combo')) {
-                                  _priceController.text = '70.00';
-                                } else if (val.contains('Barba')) {
-                                  _priceController.text = '35.00';
-                                } else {
-                                  _priceController.text = '45.00';
-                                }
-                              });
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Data (AAAA-MM-DD)',
-                      placeholder: 'Ex: 2026-07-09',
-                      controller: _dateController,
-                      validator: (val) => val == null || val.isEmpty
-                          ? 'Data obrigatória'
-                          : null,
-                      onChanged: (_) => setState(() => _conflictError = null),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppInput(
-                      label: 'Horário (HH:MM)',
-                      placeholder: 'Ex: 14:30',
-                      controller: _timeController,
-                      validator: (val) => val == null || val.isEmpty
-                          ? 'Horário obrigatório'
-                          : null,
-                      onChanged: (_) => setState(() => _conflictError = null),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Valor Cobrado (R\$)',
-                      placeholder: 'Ex: 80.00',
-                      controller: _priceController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      validator: (val) =>
-                          val == null || val.isEmpty ? 'Obrigatório' : null,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Status',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        DropdownButtonFormField<String>(
-                          dropdownColor: isDark
-                              ? ThemeColors.darkSurface
-                              : Colors.white,
-                          initialValue: _status,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: isDark
-                                ? ThemeColors.darkSurface
-                                : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 14,
-                          ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'pending',
-                              child: Text('Pendente'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'confirmed',
-                              child: Text('Confirmado'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'completed',
-                              child: Text('Finalizado'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'cancelled',
-                              child: Text('Cancelado'),
-                            ),
-                          ],
-                          onChanged: (val) {
-                            if (val != null) setState(() => _status = val);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              AppInput(
-                label: 'Observações do Agendamento',
-                placeholder: 'Ex: Cabelo molhado, deseja degradê baixo...',
-                controller: _notesController,
-                maxLines: 2,
-              ),
-            ],
-          ),
-        ),
-      ),
+    return AppResponsiveDialog(
+      title: appointment == null ? 'Novo Agendamento' : 'Editar Agendamento',
+      subtitle: appointment == null
+          ? 'Agende um novo horário para o cliente com o profissional selecionado'
+          : 'Atualize os dados, horário ou status do agendamento',
+      maxWidth: 640,
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
             'Cancelar',
-            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            style: TextStyle(
+              color: isDark ? Colors.white70 : Colors.black54,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
+        const SizedBox(width: 8),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: ThemeColors.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
           onPressed: () {
@@ -1173,9 +804,384 @@ class _AppointmentFormDialogState
               Navigator.of(context).pop();
             }
           },
-          child: const Text('Salvar', style: TextStyle(color: Colors.black)),
+          child: const Text(
+            'Salvar Agendamento',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
         ),
       ],
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_conflictError != null) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: ThemeColors.danger.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: ThemeColors.danger.withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      color: ThemeColors.danger,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _conflictError!,
+                        style: const TextStyle(
+                          color: ThemeColors.danger,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Cliente',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                DropdownButtonFormField<String>(
+                  dropdownColor: isDark
+                      ? ThemeColors.darkSurface
+                      : Colors.white,
+                  initialValue: _selectedClient,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: isDark
+                        ? ThemeColors.darkSurface
+                        : Colors.grey.shade50,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? ThemeColors.darkBorder
+                            : Colors.grey.shade300,
+                        width: 1.0,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? ThemeColors.darkBorder
+                            : Colors.grey.shade300,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                  ),
+                  items: _clients
+                      .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                      .toList(),
+                  onChanged: (val) {
+                    if (val != null) setState(() => _selectedClient = val);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Barbeiro',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      DropdownButtonFormField<String>(
+                        dropdownColor: isDark
+                            ? ThemeColors.darkSurface
+                            : Colors.white,
+                        initialValue: _selectedBarber,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.grey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 14,
+                        ),
+                        items: _barbers
+                            .map(
+                              (b) => DropdownMenuItem(value: b, child: Text(b)),
+                            )
+                            .toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() {
+                              _selectedBarber = val;
+                              _conflictError = null;
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Serviço Principal',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      DropdownButtonFormField<String>(
+                        dropdownColor: isDark
+                            ? ThemeColors.darkSurface
+                            : Colors.white,
+                        initialValue: _selectedService,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.grey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 14,
+                        ),
+                        items: _services
+                            .map(
+                              (s) => DropdownMenuItem(value: s, child: Text(s)),
+                            )
+                            .toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() {
+                              _selectedService = val;
+                              if (val.contains('Combo')) {
+                                _priceController.text = '70.00';
+                              } else if (val.contains('Barba')) {
+                                _priceController.text = '35.00';
+                              } else {
+                                _priceController.text = '45.00';
+                              }
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'Data (AAAA-MM-DD)',
+                    placeholder: 'Ex: 2026-07-09',
+                    controller: _dateController,
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Data obrigatória' : null,
+                    onChanged: (_) => setState(() => _conflictError = null),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: AppInput(
+                    label: 'Horário (HH:MM)',
+                    placeholder: 'Ex: 14:30',
+                    controller: _timeController,
+                    validator: (val) => val == null || val.isEmpty
+                        ? 'Horário obrigatório'
+                        : null,
+                    onChanged: (_) => setState(() => _conflictError = null),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'Valor Cobrado (R\$)',
+                    placeholder: 'Ex: 80.00',
+                    controller: _priceController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Status',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      DropdownButtonFormField<String>(
+                        dropdownColor: isDark
+                            ? ThemeColors.darkSurface
+                            : Colors.white,
+                        initialValue: _status,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.grey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 14,
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'pending',
+                            child: Text('Pendente'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'confirmed',
+                            child: Text('Confirmado'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'completed',
+                            child: Text('Finalizado'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'cancelled',
+                            child: Text('Cancelado'),
+                          ),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) setState(() => _status = val);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            AppInput(
+              label: 'Observações do Agendamento',
+              placeholder: 'Ex: Cabelo molhado, deseja degradê baixo...',
+              controller: _notesController,
+              maxLines: 2,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

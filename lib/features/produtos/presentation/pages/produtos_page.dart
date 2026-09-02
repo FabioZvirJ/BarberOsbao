@@ -11,6 +11,7 @@ import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_image_upload.dart';
+import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/produtos/domain/models/produto.dart';
 import 'package:barber_osbao/features/produtos/presentation/controllers/produtos_controller.dart';
@@ -397,34 +398,10 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: Text(
-          '$type de Estoque: ${product.name}',
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black87,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppInput(
-              label: 'Quantidade',
-              placeholder: 'Quantidade de itens',
-              controller: qtyController,
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 12),
-            AppInput(
-              label: 'Motivo / Justificativa',
-              placeholder: 'Ex: Reposição de estoque',
-              controller: reasonController,
-            ),
-          ],
-        ),
+      builder: (ctx) => AppResponsiveDialog(
+        title: '$type de Estoque: ${product.name}',
+        subtitle: 'Informe a quantidade e o motivo da movimentação',
+        maxWidth: 480,
         actions: [
           TextButton(
             onPressed: () {
@@ -434,16 +411,21 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
             },
             child: Text(
               'Cancelar',
-              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+              style: TextStyle(
+                color: isDark ? Colors.white70 : Colors.black54,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
+          const SizedBox(width: 8),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: type == 'Entrada'
                   ? ThemeColors.success
                   : ThemeColors.warning,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
             onPressed: () {
@@ -457,7 +439,7 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
               Navigator.of(ctx).pop();
             },
             child: const Text(
-              'Gravar',
+              'Gravar Movimentação',
               style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
@@ -465,6 +447,23 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
             ),
           ),
         ],
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppInput(
+              label: 'Quantidade',
+              placeholder: 'Quantidade de itens',
+              controller: qtyController,
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 16),
+            AppInput(
+              label: 'Motivo / Justificativa',
+              placeholder: 'Ex: Reposição de estoque',
+              controller: reasonController,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -540,225 +539,30 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
     final product = widget.product;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AlertDialog(
-      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      title: Text(
-        product == null ? 'Criar Produto' : 'Editar Produto',
-        style: TextStyle(
-          color: isDark ? Colors.white : Colors.black87,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppInput(
-                label: 'Nome do Produto',
-                placeholder: 'Ex: Pomada Modeladora',
-                controller: _nameController,
-                validator: (val) =>
-                    val == null || val.isEmpty ? 'Nome obrigatório' : null,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Marca',
-                      placeholder: 'Ex: BarberGroom',
-                      controller: _brandController,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Categoria',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        DropdownButtonFormField<String>(
-                          dropdownColor: isDark
-                              ? ThemeColors.darkSurface
-                              : Colors.white,
-                          initialValue: _category,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: isDark
-                                ? ThemeColors.darkSurface
-                                : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 14,
-                          ),
-                          items: widget.categories
-                              .map(
-                                (c) =>
-                                    DropdownMenuItem(value: c, child: Text(c)),
-                              )
-                              .toList(),
-                          onChanged: (val) {
-                            if (val != null) setState(() => _category = val);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Fornecedor',
-                      placeholder: 'Ex: Distribuidora XYZ',
-                      controller: _supplierController,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppInput(
-                      label: 'Código do Produto',
-                      placeholder: 'Ex: PROD123',
-                      controller: _codeController,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Preço de Custo (R\$)',
-                      placeholder: 'Ex: 15.00',
-                      controller: _costPriceController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      validator: (val) =>
-                          val == null || val.isEmpty ? 'Obrigatório' : null,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppInput(
-                      label: 'Preço de Venda (R\$)',
-                      placeholder: 'Ex: 45.00',
-                      controller: _priceController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      validator: (val) =>
-                          val == null || val.isEmpty ? 'Obrigatório' : null,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Quantidade em Estoque',
-                      placeholder: 'Ex: 24',
-                      controller: _stockController,
-                      keyboardType: TextInputType.number,
-                      validator: (val) =>
-                          val == null || val.isEmpty ? 'Obrigatório' : null,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppInput(
-                      label: 'Estoque Mínimo',
-                      placeholder: 'Ex: 5',
-                      controller: _minStockController,
-                      keyboardType: TextInputType.number,
-                      validator: (val) =>
-                          val == null || val.isEmpty ? 'Obrigatório' : null,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              AppImageUpload(
-                label: 'Foto do Produto',
-                controller: _imageUrlController,
-                height: 130,
-                helperText: 'Upload do arquivo ou informe o link',
-              ),
-              const SizedBox(height: 12),
-              AppInput(
-                label: 'Descrição',
-                placeholder: 'Ex: Características do produto...',
-                controller: _descriptionController,
-                maxLines: 2,
-              ),
-              const SizedBox(height: 12),
-              SwitchListTile(
-                title: Text(
-                  'Produto Ativo',
-                  style: TextStyle(
-                    color: isDark ? Colors.white70 : Colors.black87,
-                    fontSize: 14,
-                  ),
-                ),
-                value: _status,
-                activeThumbColor: ThemeColors.primary,
-                onChanged: (val) => setState(() => _status = val),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return AppResponsiveDialog(
+      title: product == null ? 'Cadastrar Produto' : 'Editar Produto',
+      subtitle: product == null
+          ? 'Cadastre novos itens para o estoque e controle de vendas'
+          : 'Atualize os detalhes, custos e quantidades do produto',
+      maxWidth: 660,
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
             'Cancelar',
-            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            style: TextStyle(
+              color: isDark ? Colors.white70 : Colors.black54,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
+        const SizedBox(width: 8),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: ThemeColors.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
           onPressed: () {
@@ -795,11 +599,227 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
             }
           },
           child: const Text(
-            'Salvar',
+            'Salvar Produto',
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
         ),
       ],
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppInput(
+              label: 'Nome do Produto',
+              placeholder: 'Ex: Pomada Modeladora Efeito Seco',
+              controller: _nameController,
+              validator: (val) =>
+                  val == null || val.isEmpty ? 'Nome obrigatório' : null,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'Marca',
+                    placeholder: 'Ex: BarberGroom',
+                    controller: _brandController,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Categoria',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      DropdownButtonFormField<String>(
+                        dropdownColor: isDark
+                            ? ThemeColors.darkSurface
+                            : Colors.white,
+                        initialValue: _category,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.grey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 14,
+                        ),
+                        items: widget.categories
+                            .map(
+                              (c) => DropdownMenuItem(value: c, child: Text(c)),
+                            )
+                            .toList(),
+                        onChanged: (val) {
+                          if (val != null) setState(() => _category = val);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'Fornecedor',
+                    placeholder: 'Ex: Distribuidora XYZ',
+                    controller: _supplierController,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: AppInput(
+                    label: 'Código do Produto (SKU)',
+                    placeholder: 'Ex: PROD-123',
+                    controller: _codeController,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'Preço de Custo (R\$)',
+                    placeholder: 'Ex: 15.00',
+                    controller: _costPriceController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: AppInput(
+                    label: 'Preço de Venda (R\$)',
+                    placeholder: 'Ex: 45.00',
+                    controller: _priceController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'Quantidade em Estoque',
+                    placeholder: 'Ex: 24',
+                    controller: _stockController,
+                    keyboardType: TextInputType.number,
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: AppInput(
+                    label: 'Estoque Mínimo (Alerta)',
+                    placeholder: 'Ex: 5',
+                    controller: _minStockController,
+                    keyboardType: TextInputType.number,
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            AppImageUpload(
+              label: 'Foto do Produto',
+              controller: _imageUrlController,
+              height: 140,
+              helperText: 'Upload do arquivo ou informe o link',
+            ),
+            const SizedBox(height: 16),
+            AppInput(
+              label: 'Descrição',
+              placeholder: 'Ex: Características do produto...',
+              controller: _descriptionController,
+              maxLines: 2,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.03)
+                    : Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
+                ),
+              ),
+              child: SwitchListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                title: Text(
+                  'Produto Ativo',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  'Disponível para venda direta e inclusão em comandas',
+                  style: TextStyle(
+                    color: isDark ? Colors.white54 : Colors.black45,
+                    fontSize: 12,
+                  ),
+                ),
+                value: _status,
+                activeThumbColor: ThemeColors.primary,
+                onChanged: (val) => setState(() => _status = val),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

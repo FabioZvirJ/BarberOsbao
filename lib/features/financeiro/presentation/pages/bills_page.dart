@@ -6,6 +6,7 @@ import 'package:barber_osbao/packages/design_system/molecules/app_card.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
+import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/financeiro/domain/models/bill.dart';
 import 'package:barber_osbao/features/financeiro/presentation/controllers/bill_controller.dart';
@@ -309,230 +310,23 @@ class _CheckoutBillDialogState extends ConsumerState<_CheckoutBillDialog> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AlertDialog(
-      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      title: Text(
-        'Fechar Comanda: ${widget.bill.clientName}',
-        style: TextStyle(
-          color: isDark ? Colors.white : Colors.black87,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      content: SizedBox(
-        width: 450,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Invoice Summary
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isDark ? ThemeColors.darkBg : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    ...widget.bill.items.map(
-                      (it) => Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '${it.quantity}x ${it.name}',
-                            style: TextStyle(
-                              color: isDark ? Colors.white70 : Colors.black87,
-                              fontSize: 12,
-                            ),
-                          ),
-                          Text(
-                            'R\$ ${it.total.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              color: isDark ? Colors.white70 : Colors.black87,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Divider(
-                      color: isDark ? Colors.white10 : Colors.grey.shade300,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Subtotal',
-                          style: TextStyle(color: Colors.grey, fontSize: 13),
-                        ),
-                        Text(
-                          'R\$ ${subtotal.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Total a Pagar',
-                          style: TextStyle(
-                            color: ThemeColors.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                        ),
-                        Text(
-                          'R\$ ${total.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            color: ThemeColors.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              AppInput(
-                label: 'Desconto (R\$)',
-                controller: _discountController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                onChanged: (_) => setState(() => _errorMessage = null),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Divisão de Pagamento (Split)',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _pixController.text = total.toStringAsFixed(2);
-                        _cardController.text = '0';
-                        _cashController.text = '0';
-                        _errorMessage = null;
-                      });
-                    },
-                    child: const Text(
-                      'Preencher Total no PIX',
-                      style: TextStyle(
-                        color: ThemeColors.primary,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'PIX (R\$)',
-                      controller: _pixController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      onChanged: (_) => setState(() => _errorMessage = null),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: AppInput(
-                      label: 'Cartão (R\$)',
-                      controller: _cardController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      onChanged: (_) => setState(() => _errorMessage = null),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: AppInput(
-                      label: 'Dinheiro (R\$)',
-                      controller: _cashController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      onChanged: (_) => setState(() => _errorMessage = null),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: (totalPaid - total).abs() < 0.01
-                      ? ThemeColors.success.withValues(alpha: 0.1)
-                      : Colors.red.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Total Informado no Split:',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade300,
-                      ),
-                    ),
-                    Text(
-                      'R\$ ${totalPaid.toStringAsFixed(2)} / R\$ ${total.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: (totalPaid - total).abs() < 0.01
-                            ? ThemeColors.success
-                            : ThemeColors.danger,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (_errorMessage != null) ...[
-                const SizedBox(height: 10),
-                Text(
-                  _errorMessage!,
-                  style: const TextStyle(
-                    color: ThemeColors.danger,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
+    return AppResponsiveDialog(
+      title: 'Fechar Comanda: ${widget.bill.clientName}',
+      subtitle:
+          'Conclua a cobrança com divisão flexível entre PIX, Cartão e Dinheiro',
+      maxWidth: 580,
       actions: [
         TextButton(
-          child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
+          child: Text(
+            'Cancelar',
+            style: TextStyle(
+              color: isDark ? Colors.white70 : Colors.black54,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
           onPressed: () => Navigator.pop(context),
         ),
+        const SizedBox(width: 8),
         AppButton(
           label: 'Finalizar Pagamento',
           onPressed: () {
@@ -576,6 +370,217 @@ class _CheckoutBillDialogState extends ConsumerState<_CheckoutBillDialog> {
           },
         ),
       ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Invoice Summary
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: isDark ? ThemeColors.darkBg : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+              ),
+            ),
+            child: Column(
+              children: [
+                ...widget.bill.items.map(
+                  (it) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 3),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${it.quantity}x ${it.name}',
+                          style: TextStyle(
+                            color: isDark ? Colors.white70 : Colors.black87,
+                            fontSize: 13,
+                          ),
+                        ),
+                        Text(
+                          'R\$ ${it.total.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            color: isDark ? Colors.white70 : Colors.black87,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Divider(
+                  height: 16,
+                  color: isDark ? Colors.white10 : Colors.grey.shade300,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Subtotal',
+                      style: TextStyle(color: Colors.grey, fontSize: 13),
+                    ),
+                    Text(
+                      'R\$ ${subtotal.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Total a Pagar',
+                      style: TextStyle(
+                        color: ThemeColors.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      'R\$ ${total.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        color: ThemeColors.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          AppInput(
+            label: 'Desconto (R\$)',
+            controller: _discountController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            onChanged: (_) => setState(() => _errorMessage = null),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Divisão de Pagamento (Split)',
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _pixController.text = total.toStringAsFixed(2);
+                    _cardController.text = '0';
+                    _cashController.text = '0';
+                    _errorMessage = null;
+                  });
+                },
+                child: const Text(
+                  'Preencher Total no PIX',
+                  style: TextStyle(
+                    color: ThemeColors.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: AppInput(
+                  label: 'PIX (R\$)',
+                  controller: _pixController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  onChanged: (_) => setState(() => _errorMessage = null),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: AppInput(
+                  label: 'Cartão (R\$)',
+                  controller: _cardController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  onChanged: (_) => setState(() => _errorMessage = null),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: AppInput(
+                  label: 'Dinheiro (R\$)',
+                  controller: _cashController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  onChanged: (_) => setState(() => _errorMessage = null),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: (totalPaid - total).abs() < 0.01
+                  ? ThemeColors.success.withValues(alpha: 0.1)
+                  : Colors.red.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: (totalPaid - total).abs() < 0.01
+                    ? ThemeColors.success.withValues(alpha: 0.3)
+                    : Colors.red.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total Informado no Split:',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.grey.shade300 : Colors.black87,
+                  ),
+                ),
+                Text(
+                  'R\$ ${totalPaid.toStringAsFixed(2)} / R\$ ${total.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: (totalPaid - total).abs() < 0.01
+                        ? ThemeColors.success
+                        : ThemeColors.danger,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_errorMessage != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              _errorMessage!,
+              style: const TextStyle(
+                color: ThemeColors.danger,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -636,193 +641,25 @@ class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AlertDialog(
-      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      title: Text(
-        'Lançar na comanda de ${widget.bill.clientName}',
-        style: TextStyle(
-          color: isDark ? Colors.white : Colors.black87,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      content: SizedBox(
-        width: 400,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: ChoiceChip(
-                    label: const Center(child: Text('Serviço')),
-                    selected: _selectedType == 'service',
-                    selectedColor: ThemeColors.primary,
-                    labelStyle: TextStyle(
-                      color: _selectedType == 'service'
-                          ? Colors.black
-                          : (isDark ? Colors.white70 : Colors.black87),
-                      fontWeight: FontWeight.bold,
-                    ),
-                    onSelected: (selected) {
-                      if (selected) {
-                        setState(() {
-                          _selectedType = 'service';
-                          _selectedItemId = null;
-                        });
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ChoiceChip(
-                    label: const Center(child: Text('Produto')),
-                    selected: _selectedType == 'product',
-                    selectedColor: ThemeColors.primary,
-                    labelStyle: TextStyle(
-                      color: _selectedType == 'product'
-                          ? Colors.black
-                          : (isDark ? Colors.white70 : Colors.black87),
-                      fontWeight: FontWeight.bold,
-                    ),
-                    onSelected: (selected) {
-                      if (selected) {
-                        setState(() {
-                          _selectedType = 'product';
-                          _selectedItemId = null;
-                        });
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              key: ValueKey('item_$_selectedType'),
-              dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
-              decoration: InputDecoration(
-                labelText: 'Selecione o item',
-                labelStyle: TextStyle(
-                  color: isDark ? Colors.grey : Colors.grey.shade600,
-                ),
-                filled: true,
-                fillColor: isDark
-                    ? ThemeColors.darkSurface
-                    : Colors.grey.shade50,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: isDark
-                        ? ThemeColors.darkBorder
-                        : Colors.grey.shade300,
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: isDark
-                        ? ThemeColors.darkBorder
-                        : Colors.grey.shade300,
-                  ),
-                ),
-              ),
-              style: TextStyle(color: isDark ? Colors.white : Colors.black87),
-              initialValue: _selectedItemId,
-              items: itemsToSelect,
-              onChanged: (val) => setState(() => _selectedItemId = val),
-            ),
-            const SizedBox(height: 12),
-            if (_selectedType == 'service') ...[
-              DropdownButtonFormField<String>(
-                dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
-                decoration: InputDecoration(
-                  labelText: 'Barbeiro Responsável',
-                  labelStyle: TextStyle(
-                    color: isDark ? Colors.grey : Colors.grey.shade600,
-                  ),
-                  filled: true,
-                  fillColor: isDark
-                      ? ThemeColors.darkSurface
-                      : Colors.grey.shade50,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDark
-                          ? ThemeColors.darkBorder
-                          : Colors.grey.shade300,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: isDark
-                          ? ThemeColors.darkBorder
-                          : Colors.grey.shade300,
-                    ),
-                  ),
-                ),
-                style: TextStyle(color: isDark ? Colors.white : Colors.black87),
-                initialValue: _selectedProfessionalId,
-                items: professionalsToSelect,
-                onChanged: (val) =>
-                    setState(() => _selectedProfessionalId = val),
-              ),
-              const SizedBox(height: 12),
-            ],
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Quantidade:',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.remove,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                      onPressed: _quantity > 1
-                          ? () => setState(() => _quantity--)
-                          : null,
-                    ),
-                    Text(
-                      '$_quantity',
-                      style: TextStyle(
-                        color: isDark ? Colors.white : Colors.black87,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.add,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                      onPressed: () => setState(() => _quantity++),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+    return AppResponsiveDialog(
+      title: 'Lançar Item na Comanda',
+      subtitle:
+          'Adicione serviços ou produtos à comanda de ${widget.bill.clientName}',
+      maxWidth: 520,
       actions: [
         TextButton(
           child: Text(
             'Cancelar',
-            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            style: TextStyle(
+              color: isDark ? Colors.white70 : Colors.black54,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           onPressed: () => Navigator.pop(context),
         ),
+        const SizedBox(width: 8),
         AppButton(
-          label: 'Lançar',
+          label: 'Lançar Item',
           onPressed: () {
             if (_selectedItemId != null) {
               String name = '';
@@ -870,6 +707,182 @@ class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
           },
         ),
       ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: ChoiceChip(
+                  label: const Center(child: Text('Serviço')),
+                  selected: _selectedType == 'service',
+                  selectedColor: ThemeColors.primary,
+                  labelStyle: TextStyle(
+                    color: _selectedType == 'service'
+                        ? Colors.black
+                        : (isDark ? Colors.white70 : Colors.black87),
+                    fontWeight: FontWeight.bold,
+                  ),
+                  onSelected: (selected) {
+                    if (selected) {
+                      setState(() {
+                        _selectedType = 'service';
+                        _selectedItemId = null;
+                      });
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ChoiceChip(
+                  label: const Center(child: Text('Produto')),
+                  selected: _selectedType == 'product',
+                  selectedColor: ThemeColors.primary,
+                  labelStyle: TextStyle(
+                    color: _selectedType == 'product'
+                        ? Colors.black
+                        : (isDark ? Colors.white70 : Colors.black87),
+                    fontWeight: FontWeight.bold,
+                  ),
+                  onSelected: (selected) {
+                    if (selected) {
+                      setState(() {
+                        _selectedType = 'product';
+                        _selectedItemId = null;
+                      });
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<String>(
+            key: ValueKey('item_$_selectedType'),
+            dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+            decoration: InputDecoration(
+              labelText: 'Selecione o item',
+              labelStyle: TextStyle(
+                color: isDark ? Colors.grey : Colors.grey.shade600,
+              ),
+              filled: true,
+              fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(
+                  color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                ),
+              ),
+            ),
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+            initialValue: _selectedItemId,
+            items: itemsToSelect,
+            onChanged: (val) => setState(() => _selectedItemId = val),
+          ),
+          if (_selectedType == 'service') ...[
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+              decoration: InputDecoration(
+                labelText: 'Barbeiro Responsável',
+                labelStyle: TextStyle(
+                  color: isDark ? Colors.grey : Colors.grey.shade600,
+                ),
+                filled: true,
+                fillColor: isDark
+                    ? ThemeColors.darkSurface
+                    : Colors.grey.shade50,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? ThemeColors.darkBorder
+                        : Colors.grey.shade300,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: isDark
+                        ? ThemeColors.darkBorder
+                        : Colors.grey.shade300,
+                  ),
+                ),
+              ),
+              style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+              initialValue: _selectedProfessionalId,
+              items: professionalsToSelect,
+              onChanged: (val) => setState(() => _selectedProfessionalId = val),
+            ),
+          ],
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.03)
+                  : Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Quantidade de itens:',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        Icons.remove_circle_outline,
+                        color: _quantity > 1
+                            ? ThemeColors.primary
+                            : (isDark ? Colors.white24 : Colors.grey.shade300),
+                      ),
+                      onPressed: _quantity > 1
+                          ? () => setState(() => _quantity--)
+                          : null,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        '$_quantity',
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.add_circle_outline,
+                        color: ThemeColors.primary,
+                      ),
+                      onPressed: () => setState(() => _quantity++),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -10,6 +10,7 @@ import 'package:barber_osbao/packages/design_system/molecules/app_search_bar.dar
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
+import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/categorias/domain/models/categoria.dart';
 import 'package:barber_osbao/features/categorias/presentation/controllers/categorias_controller.dart';
@@ -293,99 +294,30 @@ class _CategoriaFormDialogState extends ConsumerState<_CategoriaFormDialog> {
     final category = widget.category;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AlertDialog(
-      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      title: Text(
-        category == null ? 'Criar Categoria' : 'Editar Categoria',
-        style: TextStyle(
-          color: isDark ? Colors.white : Colors.black87,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppInput(
-              label: 'Nome da Categoria',
-              placeholder: 'Ex: Barboterapia',
-              controller: _nomeController,
-              validator: (val) =>
-                  val == null || val.isEmpty ? 'Nome obrigatório' : null,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Tipo de Módulo',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white70 : Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 6),
-            DropdownButtonFormField<String>(
-              dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
-              initialValue: _tipo,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: isDark
-                    ? ThemeColors.darkSurface
-                    : Colors.grey.shade50,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 12,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: isDark
-                        ? ThemeColors.darkBorder
-                        : Colors.grey.shade300,
-                    width: 1.0,
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: isDark
-                        ? ThemeColors.darkBorder
-                        : Colors.grey.shade300,
-                    width: 1.0,
-                  ),
-                ),
-              ),
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black87,
-                fontSize: 14,
-              ),
-              items: const [
-                DropdownMenuItem(value: 'servicos', child: Text('Serviços')),
-                DropdownMenuItem(value: 'produtos', child: Text('Produtos')),
-                DropdownMenuItem(value: 'planos', child: Text('Planos')),
-              ],
-              onChanged: (val) {
-                if (val != null) setState(() => _tipo = val);
-              },
-            ),
-          ],
-        ),
-      ),
+    return AppResponsiveDialog(
+      title: category == null ? 'Criar Categoria' : 'Editar Categoria',
+      subtitle: category == null
+          ? 'Defina o nome da categoria e o módulo associado'
+          : 'Atualize os dados e o tipo de módulo da categoria',
+      maxWidth: 520,
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
             'Cancelar',
-            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            style: TextStyle(
+              color: isDark ? Colors.white70 : Colors.black54,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
+        const SizedBox(width: 8),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: ThemeColors.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
           onPressed: () {
@@ -404,11 +336,93 @@ class _CategoriaFormDialogState extends ConsumerState<_CategoriaFormDialog> {
             }
           },
           child: const Text(
-            'Salvar',
+            'Salvar Categoria',
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
         ),
       ],
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppInput(
+              label: 'Nome da Categoria',
+              placeholder: 'Ex: Barboterapia',
+              controller: _nomeController,
+              validator: (val) =>
+                  val == null || val.isEmpty ? 'Nome obrigatório' : null,
+            ),
+            const SizedBox(height: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Tipo de Módulo',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                DropdownButtonFormField<String>(
+                  dropdownColor: isDark
+                      ? ThemeColors.darkSurface
+                      : Colors.white,
+                  initialValue: _tipo,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: isDark
+                        ? ThemeColors.darkSurface
+                        : Colors.grey.shade50,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? ThemeColors.darkBorder
+                            : Colors.grey.shade300,
+                        width: 1.0,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? ThemeColors.darkBorder
+                            : Colors.grey.shade300,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'servicos',
+                      child: Text('Serviços'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'produtos',
+                      child: Text('Produtos'),
+                    ),
+                    DropdownMenuItem(value: 'planos', child: Text('Planos')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setState(() => _tipo = val);
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

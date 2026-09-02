@@ -6,12 +6,7 @@ class AppAvatar extends StatelessWidget {
   final double size;
   final String? name;
 
-  const AppAvatar({
-    super.key,
-    required this.url,
-    this.size = 48.0,
-    this.name,
-  });
+  const AppAvatar({super.key, required this.url, this.size = 48.0, this.name});
 
   ImageProvider? _getImageProvider() {
     final trimmed = url.trim();
@@ -48,10 +43,7 @@ class AppAvatar extends StatelessWidget {
         color: Colors.grey.shade800,
         border: Border.all(color: Colors.white24, width: 1.5),
         image: provider != null
-            ? DecorationImage(
-                image: provider,
-                fit: BoxFit.cover,
-              )
+            ? DecorationImage(image: provider, fit: BoxFit.cover)
             : null,
       ),
       child: provider == null

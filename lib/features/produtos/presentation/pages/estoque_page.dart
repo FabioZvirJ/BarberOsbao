@@ -10,6 +10,7 @@ import 'package:barber_osbao/packages/design_system/molecules/app_info_card.dart
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
+import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/produtos/domain/models/produto.dart';
 import 'package:barber_osbao/features/produtos/domain/models/movimentacao.dart';
@@ -312,179 +313,29 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
     );
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AlertDialog(
-      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      title: Text(
-        'Lançar Movimentação de Estoque',
-        style: TextStyle(
-          color: isDark ? Colors.white : Colors.black87,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Produto',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white70 : Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 6),
-            DropdownButtonFormField<String>(
-              dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
-              initialValue: _selectedProductId,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: isDark
-                    ? ThemeColors.darkSurface
-                    : Colors.grey.shade50,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 12,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: isDark
-                        ? ThemeColors.darkBorder
-                        : Colors.grey.shade300,
-                    width: 1.0,
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: isDark
-                        ? ThemeColors.darkBorder
-                        : Colors.grey.shade300,
-                    width: 1.0,
-                  ),
-                ),
-              ),
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black87,
-                fontSize: 14,
-              ),
-              items: widget.products
-                  .map(
-                    (p) => DropdownMenuItem(
-                      value: p.id,
-                      child: Text('${p.name} (Qtd atual: ${p.stock})'),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (val) {
-                if (val != null) setState(() => _selectedProductId = val);
-              },
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Tipo de Lançamento',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white70 : Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 6),
-            DropdownButtonFormField<String>(
-              dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
-              initialValue: _type,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: isDark
-                    ? ThemeColors.darkSurface
-                    : Colors.grey.shade50,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 12,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: isDark
-                        ? ThemeColors.darkBorder
-                        : Colors.grey.shade300,
-                    width: 1.0,
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: isDark
-                        ? ThemeColors.darkBorder
-                        : Colors.grey.shade300,
-                    width: 1.0,
-                  ),
-                ),
-              ),
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black87,
-                fontSize: 14,
-              ),
-              items: const [
-                DropdownMenuItem(value: 'Entrada', child: Text('Entrada (+)')),
-                DropdownMenuItem(value: 'Saída', child: Text('Saída (-)')),
-                DropdownMenuItem(
-                  value: 'Inventário',
-                  child: Text('Inventário / Acerto (=)'),
-                ),
-              ],
-              onChanged: (val) {
-                if (val != null) {
-                  setState(() {
-                    _type = val;
-                    if (val == 'Entrada') {
-                      _reasonController.text = 'Compra de fornecedor';
-                    } else if (val == 'Saída') {
-                      _reasonController.text = 'Consumo interno cabine';
-                    } else {
-                      _reasonController.text = 'Ajuste de inventário periódico';
-                    }
-                  });
-                }
-              },
-            ),
-            const SizedBox(height: 12),
-            AppInput(
-              label: _type == 'Inventário'
-                  ? 'Nova Quantidade Real'
-                  : 'Quantidade de Itens',
-              placeholder: 'Ex: 10',
-              controller: _qtyController,
-              keyboardType: TextInputType.number,
-              validator: (val) =>
-                  val == null || val.isEmpty ? 'Quantidade obrigatória' : null,
-            ),
-            const SizedBox(height: 12),
-            AppInput(
-              label: 'Motivo',
-              placeholder: 'Justifique a alteração',
-              controller: _reasonController,
-            ),
-          ],
-        ),
-      ),
+    return AppResponsiveDialog(
+      title: 'Lançar Movimentação de Estoque',
+      subtitle:
+          'Registre entradas, saídas ou acertos de inventário dos produtos',
+      maxWidth: 540,
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
             'Cancelar',
-            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            style: TextStyle(
+              color: isDark ? Colors.white70 : Colors.black54,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
+        const SizedBox(width: 8),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: ThemeColors.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
           onPressed: () {
@@ -503,11 +354,178 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
             }
           },
           child: const Text(
-            'Confirmar',
+            'Confirmar Movimentação',
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
         ),
       ],
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Produto',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                DropdownButtonFormField<String>(
+                  dropdownColor: isDark
+                      ? ThemeColors.darkSurface
+                      : Colors.white,
+                  initialValue: _selectedProductId,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: isDark
+                        ? ThemeColors.darkSurface
+                        : Colors.grey.shade50,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? ThemeColors.darkBorder
+                            : Colors.grey.shade300,
+                        width: 1.0,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? ThemeColors.darkBorder
+                            : Colors.grey.shade300,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                  ),
+                  items: widget.products
+                      .map(
+                        (p) => DropdownMenuItem(
+                          value: p.id,
+                          child: Text('${p.name} (Qtd atual: ${p.stock})'),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (val) {
+                    if (val != null) setState(() => _selectedProductId = val);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Tipo de Lançamento',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                DropdownButtonFormField<String>(
+                  dropdownColor: isDark
+                      ? ThemeColors.darkSurface
+                      : Colors.white,
+                  initialValue: _type,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: isDark
+                        ? ThemeColors.darkSurface
+                        : Colors.grey.shade50,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? ThemeColors.darkBorder
+                            : Colors.grey.shade300,
+                        width: 1.0,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? ThemeColors.darkBorder
+                            : Colors.grey.shade300,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'Entrada',
+                      child: Text('Entrada (+)'),
+                    ),
+                    DropdownMenuItem(value: 'Saída', child: Text('Saída (-)')),
+                    DropdownMenuItem(
+                      value: 'Inventário',
+                      child: Text('Inventário / Acerto (=)'),
+                    ),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() {
+                        _type = val;
+                        if (val == 'Entrada') {
+                          _reasonController.text = 'Compra de fornecedor';
+                        } else if (val == 'Saída') {
+                          _reasonController.text = 'Consumo interno cabine';
+                        } else {
+                          _reasonController.text =
+                              'Ajuste de inventário periódico';
+                        }
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            AppInput(
+              label: _type == 'Inventário'
+                  ? 'Nova Quantidade Real'
+                  : 'Quantidade de Itens',
+              placeholder: 'Ex: 10',
+              controller: _qtyController,
+              keyboardType: TextInputType.number,
+              validator: (val) =>
+                  val == null || val.isEmpty ? 'Quantidade obrigatória' : null,
+            ),
+            const SizedBox(height: 16),
+            AppInput(
+              label: 'Motivo',
+              placeholder: 'Justifique a alteração ou informe fornecedor',
+              controller: _reasonController,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

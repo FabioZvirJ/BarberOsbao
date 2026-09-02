@@ -12,6 +12,7 @@ import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_image_upload.dart';
+import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_search_bar.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/funcionarios/domain/models/funcionario.dart';
@@ -554,187 +555,30 @@ class _FuncionarioFormDialogState
     final employee = widget.employee;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AlertDialog(
-      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      title: Text(
-        employee == null ? 'Cadastrar Funcionário' : 'Editar Funcionário',
-        style: TextStyle(
-          color: isDark ? Colors.white : Colors.black87,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              AppInput(
-                label: 'Nome Completo',
-                placeholder: 'Ex: Arthur Mendes',
-                controller: _nameController,
-                validator: (val) =>
-                    val == null || val.isEmpty ? 'Nome obrigatório' : null,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Cargo / Função',
-                      placeholder: 'Ex: Barbeiro Specialist',
-                      controller: _cargoController,
-                      validator: (val) => val == null || val.isEmpty
-                          ? 'Cargo obrigatório'
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppInput(
-                      label: 'Comissão (%)',
-                      placeholder: 'Ex: 30',
-                      controller: _commissionRateController,
-                      keyboardType: TextInputType.number,
-                      validator: (val) => val == null || val.isEmpty
-                          ? 'Comissão obrigatória'
-                          : null,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Telefone',
-                      placeholder: 'Ex: (11) 97777-2222',
-                      controller: _phoneController,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppInput(
-                      label: 'CPF',
-                      placeholder: 'Ex: 123.456.789-00',
-                      controller: _cpfController,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              AppInput(
-                label: 'E-mail',
-                placeholder: 'Ex: arthur@barberosbao.com',
-                controller: _emailController,
-              ),
-              const SizedBox(height: 12),
-              AppInput(
-                label: 'Especialidades (separadas por vírgula)',
-                placeholder: 'Ex: Corte Degradê, Platinado, Barba',
-                controller: _specialtiesController,
-              ),
-              const SizedBox(height: 12),
-              AppInput(
-                label: 'Horário de Trabalho',
-                placeholder: 'Ex: 09:00 - 18:00',
-                controller: _horarioController,
-              ),
-              const SizedBox(height: 12),
-              AppImageUpload(
-                label: 'Foto do Profissional / Barbeiro',
-                controller: _avatarUrlController,
-                height: 130,
-                helperText: 'Upload do arquivo ou informe o link',
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Dias Disponíveis',
-                style: TextStyle(
-                  color: isDark ? Colors.white70 : Colors.black87,
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: _weekDays.map((day) {
-                  final isSelected = _selectedDays.contains(day);
-                  return FilterChip(
-                    label: Text(
-                      day,
-                      style: TextStyle(
-                        color: isSelected
-                            ? Colors.black
-                            : (isDark ? Colors.white70 : Colors.black87),
-                        fontSize: 11,
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
-                    ),
-                    selected: isSelected,
-                    selectedColor: ThemeColors.primary,
-                    backgroundColor: isDark
-                        ? ThemeColors.darkBg
-                        : Colors.grey.shade100,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                      side: BorderSide(
-                        color: isDark
-                            ? ThemeColors.darkBorder
-                            : Colors.grey.shade300,
-                      ),
-                    ),
-                    onSelected: (val) {
-                      setState(() {
-                        if (val) {
-                          _selectedDays.add(day);
-                          _selectedFolgas.remove(day);
-                        } else {
-                          _selectedDays.remove(day);
-                          _selectedFolgas.add(day);
-                        }
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-              SwitchListTile(
-                title: Text(
-                  'Funcionário Ativo',
-                  style: TextStyle(
-                    color: isDark ? Colors.white70 : Colors.black87,
-                    fontSize: 14,
-                  ),
-                ),
-                value: _active,
-                activeThumbColor: ThemeColors.primary,
-                onChanged: (val) => setState(() => _active = val),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return AppResponsiveDialog(
+      title: employee == null ? 'Cadastrar Funcionário' : 'Editar Funcionário',
+      subtitle: employee == null
+          ? 'Cadastre um novo barbeiro ou colaborador da barbearia'
+          : 'Atualize os dados cadastrais, horários e comissões',
+      maxWidth: 660,
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
             'Cancelar',
-            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            style: TextStyle(
+              color: isDark ? Colors.white70 : Colors.black54,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
+        const SizedBox(width: 8),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: ThemeColors.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
           onPressed: () {
@@ -781,11 +625,196 @@ class _FuncionarioFormDialogState
             }
           },
           child: const Text(
-            'Salvar',
+            'Salvar Funcionário',
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
         ),
       ],
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppInput(
+              label: 'Nome Completo',
+              placeholder: 'Ex: Arthur Mendes',
+              controller: _nameController,
+              validator: (val) =>
+                  val == null || val.isEmpty ? 'Nome obrigatório' : null,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'Cargo / Função',
+                    placeholder: 'Ex: Barbeiro Especialista',
+                    controller: _cargoController,
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Cargo obrigatório' : null,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: AppInput(
+                    label: 'Comissão (%)',
+                    placeholder: 'Ex: 30',
+                    controller: _commissionRateController,
+                    keyboardType: TextInputType.number,
+                    validator: (val) => val == null || val.isEmpty
+                        ? 'Comissão obrigatória'
+                        : null,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'Telefone',
+                    placeholder: 'Ex: (11) 97777-2222',
+                    controller: _phoneController,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: AppInput(
+                    label: 'CPF',
+                    placeholder: 'Ex: 123.456.789-00',
+                    controller: _cpfController,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'E-mail',
+                    placeholder: 'Ex: arthur@barberosbao.com',
+                    controller: _emailController,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: AppInput(
+                    label: 'Horário de Trabalho',
+                    placeholder: 'Ex: 09:00 - 18:00',
+                    controller: _horarioController,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            AppInput(
+              label: 'Especialidades (separadas por vírgula)',
+              placeholder: 'Ex: Corte Degradê, Platinado, Barba',
+              controller: _specialtiesController,
+            ),
+            const SizedBox(height: 16),
+            AppImageUpload(
+              label: 'Foto do Profissional / Barbeiro',
+              controller: _avatarUrlController,
+              height: 140,
+              helperText: 'Upload do arquivo ou informe o link',
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Dias Disponíveis de Trabalho',
+              style: TextStyle(
+                color: isDark ? Colors.white70 : Colors.black87,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _weekDays.map((day) {
+                final isSelected = _selectedDays.contains(day);
+                return FilterChip(
+                  label: Text(
+                    day,
+                    style: TextStyle(
+                      color: isSelected
+                          ? Colors.black
+                          : (isDark ? Colors.white70 : Colors.black87),
+                      fontSize: 12,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  ),
+                  selected: isSelected,
+                  selectedColor: ThemeColors.primary,
+                  backgroundColor: isDark
+                      ? ThemeColors.darkBg
+                      : Colors.grey.shade100,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                    side: BorderSide(
+                      color: isDark
+                          ? ThemeColors.darkBorder
+                          : Colors.grey.shade300,
+                    ),
+                  ),
+                  onSelected: (val) {
+                    setState(() {
+                      if (val) {
+                        _selectedDays.add(day);
+                        _selectedFolgas.remove(day);
+                      } else {
+                        _selectedDays.remove(day);
+                        _selectedFolgas.add(day);
+                      }
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.03)
+                    : Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
+                ),
+              ),
+              child: SwitchListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                title: Text(
+                  'Funcionário Ativo',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  'Disponível para atendimentos na agenda',
+                  style: TextStyle(
+                    color: isDark ? Colors.white54 : Colors.black45,
+                    fontSize: 12,
+                  ),
+                ),
+                value: _active,
+                activeThumbColor: ThemeColors.primary,
+                onChanged: (val) => setState(() => _active = val),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

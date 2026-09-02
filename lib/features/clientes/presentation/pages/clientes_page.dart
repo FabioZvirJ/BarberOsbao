@@ -12,6 +12,7 @@ import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_avatar.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_image_upload.dart';
+import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/clientes/domain/models/cliente.dart';
 import 'package:barber_osbao/features/clientes/presentation/controllers/clientes_controller.dart';
@@ -380,107 +381,139 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: Row(
-          children: [
-            AppAvatar(url: customer.avatarUrl, size: 36),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    customer.name,
-                    style: TextStyle(
-                      color: isDark ? Colors.white : Colors.black87,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    customer.email,
-                    style: const TextStyle(color: Colors.grey, fontSize: 11),
-                  ),
-                ],
+      builder: (ctx) => AppResponsiveDialog(
+        title: customer.name,
+        subtitle: '${customer.email} • Plano: ${customer.plano}',
+        maxWidth: 520,
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ThemeColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
-          ],
-        ),
-        content: SizedBox(
-          width: 500,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Histórico de Visitas Recentes',
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text(
+              'Fechar',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                AppAvatar(url: customer.avatarUrl, size: 48),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        customer.name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Telefone: ${customer.phone}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isDark ? Colors.white60 : Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Histórico de Visitas Recentes',
+              style: TextStyle(
+                color: ThemeColors.primary,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(
+                Icons.check_circle,
+                color: ThemeColors.success,
+              ),
+              title: Text(
+                'Corte + Barba (Arthur Santos)',
                 style: TextStyle(
-                  color: ThemeColors.primary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 13,
                 ),
               ),
-              const SizedBox(height: 16),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(
-                  Icons.check_circle,
-                  color: ThemeColors.success,
-                ),
-                title: Text(
-                  'Corte + Barba (Arthur Santos)',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
-                    fontSize: 13,
-                  ),
-                ),
-                subtitle: Text(
-                  'Data: ${customer.ultimaVisita} - R\$ 80.00',
-                  style: const TextStyle(color: Colors.grey, fontSize: 11),
+              subtitle: Text(
+                'Data: ${customer.ultimaVisita} - R\$ 80.00',
+                style: const TextStyle(color: Colors.grey, fontSize: 11),
+              ),
+            ),
+            Divider(color: isDark ? Colors.white10 : Colors.grey.shade200),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(
+                Icons.check_circle,
+                color: ThemeColors.success,
+              ),
+              title: Text(
+                'Corte Degradê (Marcos Silva)',
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 13,
                 ),
               ),
-              Divider(color: isDark ? Colors.white10 : Colors.grey.shade200),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(
-                  Icons.check_circle,
-                  color: ThemeColors.success,
-                ),
-                title: Text(
-                  'Corte Degradê (Marcos Silva)',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
-                    fontSize: 13,
-                  ),
-                ),
-                subtitle: const Text(
-                  'Data: 10/05/2026 - R\$ 45.00',
-                  style: TextStyle(color: Colors.grey, fontSize: 11),
+              subtitle: const Text(
+                'Data: 10/05/2026 - R\$ 45.00',
+                style: TextStyle(color: Colors.grey, fontSize: 11),
+              ),
+            ),
+            Divider(color: isDark ? Colors.white10 : Colors.grey.shade200),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(
+                Icons.check_circle,
+                color: ThemeColors.success,
+              ),
+              title: Text(
+                'Design de Sobrancelha (Gabriel Neves)',
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 13,
                 ),
               ),
-              Divider(color: isDark ? Colors.white10 : Colors.grey.shade200),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(
-                  Icons.check_circle,
-                  color: ThemeColors.success,
-                ),
-                title: Text(
-                  'Design de Sobrancelha (Gabriel Neves)',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
-                    fontSize: 13,
-                  ),
-                ),
-                subtitle: const Text(
-                  'Data: 15/04/2026 - R\$ 20.00',
-                  style: TextStyle(color: Colors.grey, fontSize: 11),
+              subtitle: const Text(
+                'Data: 15/04/2026 - R\$ 20.00',
+                style: TextStyle(color: Colors.grey, fontSize: 11),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.03)
+                    : Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
                 ),
               ),
-              const SizedBox(height: 16),
-              Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
@@ -488,6 +521,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                     style: TextStyle(
                       color: isDark ? Colors.white70 : Colors.black87,
                       fontSize: 13,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   Text(
@@ -495,23 +529,14 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                     style: const TextStyle(
                       color: ThemeColors.success,
                       fontWeight: FontWeight.bold,
-                      fontSize: 15,
+                      fontSize: 16,
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
-              'Fechar',
-              style: TextStyle(color: ThemeColors.primary),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -574,245 +599,30 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
     final customer = widget.customer;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AlertDialog(
-      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      title: Text(
-        customer == null ? 'Cadastrar Cliente' : 'Editar Cliente',
-        style: TextStyle(
-          color: isDark ? Colors.white : Colors.black87,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppInput(
-                label: 'Nome Completo',
-                placeholder: 'Ex: João Carlos da Silva',
-                controller: _nameController,
-                validator: (val) =>
-                    val == null || val.isEmpty ? 'Nome obrigatório' : null,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppInput(
-                      label: 'Telefone',
-                      placeholder: 'Ex: (11) 99999-9999',
-                      controller: _phoneController,
-                      validator: (val) => val == null || val.isEmpty
-                          ? 'Telefone obrigatório'
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppInput(
-                      label: 'Nascimento',
-                      placeholder: 'Ex: 15/08/1990',
-                      controller: _nascimentoController,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              AppInput(
-                label: 'E-mail',
-                placeholder: 'Ex: joao@gmail.com',
-                controller: _emailController,
-              ),
-              const SizedBox(height: 12),
-              AppImageUpload(
-                label: 'Foto do Cliente (Avatar)',
-                controller: _avatarUrlController,
-                height: 130,
-                helperText: 'Upload do arquivo ou informe o link',
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Plano',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        DropdownButtonFormField<String>(
-                          dropdownColor: isDark
-                              ? ThemeColors.darkSurface
-                              : Colors.white,
-                          initialValue: _plano,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: isDark
-                                ? ThemeColors.darkSurface
-                                : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                ThemeColors.radius,
-                              ),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                ThemeColors.radius,
-                              ),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 14,
-                          ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'Nenhum',
-                              child: Text('Nenhum'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Plano Cavalheiro',
-                              child: Text('Plano Cavalheiro'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Plano Barão',
-                              child: Text('Plano Barão'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Plano Imperial',
-                              child: Text('Plano Imperial'),
-                            ),
-                          ],
-                          onChanged: (val) {
-                            if (val != null) setState(() => _plano = val);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Status',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        DropdownButtonFormField<String>(
-                          dropdownColor: isDark
-                              ? ThemeColors.darkSurface
-                              : Colors.white,
-                          initialValue: _status,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: isDark
-                                ? ThemeColors.darkSurface
-                                : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                ThemeColors.radius,
-                              ),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                ThemeColors.radius,
-                              ),
-                              borderSide: BorderSide(
-                                color: isDark
-                                    ? ThemeColors.darkBorder
-                                    : Colors.grey.shade300,
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                          style: TextStyle(
-                            color: isDark ? Colors.white : Colors.black87,
-                            fontSize: 14,
-                          ),
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'active',
-                              child: Text('Ativo'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'inactive',
-                              child: Text('Inativo'),
-                            ),
-                          ],
-                          onChanged: (val) {
-                            if (val != null) setState(() => _status = val);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              AppInput(
-                label: 'Observações',
-                placeholder: 'Ex: Alérgico a produtos mentolados...',
-                controller: _observacoesController,
-                maxLines: 3,
-              ),
-            ],
-          ),
-        ),
-      ),
+    return AppResponsiveDialog(
+      title: customer == null ? 'Cadastrar Cliente' : 'Editar Cliente',
+      subtitle: customer == null
+          ? 'Preencha os dados cadastrais e preferências do cliente'
+          : 'Atualize os dados de contato, plano e observações',
+      maxWidth: 640,
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
             'Cancelar',
-            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            style: TextStyle(
+              color: isDark ? Colors.white70 : Colors.black54,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
+        const SizedBox(width: 8),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: ThemeColors.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
           onPressed: () {
@@ -845,9 +655,213 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
               Navigator.of(context).pop();
             }
           },
-          child: const Text('Salvar', style: TextStyle(color: Colors.black)),
+          child: const Text(
+            'Salvar Cliente',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
         ),
       ],
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppInput(
+              label: 'Nome Completo',
+              placeholder: 'Ex: João Carlos da Silva',
+              controller: _nameController,
+              validator: (val) =>
+                  val == null || val.isEmpty ? 'Nome obrigatório' : null,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'Telefone',
+                    placeholder: 'Ex: (11) 99999-9999',
+                    controller: _phoneController,
+                    validator: (val) => val == null || val.isEmpty
+                        ? 'Telefone obrigatório'
+                        : null,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: AppInput(
+                    label: 'Nascimento',
+                    placeholder: 'Ex: 15/08/1990',
+                    controller: _nascimentoController,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'E-mail',
+                    placeholder: 'Ex: joao@gmail.com',
+                    controller: _emailController,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Plano do Clube',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      DropdownButtonFormField<String>(
+                        dropdownColor: isDark
+                            ? ThemeColors.darkSurface
+                            : Colors.white,
+                        initialValue: _plano,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.grey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 14,
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'Nenhum',
+                            child: Text('Nenhum'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Plano Cavalheiro',
+                            child: Text('Plano Cavalheiro'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Plano Barão',
+                            child: Text('Plano Barão'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Plano Imperial',
+                            child: Text('Plano Imperial'),
+                          ),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) setState(() => _plano = val);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            AppImageUpload(
+              label: 'Foto do Cliente (Avatar)',
+              controller: _avatarUrlController,
+              height: 140,
+              helperText: 'Upload do arquivo ou informe o link',
+            ),
+            const SizedBox(height: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Status do Cadastro',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                DropdownButtonFormField<String>(
+                  dropdownColor: isDark
+                      ? ThemeColors.darkSurface
+                      : Colors.white,
+                  initialValue: _status,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: isDark
+                        ? ThemeColors.darkSurface
+                        : Colors.grey.shade50,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? ThemeColors.darkBorder
+                            : Colors.grey.shade300,
+                        width: 1.0,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? ThemeColors.darkBorder
+                            : Colors.grey.shade300,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'active', child: Text('Ativo')),
+                    DropdownMenuItem(value: 'inactive', child: Text('Inativo')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setState(() => _status = val);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            AppInput(
+              label: 'Observações / Preferências',
+              placeholder:
+                  'Ex: Alérgico a produtos mentolados, prefere café expresso...',
+              controller: _observacoesController,
+              maxLines: 3,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
