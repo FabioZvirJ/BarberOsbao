@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_avatar.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/packages/core/auth/application/auth_controller.dart';
@@ -122,30 +123,6 @@ class AppHeader extends ConsumerWidget {
                 const SizedBox(width: 16),
               ],
 
-              // Quick Theme Toggle Button
-              IconButton(
-                icon: Icon(
-                  isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
-                  size: 20,
-                  color: isDark ? ThemeColors.primary : Colors.grey.shade800,
-                ),
-                tooltip: isDark
-                    ? 'Mudar para Tema Claro'
-                    : 'Mudar para Tema Escuro',
-                style: IconButton.styleFrom(
-                  backgroundColor: isDark
-                      ? ThemeColors.darkSurface
-                      : Colors.grey.shade100,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                onPressed: () {
-                  ref.read(authControllerProvider.notifier).toggleTheme();
-                },
-              ),
-              const SizedBox(width: 14),
-
               // Profile Avatar Menu
               PopupMenuButton<String>(
                 offset: const Offset(0, 48),
@@ -162,10 +139,14 @@ class AppHeader extends ConsumerWidget {
                 onSelected: (value) {
                   if (value == 'theme') {
                     ref.read(authControllerProvider.notifier).toggleTheme();
+                  } else if (value == 'settings') {
+                    if (onProfileTap != null) {
+                      onProfileTap!();
+                    } else {
+                      context.go('/configuracoes');
+                    }
                   } else if (value == 'logout') {
                     ref.read(authControllerProvider.notifier).logout();
-                  } else if (onProfileTap != null) {
-                    onProfileTap!();
                   }
                 },
                 itemBuilder: (context) => [
@@ -210,6 +191,26 @@ class AppHeader extends ConsumerWidget {
                         const SizedBox(width: 10),
                         Text(
                           isDark ? 'Tema Claro' : 'Tema Escuro',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'settings',
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.settings_outlined,
+                          size: 18,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Configurações',
                           style: TextStyle(
                             fontSize: 13,
                             color: isDark ? Colors.white : Colors.black87,
