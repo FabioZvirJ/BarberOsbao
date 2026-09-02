@@ -226,7 +226,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
         AppTableColumn(label: 'ÚLT. VISITA', width: 100),
         AppTableColumn(label: 'TOTAL GASTO', width: 110),
         AppTableColumn(label: 'STATUS', width: 85),
-        AppTableColumn(label: 'AÇÕES', width: 110),
+        AppTableColumn(label: 'AÇÕES', width: 130),
       ],
       rows: filtered.map((c) {
         return AppTableRow(
@@ -279,18 +279,36 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                   : AppStatusType.danger,
             ),
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
                   icon: const Icon(Icons.history, size: 18),
                   onPressed: () => _showHistoryDialog(context, c),
                   tooltip: 'Visualizar Histórico',
                 ),
+                const SizedBox(width: 4),
                 IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
                   icon: const Icon(Icons.edit_outlined, size: 18),
                   onPressed: () => _showFormDialog(context, c),
                   tooltip: 'Editar',
                 ),
+                const SizedBox(width: 4),
                 IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
                   icon: const Icon(
                     Icons.delete_outline,
                     size: 18,

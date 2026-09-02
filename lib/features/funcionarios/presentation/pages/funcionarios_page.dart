@@ -173,7 +173,7 @@ class _FuncionariosPageState extends ConsumerState<FuncionariosPage> {
         AppTableColumn(label: 'HORÁRIO', width: 110),
         AppTableColumn(label: 'AVALIAÇÃO', width: 90),
         AppTableColumn(label: 'STATUS', width: 85),
-        AppTableColumn(label: 'AÇÕES', width: 110),
+        AppTableColumn(label: 'AÇÕES', width: 130),
       ],
       rows: filtered.map((f) {
         return AppTableRow(
@@ -239,18 +239,36 @@ class _FuncionariosPageState extends ConsumerState<FuncionariosPage> {
               type: f.status ? AppStatusType.success : AppStatusType.danger,
             ),
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
                   icon: const Icon(Icons.calendar_month, size: 18),
                   onPressed: () => _showAgendaDialog(context, f),
                   tooltip: 'Visualizar Agenda',
                 ),
+                const SizedBox(width: 4),
                 IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
                   icon: const Icon(Icons.edit_outlined, size: 18),
                   onPressed: () => _showFormDialog(context, f),
                   tooltip: 'Editar',
                 ),
+                const SizedBox(width: 4),
                 IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
                   icon: const Icon(
                     Icons.delete_outline,
                     size: 18,
