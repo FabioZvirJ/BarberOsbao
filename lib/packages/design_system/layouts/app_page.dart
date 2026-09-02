@@ -23,7 +23,7 @@ class AppPage extends StatelessWidget {
     this.onSearch,
     this.onProfileTap,
     this.scrollable = true,
-    this.maxWidth = 1200.0,
+    this.maxWidth = 1800.0,
   });
 
   @override

@@ -1,25 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 
 class AppContainer extends StatelessWidget {
   final Widget child;
   final double maxWidth;
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? padding;
   final bool scrollable;
 
   const AppContainer({
     super.key,
     required this.child,
-    this.maxWidth = 1200.0,
-    this.padding = const EdgeInsets.all(32.0),
+    this.maxWidth = 1800.0,
+    this.padding,
     this.scrollable = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    Widget content = Center(
+    final isMobile = AppBreakpoints.isMobile(context);
+    final isTablet = AppBreakpoints.isTablet(context);
+
+    final effectivePadding =
+        padding ??
+        EdgeInsets.symmetric(
+          horizontal: isMobile ? 16.0 : (isTablet ? 24.0 : 32.0),
+          vertical: isMobile ? 16.0 : 28.0,
+        );
+
+    Widget content = Align(
+      alignment: Alignment.topCenter,
       child: Container(
         constraints: BoxConstraints(maxWidth: maxWidth),
-        padding: padding,
+        width: double.infinity,
+        padding: effectivePadding,
         child: child,
       ),
     );
