@@ -6,6 +6,7 @@ import 'package:barber_osbao/packages/design_system/layouts/app_section.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_card.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/relatorios/presentation/controllers/relatorios_controller.dart';
+import 'package:barber_osbao/features/relatorios/presentation/widgets/report_dashboard_modal.dart';
 
 class RelatoriosPage extends ConsumerWidget {
   const RelatoriosPage({super.key});
@@ -90,7 +91,7 @@ class RelatoriosPage extends ConsumerWidget {
             crossAxisCount: crossCount,
             crossAxisSpacing: 20,
             mainAxisSpacing: 20,
-            mainAxisExtent: 240,
+            mainAxisExtent: 255,
           ),
           itemCount: reports.length,
           itemBuilder: (context, index) {
@@ -99,96 +100,131 @@ class RelatoriosPage extends ConsumerWidget {
             final color = colorMap[id] ?? ThemeColors.primary;
             final icon = iconMap[report['icon']] ?? Icons.bar_chart;
 
-            return AppCard(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(10),
+            return InkWell(
+              borderRadius: BorderRadius.circular(ThemeColors.radius),
+              onTap: () => ReportDashboardModal.show(
+                context,
+                report: report,
+                themeColor: color,
+                icon: icon,
+              ),
+              child: AppCard(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(icon, color: color, size: 24),
                         ),
-                        child: Icon(icon, color: color, size: 24),
-                      ),
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(
-                              Icons.picture_as_pdf,
-                              size: 20,
-                              color: Colors.red,
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.picture_as_pdf,
+                                size: 20,
+                                color: Colors.red,
+                              ),
+                              onPressed: () => _exportMock(
+                                context,
+                                report['title'] as String,
+                                'PDF',
+                              ),
+                              tooltip: 'Exportar PDF',
                             ),
-                            onPressed: () => _exportMock(
-                              context,
-                              report['title'] as String,
-                              'PDF',
+                            IconButton(
+                              icon: const Icon(Icons.download, size: 20),
+                              onPressed: () => _exportMock(
+                                context,
+                                report['title'] as String,
+                                'Excel (XLSX)',
+                              ),
+                              tooltip: 'Exportar Excel',
                             ),
-                            tooltip: 'Exportar PDF',
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.download, size: 20),
-                            onPressed: () => _exportMock(
-                              context,
-                              report['title'] as String,
-                              'Excel (XLSX)',
-                            ),
-                            tooltip: 'Exportar Excel',
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    report['title'] as String,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Expanded(
-                    child: Text(
-                      report['desc'] as String,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isDark ? Colors.white60 : Colors.black54,
-                        height: 1.4,
-                      ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.trending_up,
-                        color: ThemeColors.success,
-                        size: 14,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          report['stats'] as String,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          ],
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      report['title'] as String,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 6),
+                    Expanded(
+                      child: Text(
+                        report['desc'] as String,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? Colors.white60 : Colors.black54,
+                          height: 1.4,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const Divider(),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.trending_up,
+                                color: ThemeColors.success,
+                                size: 14,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  report['stats'] as String,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Abrir Dashboard',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: color,
+                              ),
+                            ),
+                            const SizedBox(width: 3),
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              size: 10,
+                              color: color,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             );
           },
