@@ -337,29 +337,36 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
   }
 
   void _showDeleteDialog(BuildContext context, Produto product) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: ThemeColors.darkBg,
-        title: const Text(
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        title: Text(
           'Excluir Produto',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: Text(
           'Tem certeza que deseja excluir o produto "${product.name}"? Essa ação removerá o registro permanente no estoque.',
-          style: const TextStyle(color: Colors.white70),
+          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
+            child: Text(
               'Cancelar',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: ThemeColors.danger,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
             ),
             onPressed: () {
               ref
@@ -383,14 +390,20 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
     final reasonController = TextEditingController(
       text: type == 'Entrada' ? 'Compra fornecedor' : 'Uso interno',
     );
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: ThemeColors.darkBg,
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         title: Text(
           '$type de Estoque: ${product.name}',
-          style: const TextStyle(color: Colors.white, fontSize: 16),
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -416,9 +429,9 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
               reasonController.dispose();
               Navigator.of(ctx).pop();
             },
-            child: const Text(
+            child: Text(
               'Cancelar',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
             ),
           ),
           ElevatedButton(
@@ -426,6 +439,7 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
               backgroundColor: type == 'Entrada'
                   ? ThemeColors.success
                   : ThemeColors.warning,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
             ),
             onPressed: () {
               final qty = int.tryParse(qtyController.text.trim()) ?? 1;
@@ -437,13 +451,14 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
               reasonController.dispose();
               Navigator.of(ctx).pop();
             },
-            child: const Text('Gravar', style: TextStyle(color: Colors.black)),
+            child: const Text('Gravar', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
 }
+
 
 class _ProdutoFormDialog extends ConsumerStatefulWidget {
   final List<String> categories;
@@ -483,15 +498,15 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
       text: p?.costPrice.toString() ?? '',
     );
     _priceController = TextEditingController(text: p?.price.toString() ?? '');
-    _stockController = TextEditingController(text: p?.stock.toString() ?? '10');
+    _stockController = TextEditingController(text: p?.stock.toString() ?? '');
     _minStockController = TextEditingController(
-      text: p?.minStock.toString() ?? '5',
+      text: p?.minStock.toString() ?? '',
     );
     _descriptionController = TextEditingController(text: p?.description ?? '');
     _imageUrlController = TextEditingController(text: p?.imageUrl ?? '');
     _category =
         p?.category ??
-        (widget.categories.isNotEmpty ? widget.categories[0] : 'Finalizadores');
+        (widget.categories.isNotEmpty ? widget.categories[0] : 'Pomadas');
     _status = p?.status ?? true;
   }
 
@@ -513,12 +528,17 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AlertDialog(
-      backgroundColor: ThemeColors.darkBg,
+      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       title: Text(
         product == null ? 'Criar Produto' : 'Editar Produto',
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       content: SingleChildScrollView(
         child: Form(
@@ -545,25 +565,54 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      dropdownColor: ThemeColors.darkBg,
-                      initialValue: _category,
-                      decoration: const InputDecoration(
-                        labelText: 'Categoria',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Categoria',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
                         ),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                      items: widget.categories
-                          .map(
-                            (c) => DropdownMenuItem(value: c, child: Text(c)),
-                          )
-                          .toList(),
-                      onChanged: (val) {
-                        if (val != null) setState(() => _category = val);
-                      },
+                        const SizedBox(height: 6),
+                        DropdownButtonFormField<String>(
+                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          initialValue: _category,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                          ),
+                          items: widget.categories
+                              .map(
+                                (c) => DropdownMenuItem(value: c, child: Text(c)),
+                              )
+                              .toList(),
+                          onChanged: (val) {
+                            if (val != null) setState(() => _category = val);
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -659,9 +708,12 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
               ),
               const SizedBox(height: 12),
               SwitchListTile(
-                title: const Text(
+                title: Text(
                   'Produto Ativo',
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                  style: TextStyle(
+                    color: isDark ? Colors.white70 : Colors.black87,
+                    fontSize: 14,
+                  ),
                 ),
                 value: _status,
                 activeThumbColor: ThemeColors.primary,
@@ -674,13 +726,16 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text(
+          child: Text(
             'Cancelar',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
           ),
         ),
         ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.primary),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ThemeColors.primary,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
               final newProd = Produto(
@@ -714,7 +769,7 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
               Navigator.of(context).pop();
             }
           },
-          child: const Text('Salvar', style: TextStyle(color: Colors.black)),
+          child: const Text('Salvar', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         ),
       ],
     );

@@ -310,29 +310,59 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
     final currentProduct = widget.products.firstWhere(
       (p) => p.id == _selectedProductId,
     );
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AlertDialog(
-      backgroundColor: ThemeColors.darkBg,
-      title: const Text(
+      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      title: Text(
         'Lançar Movimentação de Estoque',
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       content: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              'Produto',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white70 : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 6),
             DropdownButtonFormField<String>(
-              dropdownColor: ThemeColors.darkBg,
+              dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
               initialValue: _selectedProductId,
-              decoration: const InputDecoration(
-                labelText: 'Produto',
-                labelStyle: TextStyle(color: Colors.white70),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white30),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                    width: 1.0,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                    width: 1.0,
+                  ),
                 ),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black87,
+                fontSize: 14,
+              ),
               items: widget.products
                   .map(
                     (p) => DropdownMenuItem(
@@ -346,17 +376,41 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
               },
             ),
             const SizedBox(height: 12),
+            Text(
+              'Tipo de Lançamento',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white70 : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 6),
             DropdownButtonFormField<String>(
-              dropdownColor: ThemeColors.darkBg,
+              dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
               initialValue: _type,
-              decoration: const InputDecoration(
-                labelText: 'Tipo de Lançamento',
-                labelStyle: TextStyle(color: Colors.white70),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white30),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                    width: 1.0,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                    width: 1.0,
+                  ),
                 ),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black87,
+                fontSize: 14,
+              ),
               items: const [
                 DropdownMenuItem(value: 'Entrada', child: Text('Entrada (+)')),
                 DropdownMenuItem(value: 'Saída', child: Text('Saída (-)')),
@@ -403,13 +457,16 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text(
+          child: Text(
             'Cancelar',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
           ),
         ),
         ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.primary),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ThemeColors.primary,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
               final qty = int.tryParse(_qtyController.text.trim()) ?? 0;
@@ -425,7 +482,7 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
               Navigator.of(context).pop();
             }
           },
-          child: const Text('Confirmar', style: TextStyle(color: Colors.black)),
+          child: const Text('Confirmar', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         ),
       ],
     );

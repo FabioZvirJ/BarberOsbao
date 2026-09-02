@@ -413,29 +413,60 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
             'Outros',
           ];
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return AlertDialog(
-      backgroundColor: ThemeColors.darkBg,
-      title: const Text(
+      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      title: Text(
         'Lançar Nova Transação',
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                'Tipo de Lançamento',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 6),
               DropdownButtonFormField<String>(
-                dropdownColor: ThemeColors.darkBg,
+                dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
                 initialValue: _type,
-                decoration: const InputDecoration(
-                  labelText: 'Tipo de Lançamento',
-                  labelStyle: TextStyle(color: Colors.white70),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white30),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                      width: 1.0,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                      width: 1.0,
+                    ),
                   ),
                 ),
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 14,
+                ),
                 items: const [
                   DropdownMenuItem(value: 'income', child: Text('Receita (+)')),
                   DropdownMenuItem(
@@ -478,25 +509,54 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      dropdownColor: ThemeColors.darkBg,
-                      initialValue: _category,
-                      decoration: const InputDecoration(
-                        labelText: 'Categoria',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Categoria',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
                         ),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                      items: categories
-                          .map(
-                            (c) => DropdownMenuItem(value: c, child: Text(c)),
-                          )
-                          .toList(),
-                      onChanged: (val) {
-                        if (val != null) setState(() => _category = val);
-                      },
+                        const SizedBox(height: 6),
+                        DropdownButtonFormField<String>(
+                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          initialValue: _category,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                          ),
+                          items: categories
+                              .map(
+                                (c) => DropdownMenuItem(value: c, child: Text(c)),
+                              )
+                              .toList(),
+                          onChanged: (val) {
+                            if (val != null) setState(() => _category = val);
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -505,71 +565,129 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
               Row(
                 children: [
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      dropdownColor: ThemeColors.darkBg,
-                      initialValue: _paymentMethod,
-                      decoration: const InputDecoration(
-                        labelText: 'Forma de Pagamento',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Forma de Pagamento',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
                         ),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                      items: const [
-                        DropdownMenuItem(value: 'PIX', child: Text('PIX')),
-                        DropdownMenuItem(
-                          value: 'Cartão de Crédito',
-                          child: Text('Cartão de Crédito'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Cartão de Débito',
-                          child: Text('Cartão de Débito'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Dinheiro',
-                          child: Text('Dinheiro'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Boleto',
-                          child: Text('Boleto'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Transferência',
-                          child: Text('Transferência'),
+                        const SizedBox(height: 6),
+                        DropdownButtonFormField<String>(
+                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          initialValue: _paymentMethod,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                          ),
+                          items: const [
+                            DropdownMenuItem(value: 'PIX', child: Text('PIX')),
+                            DropdownMenuItem(
+                              value: 'Cartão de Crédito',
+                              child: Text('Cartão de Crédito'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Cartão de Débito',
+                              child: Text('Cartão de Débito'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Dinheiro',
+                              child: Text('Dinheiro'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Boleto',
+                              child: Text('Boleto'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Transferência',
+                              child: Text('Transferência'),
+                            ),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) setState(() => _paymentMethod = val);
+                          },
                         ),
                       ],
-                      onChanged: (val) {
-                        if (val != null) setState(() => _paymentMethod = val);
-                      },
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      dropdownColor: ThemeColors.darkBg,
-                      initialValue: _status,
-                      decoration: const InputDecoration(
-                        labelText: 'Status',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Status',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
                         ),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'paid',
-                          child: Text('Pago / Recebido'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'pending',
-                          child: Text('Pendente'),
+                        const SizedBox(height: 6),
+                        DropdownButtonFormField<String>(
+                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          initialValue: _status,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'paid',
+                              child: Text('Pago / Recebido'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'pending',
+                              child: Text('Pendente'),
+                            ),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) setState(() => _status = val);
+                          },
                         ),
                       ],
-                      onChanged: (val) {
-                        if (val != null) setState(() => _status = val);
-                      },
                     ),
                   ),
                 ],
@@ -589,13 +707,16 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text(
+          child: Text(
             'Cancelar',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
           ),
         ),
         ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.primary),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ThemeColors.primary,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
               final newT = TransacaoFinanceira(
@@ -614,7 +735,7 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
               Navigator.of(context).pop();
             }
           },
-          child: const Text('Confirmar', style: TextStyle(color: Colors.black)),
+          child: const Text('Confirmar', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         ),
       ],
     );

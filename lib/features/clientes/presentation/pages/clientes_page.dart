@@ -104,7 +104,9 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                   ),
                   const SizedBox(width: 8),
                   DropdownButton<String>(
-                    dropdownColor: ThemeColors.darkBg,
+                    dropdownColor: isDark
+                        ? ThemeColors.darkSurface
+                        : Colors.white,
                     value: _orderBy,
                     underline: const SizedBox(),
                     style: TextStyle(
@@ -326,29 +328,38 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
   }
 
   void _showDeleteDialog(BuildContext context, Cliente customer) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: ThemeColors.darkBg,
-        title: const Text(
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        title: Text(
           'Excluir Cliente',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: Text(
           'Tem certeza que deseja excluir o cliente "${customer.name}"? Isso apagará permanentemente o registro comercial.',
-          style: const TextStyle(color: Colors.white70),
+          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
+            child: Text(
               'Cancelar',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: ThemeColors.danger,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
             ),
             onPressed: () {
               ref
@@ -364,10 +375,13 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
   }
 
   void _showHistoryDialog(BuildContext context, Cliente customer) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: ThemeColors.darkBg,
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         title: Row(
           children: [
             AppAvatar(url: customer.avatarUrl, size: 36),
@@ -378,7 +392,11 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                 children: [
                   Text(
                     customer.name,
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     customer.email,
@@ -410,37 +428,52 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                   Icons.check_circle,
                   color: ThemeColors.success,
                 ),
-                title: const Text(
+                title: Text(
                   'Corte + Barba (Arthur Santos)',
-                  style: TextStyle(color: Colors.white, fontSize: 13),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 13,
+                  ),
                 ),
                 subtitle: Text(
                   'Data: ${customer.ultimaVisita} - R\$ 80.00',
                   style: const TextStyle(color: Colors.grey, fontSize: 11),
                 ),
               ),
-              const Divider(color: Colors.white10),
-              const ListTile(
+              Divider(color: isDark ? Colors.white10 : Colors.grey.shade200),
+              ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.check_circle, color: ThemeColors.success),
+                leading: const Icon(
+                  Icons.check_circle,
+                  color: ThemeColors.success,
+                ),
                 title: Text(
                   'Corte Degradê (Marcos Silva)',
-                  style: TextStyle(color: Colors.white, fontSize: 13),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 13,
+                  ),
                 ),
-                subtitle: Text(
+                subtitle: const Text(
                   'Data: 10/05/2026 - R\$ 45.00',
                   style: TextStyle(color: Colors.grey, fontSize: 11),
                 ),
               ),
-              const Divider(color: Colors.white10),
-              const ListTile(
+              Divider(color: isDark ? Colors.white10 : Colors.grey.shade200),
+              ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.check_circle, color: ThemeColors.success),
+                leading: const Icon(
+                  Icons.check_circle,
+                  color: ThemeColors.success,
+                ),
                 title: Text(
                   'Design de Sobrancelha (Gabriel Neves)',
-                  style: TextStyle(color: Colors.white, fontSize: 13),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 13,
+                  ),
                 ),
-                subtitle: Text(
+                subtitle: const Text(
                   'Data: 15/04/2026 - R\$ 20.00',
                   style: TextStyle(color: Colors.grey, fontSize: 11),
                 ),
@@ -451,7 +484,10 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                 children: [
                   Text(
                     'Total Consumido:',
-                    style: TextStyle(color: Colors.white70, fontSize: 13),
+                    style: TextStyle(
+                      color: isDark ? Colors.white70 : Colors.black87,
+                      fontSize: 13,
+                    ),
                   ),
                   Text(
                     'R\$ ${customer.totalGasto.toStringAsFixed(2)}',
@@ -535,12 +571,17 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
   @override
   Widget build(BuildContext context) {
     final customer = widget.customer;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AlertDialog(
-      backgroundColor: ThemeColors.darkBg,
+      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       title: Text(
         customer == null ? 'Cadastrar Cliente' : 'Editar Cliente',
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       content: SingleChildScrollView(
         child: Form(
@@ -594,63 +635,154 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
               Row(
                 children: [
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      dropdownColor: ThemeColors.darkBg,
-                      initialValue: _plano,
-                      decoration: const InputDecoration(
-                        labelText: 'Plano',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Plano',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
                         ),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'Nenhum',
-                          child: Text('Nenhum'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Plano Cavalheiro',
-                          child: Text('Plano Cavalheiro'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Plano Barão',
-                          child: Text('Plano Barão'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'Plano Imperial',
-                          child: Text('Plano Imperial'),
+                        const SizedBox(height: 6),
+                        DropdownButtonFormField<String>(
+                          dropdownColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.white,
+                          initialValue: _plano,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: isDark
+                                ? ThemeColors.darkSurface
+                                : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                ThemeColors.radius,
+                              ),
+                              borderSide: BorderSide(
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                ThemeColors.radius,
+                              ),
+                              borderSide: BorderSide(
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'Nenhum',
+                              child: Text('Nenhum'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Plano Cavalheiro',
+                              child: Text('Plano Cavalheiro'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Plano Barão',
+                              child: Text('Plano Barão'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Plano Imperial',
+                              child: Text('Plano Imperial'),
+                            ),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) setState(() => _plano = val);
+                          },
                         ),
                       ],
-                      onChanged: (val) {
-                        if (val != null) setState(() => _plano = val);
-                      },
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      dropdownColor: ThemeColors.darkBg,
-                      initialValue: _status,
-                      decoration: const InputDecoration(
-                        labelText: 'Status',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Status',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
                         ),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                      items: const [
-                        DropdownMenuItem(value: 'active', child: Text('Ativo')),
-                        DropdownMenuItem(
-                          value: 'inactive',
-                          child: Text('Inativo'),
+                        const SizedBox(height: 6),
+                        DropdownButtonFormField<String>(
+                          dropdownColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.white,
+                          initialValue: _status,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: isDark
+                                ? ThemeColors.darkSurface
+                                : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                ThemeColors.radius,
+                              ),
+                              borderSide: BorderSide(
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                ThemeColors.radius,
+                              ),
+                              borderSide: BorderSide(
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'active',
+                              child: Text('Ativo'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'inactive',
+                              child: Text('Inativo'),
+                            ),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) setState(() => _status = val);
+                          },
                         ),
                       ],
-                      onChanged: (val) {
-                        if (val != null) setState(() => _status = val);
-                      },
                     ),
                   ),
                 ],
@@ -669,13 +801,18 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text(
+          child: Text(
             'Cancelar',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
           ),
         ),
         ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.primary),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ThemeColors.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
               final newCli = Cliente(

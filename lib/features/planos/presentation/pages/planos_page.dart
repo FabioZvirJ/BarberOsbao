@@ -386,29 +386,36 @@ class PlanosPage extends ConsumerWidget {
   }
 
   void _showDeleteDialog(BuildContext context, WidgetRef ref, Plano plan) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: ThemeColors.darkBg,
-        title: const Text(
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        title: Text(
           'Excluir Plano',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: Text(
           'Tem certeza que deseja excluir o plano "${plan.name}"? Isso cancelará as cobranças futuras.',
-          style: const TextStyle(color: Colors.white70),
+          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
+            child: Text(
               'Cancelar',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: ThemeColors.danger,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
             ),
             onPressed: () {
               ref.read(planosControllerProvider.notifier).removePlano(plan.id);
@@ -479,12 +486,17 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
   @override
   Widget build(BuildContext context) {
     final plan = widget.plan;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AlertDialog(
-      backgroundColor: ThemeColors.darkBg,
+      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       title: Text(
         plan == null ? 'Criar Novo Plano' : 'Editar Plano',
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       content: SingleChildScrollView(
         child: Form(
@@ -518,35 +530,64 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      dropdownColor: ThemeColors.darkBg,
-                      initialValue: _period,
-                      decoration: const InputDecoration(
-                        labelText: 'Cobrança',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Cobrança',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
                         ),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'mensal',
-                          child: Text('Mensal'),
+                        const SizedBox(height: 6),
+                        DropdownButtonFormField<String>(
+                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          initialValue: _period,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'mensal',
+                              child: Text('Mensal'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'trimestral',
+                              child: Text('Trimestral'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'semestral',
+                              child: Text('Semestral'),
+                            ),
+                            DropdownMenuItem(value: 'anual', child: Text('Anual')),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) setState(() => _period = val);
+                          },
                         ),
-                        DropdownMenuItem(
-                          value: 'trimestral',
-                          child: Text('Trimestral'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'semestral',
-                          child: Text('Semestral'),
-                        ),
-                        DropdownMenuItem(value: 'anual', child: Text('Anual')),
                       ],
-                      onChanged: (val) {
-                        if (val != null) setState(() => _period = val);
-                      },
                     ),
                   ),
                 ],
@@ -583,28 +624,34 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
               ),
               const SizedBox(height: 16),
               SwitchListTile(
-                title: const Text(
+                title: Text(
                   'Destacar Plano (Recomendado)',
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                  style: TextStyle(
+                    color: isDark ? Colors.white70 : Colors.black87,
+                    fontSize: 14,
+                  ),
                 ),
                 value: _recommended,
                 activeThumbColor: ThemeColors.primary,
                 onChanged: (val) => setState(() => _recommended = val),
               ),
               SwitchListTile(
-                title: const Text(
+                title: Text(
                   'Plano Ativo',
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                  style: TextStyle(
+                    color: isDark ? Colors.white70 : Colors.black87,
+                    fontSize: 14,
+                  ),
                 ),
                 value: _status,
                 activeThumbColor: ThemeColors.primary,
                 onChanged: (val) => setState(() => _status = val),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Benefícios Adicionais',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: isDark ? Colors.white70 : Colors.black87,
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
                 ),
@@ -640,12 +687,12 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
               ),
               const SizedBox(height: 12),
               if (_benefits.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Text(
                     'Nenhum benefício adicionado.',
                     style: TextStyle(
-                      color: Colors.white30,
+                      color: isDark ? Colors.white30 : Colors.grey,
                       fontSize: 12,
                       fontStyle: FontStyle.italic,
                     ),
@@ -664,7 +711,10 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
                     ),
                     title: Text(
                       b,
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontSize: 13,
+                      ),
                     ),
                     trailing: IconButton(
                       icon: const Icon(
@@ -683,13 +733,16 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text(
+          child: Text(
             'Cancelar',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
           ),
         ),
         ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.primary),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ThemeColors.primary,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
               final newPlan = Plano(
@@ -714,7 +767,7 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
               Navigator.of(context).pop();
             }
           },
-          child: const Text('Salvar', style: TextStyle(color: Colors.black)),
+          child: const Text('Salvar', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         ),
       ],
     );

@@ -213,29 +213,36 @@ class _CategoriasPageState extends ConsumerState<CategoriasPage> {
   }
 
   void _showDeleteDialog(BuildContext context, Categoria category) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: ThemeColors.darkBg,
-        title: const Text(
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        title: Text(
           'Excluir Categoria',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: Text(
           'Tem certeza que deseja excluir a categoria "${category.nome}"? Ela pode estar vinculada a outros cadastros.',
-          style: const TextStyle(color: Colors.white70),
+          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
+            child: Text(
               'Cancelar',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: ThemeColors.danger,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
             ),
             onPressed: () {
               ref
@@ -282,17 +289,23 @@ class _CategoriaFormDialogState extends ConsumerState<_CategoriaFormDialog> {
   @override
   Widget build(BuildContext context) {
     final category = widget.category;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AlertDialog(
-      backgroundColor: ThemeColors.darkBg,
+      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       title: Text(
         category == null ? 'Criar Categoria' : 'Editar Categoria',
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       content: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AppInput(
               label: 'Nome da Categoria',
@@ -302,17 +315,41 @@ class _CategoriaFormDialogState extends ConsumerState<_CategoriaFormDialog> {
                   val == null || val.isEmpty ? 'Nome obrigatório' : null,
             ),
             const SizedBox(height: 16),
+            Text(
+              'Tipo de Módulo',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white70 : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 6),
             DropdownButtonFormField<String>(
-              dropdownColor: ThemeColors.darkBg,
+              dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
               initialValue: _tipo,
-              decoration: const InputDecoration(
-                labelText: 'Tipo de Módulo',
-                labelStyle: TextStyle(color: Colors.white70),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white30),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                    width: 1.0,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                    width: 1.0,
+                  ),
                 ),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black87,
+                fontSize: 14,
+              ),
               items: const [
                 DropdownMenuItem(value: 'servicos', child: Text('Serviços')),
                 DropdownMenuItem(value: 'produtos', child: Text('Produtos')),
@@ -328,13 +365,16 @@ class _CategoriaFormDialogState extends ConsumerState<_CategoriaFormDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text(
+          child: Text(
             'Cancelar',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
           ),
         ),
         ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.primary),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ThemeColors.primary,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
               final nome = _nomeController.text.trim();
@@ -350,7 +390,7 @@ class _CategoriaFormDialogState extends ConsumerState<_CategoriaFormDialog> {
               Navigator.of(context).pop();
             }
           },
-          child: const Text('Salvar', style: TextStyle(color: Colors.black)),
+          child: const Text('Salvar', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         ),
       ],
     );

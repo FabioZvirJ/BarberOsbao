@@ -50,37 +50,43 @@ class AppInput extends StatelessWidget {
           maxLines: maxLines,
           validator: validator,
           onChanged: onChanged,
-          style: const TextStyle(fontSize: 15),
+          style: TextStyle(
+            fontSize: 14,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
           decoration: InputDecoration(
             hintText: placeholder,
             hintStyle: TextStyle(
               color: isDark ? Colors.white30 : Colors.grey.shade400,
-              fontSize: 14,
+              fontSize: 13,
             ),
             filled: true,
-            fillColor: isDark ? ThemeColors.darkSurface : Colors.white,
+            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(ThemeColors.radius),
               borderSide: BorderSide(
-                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
-                width: 1.5,
+                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                width: 1.0,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(ThemeColors.radius),
               borderSide: BorderSide(
-                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
-                width: 1.5,
+                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                width: 1.0,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(ThemeColors.radius),
               borderSide: const BorderSide(
                 color: ThemeColors.primary,
-                width: 1.8,
+                width: 1.5,
               ),
             ),
             errorBorder: OutlineInputBorder(

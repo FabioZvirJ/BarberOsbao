@@ -72,6 +72,7 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
 
     final settings = businessState.data!;
     final user = userState.value;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (!_initialized) {
       _nameController.text = settings.name;
@@ -255,21 +256,33 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               DropdownButtonFormField<String>(
-                                dropdownColor: ThemeColors.darkBg,
+                                dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
                                 initialValue: settings.slotInterval,
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   labelText: 'Tempo entre Atendimentos',
                                   labelStyle: TextStyle(
-                                    color: Colors.white70,
+                                    color: isDark ? Colors.white70 : Colors.black87,
                                     fontSize: 13,
                                   ),
-                                  enabledBorder: UnderlineInputBorder(
+                                  filled: true,
+                                  fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
                                     borderSide: BorderSide(
-                                      color: Colors.white30,
+                                      color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(
+                                      color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
                                     ),
                                   ),
                                 ),
-                                style: const TextStyle(color: Colors.white),
+                                style: TextStyle(
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  fontSize: 14,
+                                ),
                                 items: const [
                                   DropdownMenuItem(
                                     value: '15',
@@ -378,21 +391,33 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 DropdownButtonFormField<String>(
-                                  dropdownColor: ThemeColors.darkBg,
+                                  dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
                                   initialValue: settings.slotInterval,
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     labelText: 'Tempo entre Atendimentos',
                                     labelStyle: TextStyle(
-                                      color: Colors.white70,
+                                      color: isDark ? Colors.white70 : Colors.black87,
                                       fontSize: 13,
                                     ),
-                                    enabledBorder: UnderlineInputBorder(
+                                    filled: true,
+                                    fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
                                       borderSide: BorderSide(
-                                        color: Colors.white30,
+                                        color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(
+                                        color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
                                       ),
                                     ),
                                   ),
-                                  style: const TextStyle(color: Colors.white),
+                                  style: TextStyle(
+                                    color: isDark ? Colors.white : Colors.black87,
+                                    fontSize: 14,
+                                  ),
                                   items: const [
                                     DropdownMenuItem(
                                       value: '15',

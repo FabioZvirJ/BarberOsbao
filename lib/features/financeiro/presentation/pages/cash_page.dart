@@ -36,10 +36,17 @@ class _CashPageState extends ConsumerState<CashPage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (state is AppLoading) {
-      return const Center(child: CircularProgressIndicator(color: ThemeColors.primary));
+      return const Center(
+        child: CircularProgressIndicator(color: ThemeColors.primary),
+      );
     }
     if (state is AppError) {
-      return Center(child: Text('Erro: ${(state as AppError).message}', style: const TextStyle(color: ThemeColors.danger)));
+      return Center(
+        child: Text(
+          'Erro: ${(state as AppError).message}',
+          style: const TextStyle(color: ThemeColors.danger),
+        ),
+      );
     }
 
     final activeCash = state.data;
@@ -63,12 +70,20 @@ class _CashPageState extends ConsumerState<CashPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Icon(Icons.lock_outline, size: 60, color: ThemeColors.primary),
+            const Icon(
+              Icons.lock_outline,
+              size: 60,
+              color: ThemeColors.primary,
+            ),
             const SizedBox(height: 16),
             const Text(
               'O Caixa está Fechado',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
             const SizedBox(height: 8),
             const Text(
@@ -106,8 +121,13 @@ class _CashPageState extends ConsumerState<CashPage> {
         // Metrics Summary
         LayoutBuilder(
           builder: (context, constraints) {
-            final colCount = AppBreakpoints.gridColumns(context, desktopCols: 3, tabletCols: 3, mobileCols: 1);
-            
+            final colCount = AppBreakpoints.gridColumns(
+              context,
+              desktopCols: 3,
+              tabletCols: 3,
+              mobileCols: 1,
+            );
+
             // Calculate sum dynamically from state if available
             double entries = 0.0;
             double exits = 0.0;
@@ -141,12 +161,18 @@ class _CashPageState extends ConsumerState<CashPage> {
                 AppStatCard(
                   title: 'MOVIMENTAÇÕES (LÍQ.)',
                   value: 'R\$ ${(entries - exits).toStringAsFixed(2)}',
-                  icon: const Icon(Icons.swap_horiz, color: ThemeColors.warning),
+                  icon: const Icon(
+                    Icons.swap_horiz,
+                    color: ThemeColors.warning,
+                  ),
                 ),
                 AppStatCard(
                   title: 'SALDO ATUAL EM CAIXA',
                   value: 'R\$ ${currentBalance.toStringAsFixed(2)}',
-                  icon: const Icon(Icons.account_balance_wallet, color: ThemeColors.success),
+                  icon: const Icon(
+                    Icons.account_balance_wallet,
+                    color: ThemeColors.success,
+                  ),
                 ),
               ],
             );
@@ -173,7 +199,8 @@ class _CashPageState extends ConsumerState<CashPage> {
               label: 'Fechar Turno de Caixa',
               icon: const Icon(Icons.lock, size: 16),
               variant: AppButtonVariant.primary,
-              onPressed: () => _showCloseCashDialog(context, cash, movementsState),
+              onPressed: () =>
+                  _showCloseCashDialog(context, cash, movementsState),
             ),
           ],
         ),
@@ -182,7 +209,8 @@ class _CashPageState extends ConsumerState<CashPage> {
         // Movements Table
         AppSection(
           title: 'Histórico do Caixa de Hoje',
-          subtitle: 'Acompanhe todas as entradas, saídas, sangrias e suprimentos do turno ativo',
+          subtitle:
+              'Acompanhe todas as entradas, saídas, sangrias e suprimentos do turno ativo',
           child: _buildMovementsTable(movementsState, isDark),
         ),
       ],
@@ -191,10 +219,17 @@ class _CashPageState extends ConsumerState<CashPage> {
 
   Widget _buildMovementsTable(AppState<List<CashMovement>> state, bool isDark) {
     if (state is AppLoading) {
-      return const Center(child: CircularProgressIndicator(color: ThemeColors.primary));
+      return const Center(
+        child: CircularProgressIndicator(color: ThemeColors.primary),
+      );
     }
     if (state is AppError) {
-      return Center(child: Text('Erro: ${(state as AppError).message}', style: const TextStyle(color: ThemeColors.danger)));
+      return Center(
+        child: Text(
+          'Erro: ${(state as AppError).message}',
+          style: const TextStyle(color: ThemeColors.danger),
+        ),
+      );
     }
 
     final data = state.data ?? [];
@@ -202,7 +237,10 @@ class _CashPageState extends ConsumerState<CashPage> {
       return Container(
         padding: const EdgeInsets.all(40),
         alignment: Alignment.center,
-        child: Text('Nenhuma movimentação registrada neste caixa.', style: TextStyle(color: isDark ? Colors.white30 : Colors.grey)),
+        child: Text(
+          'Nenhuma movimentação registrada neste caixa.',
+          style: TextStyle(color: isDark ? Colors.white30 : Colors.grey),
+        ),
       );
     }
 
@@ -221,7 +259,11 @@ class _CashPageState extends ConsumerState<CashPage> {
           cells: [
             Text(mv.time),
             AppStatusChip(
-              label: mv.type == 'withdraw' ? 'SANGRIA' : (mv.type == 'supply' ? 'SUPRIMENTO' : mv.type.toUpperCase()),
+              label: mv.type == 'withdraw'
+                  ? 'SANGRIA'
+                  : (mv.type == 'supply'
+                        ? 'SUPRIMENTO'
+                        : mv.type.toUpperCase()),
               type: isInput ? AppStatusType.success : AppStatusType.danger,
             ),
             Text(mv.description),
@@ -242,12 +284,23 @@ class _CashPageState extends ConsumerState<CashPage> {
   void _showMovementDialog(BuildContext context, String type) {
     _amountController.clear();
     _descriptionController.clear();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: ThemeColors.darkBg,
-        title: Text(type == 'withdraw' ? 'Registrar Sangria (Retirada)' : 'Registrar Suprimento (Troco)', style: const TextStyle(color: Colors.white, fontSize: 16)),
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        title: Text(
+          type == 'withdraw'
+              ? 'Registrar Sangria (Retirada)'
+              : 'Registrar Suprimento (Troco)',
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -266,7 +319,10 @@ class _CashPageState extends ConsumerState<CashPage> {
         ),
         actions: [
           TextButton(
-            child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            ),
             onPressed: () => Navigator.pop(ctx),
           ),
           AppButton(
@@ -274,10 +330,14 @@ class _CashPageState extends ConsumerState<CashPage> {
             onPressed: () {
               final val = double.tryParse(_amountController.text) ?? 0.0;
               if (val > 0) {
-                ref.read(cashControllerProvider.notifier).registerMovement(
+                ref
+                    .read(cashControllerProvider.notifier)
+                    .registerMovement(
                       type,
                       val,
-                      _descriptionController.text.isNotEmpty ? _descriptionController.text : 'Movimentação manual de $type',
+                      _descriptionController.text.isNotEmpty
+                          ? _descriptionController.text
+                          : 'Movimentação manual de $type',
                     );
                 Navigator.pop(ctx);
               }
@@ -288,8 +348,13 @@ class _CashPageState extends ConsumerState<CashPage> {
     );
   }
 
-  void _showCloseCashDialog(BuildContext context, CashShift cash, AppState<List<CashMovement>> movementsState) {
+  void _showCloseCashDialog(
+    BuildContext context,
+    CashShift cash,
+    AppState<List<CashMovement>> movementsState,
+  ) {
     final reportController = TextEditingController();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Calculate sum dynamically from state if available
     double moneyEntries = 0.0;
@@ -308,8 +373,16 @@ class _CashPageState extends ConsumerState<CashPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: ThemeColors.darkBg,
-        title: const Text('Confirmar Fechamento de Caixa', style: TextStyle(color: Colors.white, fontSize: 16)),
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        title: Text(
+          'Confirmar Fechamento de Caixa',
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         content: SizedBox(
           width: 400,
           child: Column(
@@ -318,30 +391,75 @@ class _CashPageState extends ConsumerState<CashPage> {
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: ThemeColors.surface, borderRadius: BorderRadius.circular(8)),
+                decoration: BoxDecoration(
+                  color: isDark ? ThemeColors.darkBg : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: Column(
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Saldo Inicial de Abertura', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                        Text('R\$ ${cash.initialBalance.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                        Text(
+                          'Saldo Inicial de Abertura',
+                          style: TextStyle(
+                            color: isDark ? Colors.grey : Colors.grey.shade600,
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          'R\$ ${cash.initialBalance.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 6),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Total de Movimentações em Dinheiro', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                        Text('R\$ ${moneyEntries.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 12)),
+                        Text(
+                          'Total de Movimentações em Dinheiro',
+                          style: TextStyle(
+                            color: isDark ? Colors.grey : Colors.grey.shade600,
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          'R\$ ${moneyEntries.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
-                    const Divider(),
+                    Divider(
+                      color: isDark ? Colors.white10 : Colors.grey.shade300,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Saldo de Caixa Esperado', style: TextStyle(color: ThemeColors.primary, fontWeight: FontWeight.bold, fontSize: 14)),
-                        Text('R\$ ${totalExpected.toStringAsFixed(2)}', style: const TextStyle(color: ThemeColors.primary, fontWeight: FontWeight.bold, fontSize: 14)),
+                        const Text(
+                          'Saldo de Caixa Esperado',
+                          style: TextStyle(
+                            color: ThemeColors.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          'R\$ ${totalExpected.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            color: ThemeColors.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -358,14 +476,19 @@ class _CashPageState extends ConsumerState<CashPage> {
         ),
         actions: [
           TextButton(
-            child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            ),
             onPressed: () => Navigator.pop(ctx),
           ),
           AppButton(
             label: 'Confirmar Fechamento',
             onPressed: () {
               final reported = double.tryParse(reportController.text) ?? 0.0;
-              ref.read(cashControllerProvider.notifier).close(totalExpected, reported);
+              ref
+                  .read(cashControllerProvider.notifier)
+                  .close(totalExpected, reported);
               Navigator.pop(ctx);
             },
           ),

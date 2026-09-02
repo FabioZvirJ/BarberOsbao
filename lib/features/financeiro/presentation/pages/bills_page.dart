@@ -189,13 +189,19 @@ class _BillsPageState extends ConsumerState<BillsPage> {
 
   void _showCreateBillDialog(BuildContext context) {
     _billNameController.clear();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: ThemeColors.darkBg,
-        title: const Text(
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        title: Text(
           'Abrir Nova Comanda',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: AppInput(
           label: 'Nome do Cliente / Identificador',
@@ -204,7 +210,7 @@ class _BillsPageState extends ConsumerState<BillsPage> {
         ),
         actions: [
           TextButton(
-            child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
+            child: Text('Cancelar', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54)),
             onPressed: () => Navigator.pop(ctx),
           ),
           AppButton(
@@ -298,11 +304,18 @@ class _CheckoutBillDialogState extends ConsumerState<_CheckoutBillDialog> {
     final cashAmount = double.tryParse(_cashController.text) ?? 0.0;
     final totalPaid = pixAmount + cardAmount + cashAmount;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return AlertDialog(
-      backgroundColor: ThemeColors.darkBg,
+      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       title: Text(
         'Fechar Comanda: ${widget.bill.clientName}',
-        style: const TextStyle(color: Colors.white, fontSize: 16),
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       content: SizedBox(
         width: 450,
@@ -315,7 +328,7 @@ class _CheckoutBillDialogState extends ConsumerState<_CheckoutBillDialog> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: ThemeColors.surface,
+                  color: isDark ? ThemeColors.darkBg : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -326,22 +339,22 @@ class _CheckoutBillDialogState extends ConsumerState<_CheckoutBillDialog> {
                         children: [
                           Text(
                             '${it.quantity}x ${it.name}',
-                            style: const TextStyle(
-                              color: Colors.white70,
+                            style: TextStyle(
+                              color: isDark ? Colors.white70 : Colors.black87,
                               fontSize: 12,
                             ),
                           ),
                           Text(
                             'R\$ ${it.total.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              color: Colors.white70,
+                            style: TextStyle(
+                              color: isDark ? Colors.white70 : Colors.black87,
                               fontSize: 12,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Divider(),
+                    Divider(color: isDark ? Colors.white10 : Colors.grey.shade300),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -616,11 +629,18 @@ class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
       }
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return AlertDialog(
-      backgroundColor: ThemeColors.darkBg,
+      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       title: Text(
         'Lançar na comanda de ${widget.bill.clientName}',
-        style: const TextStyle(color: Colors.white, fontSize: 16),
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       content: SizedBox(
         width: 400,
@@ -637,7 +657,7 @@ class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
                     labelStyle: TextStyle(
                       color: _selectedType == 'service'
                           ? Colors.black
-                          : Colors.white,
+                          : (isDark ? Colors.white70 : Colors.black87),
                       fontWeight: FontWeight.bold,
                     ),
                     onSelected: (selected) {
@@ -659,7 +679,7 @@ class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
                     labelStyle: TextStyle(
                       color: _selectedType == 'product'
                           ? Colors.black
-                          : Colors.white,
+                          : (isDark ? Colors.white70 : Colors.black87),
                       fontWeight: FontWeight.bold,
                     ),
                     onSelected: (selected) {
@@ -677,12 +697,26 @@ class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               key: ValueKey('item_$_selectedType'),
-              dropdownColor: ThemeColors.darkBg,
-              decoration: const InputDecoration(
+              dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+              decoration: InputDecoration(
                 labelText: 'Selecione o item',
-                labelStyle: TextStyle(color: Colors.grey),
+                labelStyle: TextStyle(color: isDark ? Colors.grey : Colors.grey.shade600),
+                filled: true,
+                fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                  ),
+                ),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: isDark ? Colors.white : Colors.black87),
               initialValue: _selectedItemId,
               items: itemsToSelect,
               onChanged: (val) => setState(() => _selectedItemId = val),
@@ -690,12 +724,26 @@ class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
             const SizedBox(height: 12),
             if (_selectedType == 'service') ...[
               DropdownButtonFormField<String>(
-                dropdownColor: ThemeColors.darkBg,
-                decoration: const InputDecoration(
+                dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                decoration: InputDecoration(
                   labelText: 'Barbeiro Responsável',
-                  labelStyle: TextStyle(color: Colors.grey),
+                  labelStyle: TextStyle(color: isDark ? Colors.grey : Colors.grey.shade600),
+                  filled: true,
+                  fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                    ),
+                  ),
                 ),
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                 initialValue: _selectedProfessionalId,
                 items: professionalsToSelect,
                 onChanged: (val) =>
@@ -706,27 +754,27 @@ class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Quantidade:',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                 ),
                 Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.remove, color: Colors.white),
+                      icon: Icon(Icons.remove, color: isDark ? Colors.white : Colors.black87),
                       onPressed: _quantity > 1
                           ? () => setState(() => _quantity--)
                           : null,
                     ),
                     Text(
                       '$_quantity',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black87,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.add, color: Colors.white),
+                      icon: Icon(Icons.add, color: isDark ? Colors.white : Colors.black87),
                       onPressed: () => setState(() => _quantity++),
                     ),
                   ],
@@ -738,7 +786,7 @@ class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
       ),
       actions: [
         TextButton(
-          child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
+          child: Text('Cancelar', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54)),
           onPressed: () => Navigator.pop(context),
         ),
         AppButton(

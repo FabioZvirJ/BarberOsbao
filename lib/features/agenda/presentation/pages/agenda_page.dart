@@ -175,7 +175,7 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                       ),
                       const SizedBox(width: 6),
                       DropdownButton<String>(
-                        dropdownColor: ThemeColors.darkBg,
+                        dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
                         value: _selectedBarber,
                         underline: const SizedBox(),
                         style: TextStyle(
@@ -205,7 +205,7 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                       ),
                       const SizedBox(width: 6),
                       DropdownButton<String>(
-                        dropdownColor: ThemeColors.darkBg,
+                        dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
                         value: _selectedStatus,
                         underline: const SizedBox(),
                         style: TextStyle(
@@ -504,25 +504,31 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
   }
 
   void _showDetailDialog(BuildContext context, Agendamento apt) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: ThemeColors.darkBg,
-        title: const Text(
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        title: Text(
           'Detalhes do Agendamento',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDetailRow('Cliente:', apt.clientName),
-            _buildDetailRow('Barbeiro:', apt.barberName),
-            _buildDetailRow('Serviços:', apt.services),
-            _buildDetailRow('Data:', apt.date.split('-').reversed.join('/')),
-            _buildDetailRow('Horário:', apt.time),
-            _buildDetailRow('Valor:', 'R\$ ${apt.price.toStringAsFixed(2)}'),
-            _buildDetailRow('Status:', apt.status.toUpperCase()),
+            _buildDetailRow('Cliente:', apt.clientName, isDark),
+            _buildDetailRow('Barbeiro:', apt.barberName, isDark),
+            _buildDetailRow('Serviços:', apt.services, isDark),
+            _buildDetailRow('Data:', apt.date.split('-').reversed.join('/'), isDark),
+            _buildDetailRow('Horário:', apt.time, isDark),
+            _buildDetailRow('Valor:', 'R\$ ${apt.price.toStringAsFixed(2)}', isDark),
+            _buildDetailRow('Status:', apt.status.toUpperCase(), isDark),
             const SizedBox(height: 12),
             const Text(
               'Observações:',
@@ -535,7 +541,10 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
             const SizedBox(height: 4),
             Text(
               apt.notes.isNotEmpty ? apt.notes : 'Sem observações adicionais.',
-              style: const TextStyle(color: Colors.white70, fontSize: 13),
+              style: TextStyle(
+                color: isDark ? Colors.white70 : Colors.black87,
+                fontSize: 13,
+              ),
             ),
           ],
         ),
@@ -552,7 +561,7 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String label, String value, [bool isDark = true]) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
@@ -569,7 +578,11 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(color: Colors.white, fontSize: 13),
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black87,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -699,18 +712,24 @@ class _AppointmentFormDialogState
   @override
   Widget build(BuildContext context) {
     final appointment = widget.appointment;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AlertDialog(
-      backgroundColor: ThemeColors.darkBg,
+      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       title: Text(
         appointment == null ? 'Novo Agendamento' : 'Editar Agendamento',
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (_conflictError != null) ...[
                 Container(
@@ -745,17 +764,41 @@ class _AppointmentFormDialogState
                   ),
                 ),
               ],
+              Text(
+                'Cliente',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 6),
               DropdownButtonFormField<String>(
-                dropdownColor: ThemeColors.darkBg,
+                dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
                 initialValue: _selectedClient,
-                decoration: const InputDecoration(
-                  labelText: 'Cliente',
-                  labelStyle: TextStyle(color: Colors.white70),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white30),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                      width: 1.0,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                      width: 1.0,
+                    ),
                   ),
                 ),
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 14,
+                ),
                 items: _clients
                     .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                     .toList(),
@@ -767,64 +810,122 @@ class _AppointmentFormDialogState
               Row(
                 children: [
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      dropdownColor: ThemeColors.darkBg,
-                      initialValue: _selectedBarber,
-                      decoration: const InputDecoration(
-                        labelText: 'Barbeiro',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Barbeiro',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
                         ),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                      items: _barbers
-                          .map(
-                            (b) => DropdownMenuItem(value: b, child: Text(b)),
-                          )
-                          .toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() {
-                            _selectedBarber = val;
-                            _conflictError = null;
-                          });
-                        }
-                      },
+                        const SizedBox(height: 6),
+                        DropdownButtonFormField<String>(
+                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          initialValue: _selectedBarber,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                          ),
+                          items: _barbers
+                              .map(
+                                (b) => DropdownMenuItem(value: b, child: Text(b)),
+                              )
+                              .toList(),
+                          onChanged: (val) {
+                            if (val != null) {
+                              setState(() {
+                                _selectedBarber = val;
+                                _conflictError = null;
+                              });
+                            }
+                          },
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      dropdownColor: ThemeColors.darkBg,
-                      initialValue: _selectedService,
-                      decoration: const InputDecoration(
-                        labelText: 'Serviço Principal',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Serviço Principal',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
                         ),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                      items: _services
-                          .map(
-                            (s) => DropdownMenuItem(value: s, child: Text(s)),
-                          )
-                          .toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() {
-                            _selectedService = val;
-                            if (val.contains('Combo')) {
-                              _priceController.text = '70.00';
-                            } else if (val.contains('Barba')) {
-                              _priceController.text = '35.00';
-                            } else {
-                              _priceController.text = '45.00';
+                        const SizedBox(height: 6),
+                        DropdownButtonFormField<String>(
+                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          initialValue: _selectedService,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                          ),
+                          items: _services
+                              .map(
+                                (s) => DropdownMenuItem(value: s, child: Text(s)),
+                              )
+                              .toList(),
+                          onChanged: (val) {
+                            if (val != null) {
+                              setState(() {
+                                _selectedService = val;
+                                if (val.contains('Combo')) {
+                                  _priceController.text = '70.00';
+                                } else if (val.contains('Barba')) {
+                                  _priceController.text = '35.00';
+                                } else {
+                                  _priceController.text = '45.00';
+                                }
+                              });
                             }
-                          });
-                        }
-                      },
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -874,38 +975,67 @@ class _AppointmentFormDialogState
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      dropdownColor: ThemeColors.darkBg,
-                      initialValue: _status,
-                      decoration: const InputDecoration(
-                        labelText: 'Status',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Status',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
                         ),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'pending',
-                          child: Text('Pendente'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'confirmed',
-                          child: Text('Confirmado'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'completed',
-                          child: Text('Finalizado'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'cancelled',
-                          child: Text('Cancelado'),
+                        const SizedBox(height: 6),
+                        DropdownButtonFormField<String>(
+                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          initialValue: _status,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'pending',
+                              child: Text('Pendente'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'confirmed',
+                              child: Text('Confirmado'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'completed',
+                              child: Text('Finalizado'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'cancelled',
+                              child: Text('Cancelado'),
+                            ),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) setState(() => _status = val);
+                          },
                         ),
                       ],
-                      onChanged: (val) {
-                        if (val != null) setState(() => _status = val);
-                      },
                     ),
                   ),
                 ],
@@ -924,13 +1054,16 @@ class _AppointmentFormDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text(
+          child: Text(
             'Cancelar',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
           ),
         ),
         ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.primary),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ThemeColors.primary,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
               final targetDate = _dateController.text.trim();

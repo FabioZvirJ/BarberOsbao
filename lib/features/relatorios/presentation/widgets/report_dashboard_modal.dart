@@ -657,8 +657,11 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
           }
         });
 
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+
         return AlertDialog(
-          backgroundColor: ThemeColors.darkBg,
+          backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -666,7 +669,10 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
               const SizedBox(height: 16),
               Text(
                 'Gerando arquivo executivo $format...',
-                style: const TextStyle(color: Colors.white, fontSize: 13),
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 13,
+                ),
               ),
             ],
           ),

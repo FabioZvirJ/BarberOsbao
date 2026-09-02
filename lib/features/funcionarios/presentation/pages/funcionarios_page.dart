@@ -293,29 +293,38 @@ class _FuncionariosPageState extends ConsumerState<FuncionariosPage> {
   }
 
   void _showDeleteDialog(BuildContext context, Funcionario employee) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: ThemeColors.darkBg,
-        title: const Text(
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        title: Text(
           'Excluir Funcionário',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: Text(
           'Tem certeza que deseja excluir o profissional "${employee.name}"? Isso apagará seu histórico de comissões.',
-          style: const TextStyle(color: Colors.white70),
+          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
+            child: Text(
               'Cancelar',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: ThemeColors.danger,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
             ),
             onPressed: () {
               ref
@@ -331,10 +340,13 @@ class _FuncionariosPageState extends ConsumerState<FuncionariosPage> {
   }
 
   void _showAgendaDialog(BuildContext context, Funcionario employee) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: ThemeColors.darkBg,
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         title: Row(
           children: [
             AppAvatar(url: employee.avatarUrl, size: 36),
@@ -345,7 +357,11 @@ class _FuncionariosPageState extends ConsumerState<FuncionariosPage> {
                 children: [
                   Text(
                     'Agenda de ${employee.name}',
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     employee.cargo,
@@ -371,9 +387,9 @@ class _FuncionariosPageState extends ConsumerState<FuncionariosPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              const ListTile(
+              ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Text(
+                leading: const Text(
                   '09:00',
                   style: TextStyle(
                     color: ThemeColors.primary,
@@ -382,17 +398,20 @@ class _FuncionariosPageState extends ConsumerState<FuncionariosPage> {
                 ),
                 title: Text(
                   'João Silva',
-                  style: TextStyle(color: Colors.white, fontSize: 13),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 13,
+                  ),
                 ),
-                subtitle: Text(
+                subtitle: const Text(
                   'Corte + Barba - Confirmado',
                   style: TextStyle(color: Colors.grey, fontSize: 11),
                 ),
               ),
-              const Divider(color: Colors.white10),
-              const ListTile(
+              Divider(color: isDark ? Colors.white10 : Colors.grey.shade200),
+              ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Text(
+                leading: const Text(
                   '10:30',
                   style: TextStyle(
                     color: ThemeColors.primary,
@@ -400,41 +419,38 @@ class _FuncionariosPageState extends ConsumerState<FuncionariosPage> {
                   ),
                 ),
                 title: Text(
-                  'Carlos Oliveira',
-                  style: TextStyle(color: Colors.white, fontSize: 13),
+                  'Lucas Ferreira',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 13,
+                  ),
                 ),
-                subtitle: Text(
-                  'Corte Degradê - Confirmado',
+                subtitle: const Text(
+                  'Corte Degradê Navalhado',
                   style: TextStyle(color: Colors.grey, fontSize: 11),
                 ),
               ),
-              const Divider(color: Colors.white10),
-              const ListTile(
+              Divider(color: isDark ? Colors.white10 : Colors.grey.shade200),
+              ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Text(
-                  '14:30',
+                leading: const Text(
+                  '14:00',
                   style: TextStyle(
                     color: ThemeColors.primary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 title: Text(
-                  'Pedro Almeida',
-                  style: TextStyle(color: Colors.white, fontSize: 13),
+                  'Rafael Costa',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 13,
+                  ),
                 ),
-                subtitle: Text(
-                  'Corte + Barba + Sobrancelha - Pendente',
+                subtitle: const Text(
+                  'Barboterapia Completa',
                   style: TextStyle(color: Colors.grey, fontSize: 11),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Horário de Trabalho: ${employee.horarioTrabalho}',
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
-              ),
-              Text(
-                'Dias de Trabalho: ${employee.diasDisponiveis.join(", ")}',
-                style: const TextStyle(color: Colors.white54, fontSize: 11),
               ),
             ],
           ),
@@ -480,7 +496,7 @@ class _FuncionarioFormDialogState
   late List<String> _selectedFolgas;
   late bool _active;
 
-  final _weekDays = const [
+  final _weekDays = [
     'Segunda',
     'Terça',
     'Quarta',
@@ -493,29 +509,29 @@ class _FuncionarioFormDialogState
   @override
   void initState() {
     super.initState();
-    final emp = widget.employee;
-    _nameController = TextEditingController(text: emp?.name ?? '');
-    _cargoController = TextEditingController(text: emp?.cargo ?? '');
-    _phoneController = TextEditingController(text: emp?.phone ?? '');
-    _emailController = TextEditingController(text: emp?.email ?? '');
-    _cpfController = TextEditingController(text: emp?.cpf ?? '');
+    final f = widget.employee;
+    _nameController = TextEditingController(text: f?.name ?? '');
+    _cargoController = TextEditingController(text: f?.cargo ?? '');
+    _phoneController = TextEditingController(text: f?.phone ?? '');
+    _emailController = TextEditingController(text: f?.email ?? '');
+    _cpfController = TextEditingController(text: f?.cpf ?? '');
     _specialtiesController = TextEditingController(
-      text: emp?.specialties.join(", ") ?? '',
+      text: f?.specialties.join(", ") ?? '',
     );
     _commissionRateController = TextEditingController(
-      text: emp != null ? (emp.commissionRate * 100).toStringAsFixed(0) : '30',
+      text: f != null ? (f.commissionRate * 100).toStringAsFixed(0) : '30',
     );
     _horarioController = TextEditingController(
-      text: emp?.horarioTrabalho ?? '09:00 - 18:00',
+      text: f?.horarioTrabalho ?? '09:00 - 18:00',
     );
-    _avatarUrlController = TextEditingController(text: emp?.avatarUrl ?? '');
+    _avatarUrlController = TextEditingController(text: f?.avatarUrl ?? '');
 
     _selectedDays = List.from(
-      emp?.diasDisponiveis ??
+      f?.diasDisponiveis ??
           ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
     );
-    _selectedFolgas = List.from(emp?.folgas ?? ['Domingo']);
-    _active = emp?.status ?? true;
+    _selectedFolgas = List.from(f?.folgas ?? ['Domingo']);
+    _active = f?.status ?? true;
   }
 
   @override
@@ -535,12 +551,17 @@ class _FuncionarioFormDialogState
   @override
   Widget build(BuildContext context) {
     final employee = widget.employee;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AlertDialog(
-      backgroundColor: ThemeColors.darkBg,
+      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       title: Text(
         employee == null ? 'Cadastrar Funcionário' : 'Editar Funcionário',
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       content: SingleChildScrollView(
         child: Form(
@@ -628,10 +649,10 @@ class _FuncionarioFormDialogState
                 controller: _avatarUrlController,
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Dias Disponíveis',
                 style: TextStyle(
-                  color: Colors.white70,
+                  color: isDark ? Colors.white70 : Colors.black87,
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
                 ),
@@ -646,13 +667,28 @@ class _FuncionarioFormDialogState
                     label: Text(
                       day,
                       style: TextStyle(
-                        color: isSelected ? Colors.black : Colors.white,
+                        color: isSelected
+                            ? Colors.black
+                            : (isDark ? Colors.white70 : Colors.black87),
                         fontSize: 11,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
                     ),
                     selected: isSelected,
                     selectedColor: ThemeColors.primary,
-                    backgroundColor: ThemeColors.darkSurface,
+                    backgroundColor: isDark
+                        ? ThemeColors.darkBg
+                        : Colors.grey.shade100,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                      side: BorderSide(
+                        color: isDark
+                            ? ThemeColors.darkBorder
+                            : Colors.grey.shade300,
+                      ),
+                    ),
                     onSelected: (val) {
                       setState(() {
                         if (val) {
@@ -669,9 +705,12 @@ class _FuncionarioFormDialogState
               ),
               const SizedBox(height: 16),
               SwitchListTile(
-                title: const Text(
+                title: Text(
                   'Funcionário Ativo',
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                  style: TextStyle(
+                    color: isDark ? Colors.white70 : Colors.black87,
+                    fontSize: 14,
+                  ),
                 ),
                 value: _active,
                 activeThumbColor: ThemeColors.primary,
@@ -684,13 +723,18 @@ class _FuncionarioFormDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text(
+          child: Text(
             'Cancelar',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
           ),
         ),
         ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.primary),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ThemeColors.primary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
               final specs = _specialtiesController.text
@@ -734,7 +778,10 @@ class _FuncionarioFormDialogState
               Navigator.of(context).pop();
             }
           },
-          child: const Text('Salvar', style: TextStyle(color: Colors.black)),
+          child: const Text(
+            'Salvar',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );

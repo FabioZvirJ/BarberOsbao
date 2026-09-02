@@ -253,17 +253,15 @@ class RelatoriosPage extends ConsumerWidget {
         });
 
         return AlertDialog(
-          backgroundColor: ThemeColors.darkBg,
-          content: Column(
+          backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
             mainAxisSize: MainAxisSize.min,
             children: [
               const CircularProgressIndicator(color: ThemeColors.primary),
               const SizedBox(height: 16),
               Text(
                 'Compilando base de dados para $format...',
-                style: const TextStyle(color: Colors.white, fontSize: 13),
-                textAlign: TextAlign.center,
-              ),
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
             ],
           ),
         );

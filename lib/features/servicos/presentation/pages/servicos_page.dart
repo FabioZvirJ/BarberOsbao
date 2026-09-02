@@ -308,29 +308,36 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
   }
 
   void _showDeleteDialog(BuildContext context, Servico service) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: ThemeColors.darkBg,
-        title: const Text(
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        title: Text(
           'Excluir Serviço',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         content: Text(
           'Tem certeza que deseja excluir o serviço "${service.name}"? Clientes não conseguirão mais agendá-lo.',
-          style: const TextStyle(color: Colors.white70),
+          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
+            child: Text(
               'Cancelar',
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: ThemeColors.danger,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
             ),
             onPressed: () {
               ref
@@ -357,6 +364,7 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
     );
   }
 }
+
 
 class _ServicoFormDialog extends ConsumerStatefulWidget {
   final List<String> categories;
@@ -418,12 +426,17 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
   @override
   Widget build(BuildContext context) {
     final service = widget.service;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AlertDialog(
-      backgroundColor: ThemeColors.darkBg,
+      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       title: Text(
         service == null ? 'Criar Serviço' : 'Editar Serviço',
-        style: const TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       content: SingleChildScrollView(
         child: Form(
@@ -442,25 +455,54 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
               Row(
                 children: [
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      dropdownColor: ThemeColors.darkBg,
-                      initialValue: _category,
-                      decoration: const InputDecoration(
-                        labelText: 'Categoria',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Categoria',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
                         ),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                      items: widget.categories
-                          .map(
-                            (c) => DropdownMenuItem(value: c, child: Text(c)),
-                          )
-                          .toList(),
-                      onChanged: (val) {
-                        if (val != null) setState(() => _category = val);
-                      },
+                        const SizedBox(height: 6),
+                        DropdownButtonFormField<String>(
+                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          initialValue: _category,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                          ),
+                          items: widget.categories
+                              .map(
+                                (c) => DropdownMenuItem(value: c, child: Text(c)),
+                              )
+                              .toList(),
+                          onChanged: (val) {
+                            if (val != null) setState(() => _category = val);
+                          },
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -495,43 +537,72 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      dropdownColor: ThemeColors.darkBg,
-                      initialValue: _colorHex,
-                      decoration: const InputDecoration(
-                        labelText: 'Cor do Card',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Cor do Card',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
                         ),
-                      ),
-                      style: const TextStyle(color: Colors.white),
-                      items: _colorOptions
-                          .map(
-                            (c) => DropdownMenuItem(
-                              value: c['hex'],
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 12,
-                                    height: 12,
-                                    decoration: BoxDecoration(
-                                      color: Color(
-                                        int.parse('FF${c['hex']!}', radix: 16),
-                                      ),
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(c['name']!),
-                                ],
+                        const SizedBox(height: 6),
+                        DropdownButtonFormField<String>(
+                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          initialValue: _colorHex,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
                               ),
                             ),
-                          )
-                          .toList(),
-                      onChanged: (val) {
-                        if (val != null) setState(() => _colorHex = val);
-                      },
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.black87,
+                            fontSize: 14,
+                          ),
+                          items: _colorOptions
+                              .map(
+                                (c) => DropdownMenuItem(
+                                  value: c['hex'],
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 12,
+                                        height: 12,
+                                        decoration: BoxDecoration(
+                                          color: Color(
+                                            int.parse('FF${c['hex']!}', radix: 16),
+                                          ),
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(c['name']!),
+                                    ],
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (val) {
+                            if (val != null) setState(() => _colorHex = val);
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -551,9 +622,12 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
               ),
               const SizedBox(height: 12),
               SwitchListTile(
-                title: const Text(
+                title: Text(
                   'Serviço Ativo',
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                  style: TextStyle(
+                    color: isDark ? Colors.white70 : Colors.black87,
+                    fontSize: 14,
+                  ),
                 ),
                 value: _status,
                 activeThumbColor: ThemeColors.primary,
@@ -566,16 +640,19 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text(
+          child: Text(
             'Cancelar',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
           ),
         ),
         ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.primary),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ThemeColors.primary,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
-              final newSrv = Servico(
+              final newServico = Servico(
                 id: service?.id ?? '',
                 name: _nameController.text.trim(),
                 category: _category,
@@ -585,7 +662,7 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
                     int.tryParse(_durationController.text.trim()) ?? 30,
                 imageUrl: _imageUrlController.text.isNotEmpty
                     ? _imageUrlController.text.trim()
-                    : 'https://images.unsplash.com/photo-1621605815971-fbc98d665033?q=80&width=150',
+                    : 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&width=150',
                 colorHex: _colorHex,
                 status: _status,
               );
@@ -593,16 +670,16 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
               if (service == null) {
                 ref
                     .read(servicosControllerProvider.notifier)
-                    .addServico(newSrv);
+                    .addServico(newServico);
               } else {
                 ref
                     .read(servicosControllerProvider.notifier)
-                    .editServico(newSrv);
+                    .editServico(newServico);
               }
               Navigator.of(context).pop();
             }
           },
-          child: const Text('Salvar', style: TextStyle(color: Colors.black)),
+          child: const Text('Salvar', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         ),
       ],
     );
