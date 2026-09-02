@@ -60,28 +60,31 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
       constraints: const BoxConstraints(maxWidth: 1100, maxHeight: 850),
       decoration: BoxDecoration(
         color: isDark ? ThemeColors.darkBg : Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
-          width: 1.5,
+          color: isDark ? const Color(0xFF2A2A2A) : Colors.grey.shade300,
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
+            color: Colors.black.withValues(alpha: 0.4),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(8),
         child: Scaffold(
           backgroundColor: isDark ? ThemeColors.darkBg : Colors.grey.shade50,
           body: Column(
             children: [
               // 1. Header Bar
               _buildHeader(context, title, desc, color, isDark),
-              const Divider(height: 1),
+              Divider(
+                height: 1,
+                color: isDark ? const Color(0xFF2A2A2A) : Colors.grey.shade200,
+              ),
 
               // 2. Scrollable Dashboard Body
               Expanded(
@@ -134,20 +137,20 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
     bool isDark,
   ) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       color: isDark ? ThemeColors.darkSurface : Colors.white,
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color.withValues(alpha: 0.3)),
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: color.withValues(alpha: 0.25)),
             ),
-            child: Icon(widget.icon, color: color, size: 24),
+            child: Icon(widget.icon, color: color, size: 22),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,8 +160,9 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
                     Text(
                       title,
                       style: const TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        letterSpacing: -0.3,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -168,8 +172,8 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: ThemeColors.success.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(6),
+                        color: ThemeColors.success.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
@@ -184,7 +188,7 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
                             'Dados em Tempo Real',
                             style: TextStyle(
                               fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w600,
                               color: ThemeColors.success,
                             ),
                           ),
@@ -193,7 +197,7 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
                   desc,
                   style: TextStyle(
@@ -210,14 +214,25 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
               OutlinedButton.icon(
                 icon: const Icon(
                   Icons.picture_as_pdf,
-                  size: 16,
-                  color: Colors.red,
+                  size: 15,
+                  color: Colors.redAccent,
                 ),
-                label: const Text('PDF', style: TextStyle(fontSize: 12)),
+                label: const Text(
+                  'PDF',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
-                    vertical: 10,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  side: BorderSide(
+                    color: isDark
+                        ? const Color(0xFF333333)
+                        : Colors.grey.shade300,
                   ),
                 ),
                 onPressed: () => _showExportFeedback(context, title, 'PDF'),
@@ -226,22 +241,38 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
               OutlinedButton.icon(
                 icon: const Icon(
                   Icons.table_chart,
-                  size: 16,
+                  size: 15,
                   color: Colors.green,
                 ),
-                label: const Text('Excel', style: TextStyle(fontSize: 12)),
+                label: const Text(
+                  'Excel',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
-                    vertical: 10,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  side: BorderSide(
+                    color: isDark
+                        ? const Color(0xFF333333)
+                        : Colors.grey.shade300,
                   ),
                 ),
                 onPressed: () =>
                     _showExportFeedback(context, title, 'Excel (XLSX)'),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               IconButton(
-                icon: const Icon(Icons.close),
+                icon: const Icon(Icons.close, size: 20),
+                style: IconButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
                 onPressed: () => Navigator.of(context).pop(),
                 tooltip: 'Fechar',
               ),
@@ -266,37 +297,65 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
       children: [
         Row(
           children: [
-            const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
+            Icon(
+              Icons.calendar_today,
+              size: 14,
+              color: isDark ? Colors.white60 : Colors.black54,
+            ),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               'Período de Análise:',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white70 : Colors.black87,
+              ),
             ),
           ],
         ),
-        Wrap(
-          spacing: 6,
-          children: periods.map((p) {
-            final isSelected = _selectedPeriod == p;
-            return ChoiceChip(
-              label: Text(
-                p,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: isSelected
-                      ? Colors.black
-                      : (isDark ? Colors.white70 : Colors.black87),
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        Container(
+          padding: const EdgeInsets.all(3),
+          decoration: BoxDecoration(
+            color: isDark ? ThemeColors.darkSurface : Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: isDark ? const Color(0xFF2A2A2A) : Colors.grey.shade300,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: periods.map((p) {
+              final isSelected = _selectedPeriod == p;
+              return InkWell(
+                borderRadius: BorderRadius.circular(4),
+                onTap: () => setState(() => _selectedPeriod = p),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? (isDark ? ThemeColors.primary : ThemeColors.primary)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    p,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w500,
+                      color: isSelected
+                          ? Colors.black
+                          : (isDark ? Colors.white70 : Colors.black87),
+                    ),
+                  ),
                 ),
-              ),
-              selected: isSelected,
-              selectedColor: ThemeColors.primary,
-              backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-              onSelected: (val) {
-                if (val) setState(() => _selectedPeriod = p);
-              },
-            );
-          }).toList(),
+              );
+            }).toList(),
+          ),
         ),
       ],
     );
@@ -315,7 +374,7 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
             crossAxisCount: crossCount,
             crossAxisSpacing: 14,
             mainAxisSpacing: 14,
-            mainAxisExtent: 115,
+            mainAxisExtent: 135,
           ),
           itemCount: kpis.length,
           itemBuilder: (context, idx) {
@@ -327,8 +386,8 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
               positiveTrend: (k['positive'] as bool?) ?? true,
               icon: Icon(
                 k['icon'] as IconData? ?? Icons.analytics,
-                size: 20,
-                color: ThemeColors.primary,
+                size: 18,
+                color: isDark ? Colors.white38 : Colors.black38,
               ),
             );
           },

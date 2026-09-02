@@ -34,42 +34,56 @@ class AppStatCard extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white60 : Colors.black45,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.white60 : Colors.black54,
                 ),
               ),
               ?icon,
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Text(
             value,
             style: const TextStyle(
-              fontSize: 26,
+              fontSize: 24,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.5,
             ),
           ),
           if (trendText != null) ...[
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Icon(
-                  positiveTrend ? Icons.arrow_upward : Icons.arrow_downward,
-                  size: 14,
-                  color: positiveTrend ? ThemeColors.success : ThemeColors.danger,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  trendText!,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: positiveTrend ? ThemeColors.success : ThemeColors.danger,
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color:
+                    (positiveTrend ? ThemeColors.success : ThemeColors.danger)
+                        .withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    positiveTrend ? Icons.trending_up : Icons.trending_down,
+                    size: 13,
+                    color: positiveTrend
+                        ? ThemeColors.success
+                        : ThemeColors.danger,
                   ),
-                ),
-              ],
+                  const SizedBox(width: 4),
+                  Text(
+                    trendText!,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: positiveTrend
+                          ? ThemeColors.success
+                          : ThemeColors.danger,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ],
