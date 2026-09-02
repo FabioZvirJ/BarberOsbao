@@ -43,34 +43,35 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
     return AppPage(
       title: 'Clientes',
       userName: 'Fábio Zvir',
-      userAvatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&width=150',
+      userAvatarUrl:
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&width=150',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Responsive toolbar
-          if (isMobile) ...
-            [
-              AppSearchBar(
-                controller: _searchController,
-                placeholder: 'Pesquisar por nome, email ou telefone...',
-                onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
-                onClear: () => setState(() => _searchQuery = ''),
-              ),
-              const SizedBox(height: 10),
-              AppButton(
-                label: 'Novo Cliente',
-                icon: const Icon(Icons.add, size: 16),
-                onPressed: () => _showFormDialog(context),
-              ),
-            ]
-          else
+          if (isMobile) ...[
+            AppSearchBar(
+              controller: _searchController,
+              placeholder: 'Pesquisar por nome, email ou telefone...',
+              onChanged: (val) =>
+                  setState(() => _searchQuery = val.toLowerCase()),
+              onClear: () => setState(() => _searchQuery = ''),
+            ),
+            const SizedBox(height: 10),
+            AppButton(
+              label: 'Novo Cliente',
+              icon: const Icon(Icons.add, size: 16),
+              onPressed: () => _showFormDialog(context),
+            ),
+          ] else
             Row(
               children: [
                 Expanded(
                   child: AppSearchBar(
                     controller: _searchController,
                     placeholder: 'Pesquisar por nome, email ou telefone...',
-                    onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
+                    onChanged: (val) =>
+                        setState(() => _searchQuery = val.toLowerCase()),
                     onClear: () => setState(() => _searchQuery = ''),
                   ),
                 ),
@@ -97,17 +98,30 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
               // Sorting dropdown
               Row(
                 children: [
-                  const Text('Ordenar por: ', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  const Text(
+                    'Ordenar por: ',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
                   const SizedBox(width: 8),
                   DropdownButton<String>(
                     dropdownColor: ThemeColors.darkBg,
                     value: _orderBy,
                     underline: const SizedBox(),
-                    style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 13, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
                     items: const [
                       DropdownMenuItem(value: 'Nome', child: Text('Nome')),
-                      DropdownMenuItem(value: 'Gasto', child: Text('Total Gasto')),
-                      DropdownMenuItem(value: 'Visita', child: Text('Última Visita')),
+                      DropdownMenuItem(
+                        value: 'Gasto',
+                        child: Text('Total Gasto'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Visita',
+                        child: Text('Última Visita'),
+                      ),
                     ],
                     onChanged: (val) {
                       if (val != null) setState(() => _orderBy = val);
@@ -133,14 +147,21 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
     if (state is AppLoading) {
       return const Padding(
         padding: EdgeInsets.all(40.0),
-        child: Center(child: CircularProgressIndicator(color: ThemeColors.primary)),
+        child: Center(
+          child: CircularProgressIndicator(color: ThemeColors.primary),
+        ),
       );
     }
 
     if (state is AppError) {
       return Padding(
         padding: const EdgeInsets.all(40.0),
-        child: Center(child: Text('Erro: ${(state as AppError).message}', style: const TextStyle(color: ThemeColors.danger))),
+        child: Center(
+          child: Text(
+            'Erro: ${(state as AppError).message}',
+            style: const TextStyle(color: ThemeColors.danger),
+          ),
+        ),
       );
     }
 
@@ -149,17 +170,22 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
       return Container(
         padding: const EdgeInsets.all(40),
         alignment: Alignment.center,
-        child: Text('Nenhum cliente cadastrado.', style: TextStyle(color: isDark ? Colors.white30 : Colors.grey)),
+        child: Text(
+          'Nenhum cliente cadastrado.',
+          style: TextStyle(color: isDark ? Colors.white30 : Colors.grey),
+        ),
       );
     }
 
     // Apply filters
     var filtered = data.where((c) {
-      final matchesSearch = c.name.toLowerCase().contains(_searchQuery) ||
+      final matchesSearch =
+          c.name.toLowerCase().contains(_searchQuery) ||
           c.email.toLowerCase().contains(_searchQuery) ||
           c.phone.contains(_searchQuery);
-      
-      final matchesStatus = _selectedStatus == 'Todos' ||
+
+      final matchesStatus =
+          _selectedStatus == 'Todos' ||
           (_selectedStatus == 'Ativos' && c.status == 'active') ||
           (_selectedStatus == 'Inativos' && c.status == 'inactive');
 
@@ -168,7 +194,9 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
 
     // Apply sorting
     if (_orderBy == 'Nome') {
-      filtered.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      filtered.sort(
+        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+      );
     } else if (_orderBy == 'Gasto') {
       filtered.sort((a, b) => b.totalGasto.compareTo(a.totalGasto));
     } else if (_orderBy == 'Visita') {
@@ -179,23 +207,26 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
       return Container(
         padding: const EdgeInsets.all(40),
         alignment: Alignment.center,
-        child: Text('Nenhum cliente correspondente aos filtros.', style: TextStyle(color: isDark ? Colors.white30 : Colors.grey)),
+        child: Text(
+          'Nenhum cliente correspondente aos filtros.',
+          style: TextStyle(color: isDark ? Colors.white30 : Colors.grey),
+        ),
       );
     }
 
     return AppTable(
-      minWidth: 900,
+      minWidth: 1000,
       columns: [
-        AppTableColumn(label: 'FOTO', width: 60),
-        AppTableColumn(label: 'NOME'),
-        AppTableColumn(label: 'TELEFONE'),
-        AppTableColumn(label: 'EMAIL'),
-        AppTableColumn(label: 'NASCIMENTO'),
-        AppTableColumn(label: 'PLANO'),
-        AppTableColumn(label: 'ÚLT. VISITA'),
-        AppTableColumn(label: 'TOTAL GASTO'),
-        AppTableColumn(label: 'STATUS'),
-        AppTableColumn(label: 'AÇÕES', width: 140),
+        AppTableColumn(label: 'FOTO', width: 50),
+        AppTableColumn(label: 'NOME', flex: 3),
+        AppTableColumn(label: 'TELEFONE', width: 130),
+        AppTableColumn(label: 'EMAIL', flex: 2),
+        AppTableColumn(label: 'NASCIMENTO', width: 100),
+        AppTableColumn(label: 'PLANO', width: 100),
+        AppTableColumn(label: 'ÚLT. VISITA', width: 100),
+        AppTableColumn(label: 'TOTAL GASTO', width: 110),
+        AppTableColumn(label: 'STATUS', width: 85),
+        AppTableColumn(label: 'AÇÕES', width: 110),
       ],
       rows: filtered.map((c) {
         return AppTableRow(
@@ -204,11 +235,18 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(c.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  c.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 if (c.observacoes.isNotEmpty)
                   Text(
                     c.observacoes,
-                    style: const TextStyle(fontSize: 10, color: Colors.grey, fontStyle: FontStyle.italic),
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey,
+                      fontStyle: FontStyle.italic,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -220,18 +258,25 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
             Text(
               c.plano,
               style: TextStyle(
-                fontWeight: c.plano != 'Nenhum' ? FontWeight.bold : FontWeight.normal,
+                fontWeight: c.plano != 'Nenhum'
+                    ? FontWeight.bold
+                    : FontWeight.normal,
                 color: c.plano != 'Nenhum' ? ThemeColors.primary : null,
               ),
             ),
             Text(c.ultimaVisita),
             Text(
               'R\$ ${c.totalGasto.toStringAsFixed(2)}',
-              style: const TextStyle(fontWeight: FontWeight.bold, color: ThemeColors.success),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: ThemeColors.success,
+              ),
             ),
             AppStatusChip(
               label: c.status == 'active' ? 'Ativo' : 'Inativo',
-              type: c.status == 'active' ? AppStatusType.success : AppStatusType.danger,
+              type: c.status == 'active'
+                  ? AppStatusType.success
+                  : AppStatusType.danger,
             ),
             Row(
               children: [
@@ -246,7 +291,11 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                   tooltip: 'Editar',
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 18, color: ThemeColors.danger),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    size: 18,
+                    color: ThemeColors.danger,
+                  ),
                   onPressed: () => _showDeleteDialog(context, c),
                   tooltip: 'Excluir',
                 ),
@@ -263,17 +312,30 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: ThemeColors.darkBg,
-        title: const Text('Excluir Cliente', style: TextStyle(color: Colors.white)),
-        content: Text('Tem certeza que deseja excluir o cliente "${customer.name}"? Isso apagará permanentemente o registro comercial.', style: const TextStyle(color: Colors.white70)),
+        title: const Text(
+          'Excluir Cliente',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          'Tem certeza que deseja excluir o cliente "${customer.name}"? Isso apagará permanentemente o registro comercial.',
+          style: const TextStyle(color: Colors.white70),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(color: Colors.white70),
+            ),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.danger),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ThemeColors.danger,
+            ),
             onPressed: () {
-              ref.read(clientesControllerProvider.notifier).removeCliente(customer.id);
+              ref
+                  .read(clientesControllerProvider.notifier)
+                  .removeCliente(customer.id);
               Navigator.of(ctx).pop();
             },
             child: const Text('Excluir', style: TextStyle(color: Colors.white)),
@@ -296,8 +358,14 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(customer.name, style: const TextStyle(color: Colors.white, fontSize: 16)),
-                  Text(customer.email, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                  Text(
+                    customer.name,
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  Text(
+                    customer.email,
+                    style: const TextStyle(color: Colors.grey, fontSize: 11),
+                  ),
                 ],
               ),
             ),
@@ -309,34 +377,72 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Histórico de Visitas Recentes', style: TextStyle(color: ThemeColors.primary, fontWeight: FontWeight.bold, fontSize: 14)),
+              const Text(
+                'Histórico de Visitas Recentes',
+                style: TextStyle(
+                  color: ThemeColors.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
               const SizedBox(height: 16),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.check_circle, color: ThemeColors.success),
-                title: const Text('Corte + Barba (Arthur Santos)', style: TextStyle(color: Colors.white, fontSize: 13)),
-                subtitle: Text('Data: ${customer.ultimaVisita} - R\$ 80.00', style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                leading: const Icon(
+                  Icons.check_circle,
+                  color: ThemeColors.success,
+                ),
+                title: const Text(
+                  'Corte + Barba (Arthur Santos)',
+                  style: TextStyle(color: Colors.white, fontSize: 13),
+                ),
+                subtitle: Text(
+                  'Data: ${customer.ultimaVisita} - R\$ 80.00',
+                  style: const TextStyle(color: Colors.grey, fontSize: 11),
+                ),
               ),
               const Divider(color: Colors.white10),
               const ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(Icons.check_circle, color: ThemeColors.success),
-                title: Text('Corte Degradê (Marcos Silva)', style: TextStyle(color: Colors.white, fontSize: 13)),
-                subtitle: Text('Data: 10/05/2026 - R\$ 45.00', style: TextStyle(color: Colors.grey, fontSize: 11)),
+                title: Text(
+                  'Corte Degradê (Marcos Silva)',
+                  style: TextStyle(color: Colors.white, fontSize: 13),
+                ),
+                subtitle: Text(
+                  'Data: 10/05/2026 - R\$ 45.00',
+                  style: TextStyle(color: Colors.grey, fontSize: 11),
+                ),
               ),
               const Divider(color: Colors.white10),
               const ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: Icon(Icons.check_circle, color: ThemeColors.success),
-                title: Text('Design de Sobrancelha (Gabriel Neves)', style: TextStyle(color: Colors.white, fontSize: 13)),
-                subtitle: Text('Data: 15/04/2026 - R\$ 20.00', style: TextStyle(color: Colors.grey, fontSize: 11)),
+                title: Text(
+                  'Design de Sobrancelha (Gabriel Neves)',
+                  style: TextStyle(color: Colors.white, fontSize: 13),
+                ),
+                subtitle: Text(
+                  'Data: 15/04/2026 - R\$ 20.00',
+                  style: TextStyle(color: Colors.grey, fontSize: 11),
+                ),
               ),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Total Consumido:', style: TextStyle(color: Colors.white70, fontSize: 13)),
-                  Text('R\$ ${customer.totalGasto.toStringAsFixed(2)}', style: const TextStyle(color: ThemeColors.success, fontWeight: FontWeight.bold, fontSize: 15)),
+                  Text(
+                    'Total Consumido:',
+                    style: TextStyle(color: Colors.white70, fontSize: 13),
+                  ),
+                  Text(
+                    'R\$ ${customer.totalGasto.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      color: ThemeColors.success,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -345,7 +451,10 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Fechar', style: TextStyle(color: ThemeColors.primary)),
+            child: const Text(
+              'Fechar',
+              style: TextStyle(color: ThemeColors.primary),
+            ),
           ),
         ],
       ),
@@ -425,7 +534,8 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
                 label: 'Nome Completo',
                 placeholder: 'Ex: João Carlos da Silva',
                 controller: _nameController,
-                validator: (val) => val == null || val.isEmpty ? 'Nome obrigatório' : null,
+                validator: (val) =>
+                    val == null || val.isEmpty ? 'Nome obrigatório' : null,
               ),
               const SizedBox(height: 12),
               Row(
@@ -435,7 +545,9 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
                       label: 'Telefone',
                       placeholder: 'Ex: (11) 99999-9999',
                       controller: _phoneController,
-                      validator: (val) => val == null || val.isEmpty ? 'Telefone obrigatório' : null,
+                      validator: (val) => val == null || val.isEmpty
+                          ? 'Telefone obrigatório'
+                          : null,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -470,14 +582,28 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
                       decoration: const InputDecoration(
                         labelText: 'Plano',
                         labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white30),
+                        ),
                       ),
                       style: const TextStyle(color: Colors.white),
                       items: const [
-                        DropdownMenuItem(value: 'Nenhum', child: Text('Nenhum')),
-                        DropdownMenuItem(value: 'Plano Cavalheiro', child: Text('Plano Cavalheiro')),
-                        DropdownMenuItem(value: 'Plano Barão', child: Text('Plano Barão')),
-                        DropdownMenuItem(value: 'Plano Imperial', child: Text('Plano Imperial')),
+                        DropdownMenuItem(
+                          value: 'Nenhum',
+                          child: Text('Nenhum'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Plano Cavalheiro',
+                          child: Text('Plano Cavalheiro'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Plano Barão',
+                          child: Text('Plano Barão'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Plano Imperial',
+                          child: Text('Plano Imperial'),
+                        ),
                       ],
                       onChanged: (val) {
                         if (val != null) setState(() => _plano = val);
@@ -492,12 +618,17 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
                       decoration: const InputDecoration(
                         labelText: 'Status',
                         labelStyle: TextStyle(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white30)),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white30),
+                        ),
                       ),
                       style: const TextStyle(color: Colors.white),
                       items: const [
                         DropdownMenuItem(value: 'active', child: Text('Ativo')),
-                        DropdownMenuItem(value: 'inactive', child: Text('Inativo')),
+                        DropdownMenuItem(
+                          value: 'inactive',
+                          child: Text('Inativo'),
+                        ),
                       ],
                       onChanged: (val) {
                         if (val != null) setState(() => _status = val);
@@ -520,7 +651,10 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
+          child: const Text(
+            'Cancelar',
+            style: TextStyle(color: Colors.white70),
+          ),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(backgroundColor: ThemeColors.primary),
@@ -543,9 +677,13 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
               );
 
               if (customer == null) {
-                ref.read(clientesControllerProvider.notifier).addCliente(newCli);
+                ref
+                    .read(clientesControllerProvider.notifier)
+                    .addCliente(newCli);
               } else {
-                ref.read(clientesControllerProvider.notifier).editCliente(newCli);
+                ref
+                    .read(clientesControllerProvider.notifier)
+                    .editCliente(newCli);
               }
               Navigator.of(context).pop();
             }

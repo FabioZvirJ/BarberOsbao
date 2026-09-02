@@ -191,14 +191,14 @@ class ClubePage extends ConsumerWidget {
     return AppTable(
       minWidth: 900,
       columns: [
-        AppTableColumn(label: 'IMAGEM', width: 60),
-        AppTableColumn(label: 'RECOMPENSA', width: 220),
-        AppTableColumn(label: 'BENEFÍCIO'),
-        AppTableColumn(label: 'PONTOS REQUERIDOS'),
-        AppTableColumn(label: 'VALIDADE'),
-        AppTableColumn(label: 'STATUS'),
-        AppTableColumn(label: 'ORDENAR', width: 100),
-        AppTableColumn(label: 'AÇÕES', width: 100),
+        AppTableColumn(label: 'IMAGEM', width: 50),
+        AppTableColumn(label: 'RECOMPENSA', flex: 3),
+        AppTableColumn(label: 'BENEFÍCIO', flex: 3),
+        AppTableColumn(label: 'PONTOS REQUERIDOS', width: 140),
+        AppTableColumn(label: 'VALIDADE', width: 100),
+        AppTableColumn(label: 'STATUS', width: 85),
+        AppTableColumn(label: 'ORDENAR', width: 90),
+        AppTableColumn(label: 'AÇÕES', width: 90),
       ],
       rows: data.map((b) {
         final idx = data.indexOf(b);

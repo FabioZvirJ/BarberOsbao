@@ -164,16 +164,16 @@ class _FuncionariosPageState extends ConsumerState<FuncionariosPage> {
     }
 
     return AppTable(
-      minWidth: 900,
+      minWidth: 960,
       columns: [
-        AppTableColumn(label: 'BARBEIRO', width: 200),
-        AppTableColumn(label: 'CARGO'),
-        AppTableColumn(label: 'ESPECIALIDADES'),
-        AppTableColumn(label: 'COMISSÃO'),
-        AppTableColumn(label: 'HORÁRIO'),
-        AppTableColumn(label: 'AVALIAÇÃO'),
-        AppTableColumn(label: 'STATUS'),
-        AppTableColumn(label: 'AÇÕES', width: 140),
+        AppTableColumn(label: 'BARBEIRO', flex: 3),
+        AppTableColumn(label: 'CARGO', flex: 2),
+        AppTableColumn(label: 'ESPECIALIDADES', flex: 3),
+        AppTableColumn(label: 'COMISSÃO', width: 90),
+        AppTableColumn(label: 'HORÁRIO', width: 110),
+        AppTableColumn(label: 'AVALIAÇÃO', width: 90),
+        AppTableColumn(label: 'STATUS', width: 85),
+        AppTableColumn(label: 'AÇÕES', width: 110),
       ],
       rows: filtered.map((f) {
         return AppTableRow(

@@ -133,12 +133,12 @@ class _EstoquePageState extends ConsumerState<EstoquePage> {
       return AppTable(
         minWidth: 700,
         columns: [
-          AppTableColumn(label: 'PRODUTO'),
-          AppTableColumn(label: 'CÓDIGO'),
-          AppTableColumn(label: 'FORNECEDOR'),
-          AppTableColumn(label: 'MÍNIMO'),
-          AppTableColumn(label: 'ATUAL'),
-          AppTableColumn(label: 'AÇÕES', width: 140),
+          AppTableColumn(label: 'PRODUTO', flex: 3),
+          AppTableColumn(label: 'CÓDIGO', width: 110),
+          AppTableColumn(label: 'FORNECEDOR', flex: 2),
+          AppTableColumn(label: 'MÍNIMO', width: 90),
+          AppTableColumn(label: 'ATUAL', width: 90),
+          AppTableColumn(label: 'AÇÕES', width: 130),
         ],
         rows: lowStockItems.map((prod) {
           return AppTableRow(
@@ -214,13 +214,13 @@ class _EstoquePageState extends ConsumerState<EstoquePage> {
     return AppTable(
       minWidth: 800,
       columns: [
-        AppTableColumn(label: 'CÓDIGO MOV.'),
-        AppTableColumn(label: 'PRODUTO'),
-        AppTableColumn(label: 'TIPO'),
-        AppTableColumn(label: 'QTD'),
-        AppTableColumn(label: 'MOTIVO'),
-        AppTableColumn(label: 'DATA'),
-        AppTableColumn(label: 'RESPONSÁVEL'),
+        AppTableColumn(label: 'CÓDIGO MOV.', width: 120),
+        AppTableColumn(label: 'PRODUTO', flex: 3),
+        AppTableColumn(label: 'TIPO', width: 110),
+        AppTableColumn(label: 'QTD', width: 90),
+        AppTableColumn(label: 'MOTIVO', flex: 2),
+        AppTableColumn(label: 'DATA', width: 110),
+        AppTableColumn(label: 'RESPONSÁVEL', width: 140),
       ],
       rows: filtered.map((move) {
         final isEntry = move.type == 'Entrada';

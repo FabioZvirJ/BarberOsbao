@@ -188,15 +188,15 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
     return AppTable(
       minWidth: 900,
       columns: [
-        AppTableColumn(label: 'IMAGEM', width: 60),
-        AppTableColumn(label: 'NOME DO SERVIÇO', width: 220),
-        AppTableColumn(label: 'CATEGORIA'),
-        AppTableColumn(label: 'DURAÇÃO'),
-        AppTableColumn(label: 'PREÇO'),
-        AppTableColumn(label: 'COR'),
-        AppTableColumn(label: 'STATUS'),
-        AppTableColumn(label: 'REORDENAR', width: 100),
-        AppTableColumn(label: 'AÇÕES', width: 100),
+        AppTableColumn(label: 'IMAGEM', width: 50),
+        AppTableColumn(label: 'NOME DO SERVIÇO', flex: 3),
+        AppTableColumn(label: 'CATEGORIA', flex: 2),
+        AppTableColumn(label: 'DURAÇÃO', width: 90),
+        AppTableColumn(label: 'PREÇO', width: 100),
+        AppTableColumn(label: 'COR', width: 60),
+        AppTableColumn(label: 'STATUS', width: 85),
+        AppTableColumn(label: 'REORDENAR', width: 90),
+        AppTableColumn(label: 'AÇÕES', width: 90),
       ],
       rows: filtered.map((s) {
         final idx = data.indexOf(s);

@@ -198,13 +198,13 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
       minWidth: 900,
       columns: [
         AppTableColumn(label: 'IMAGEM', width: 60),
-        AppTableColumn(label: 'PRODUTO', width: 220),
-        AppTableColumn(label: 'MÓDULO/CATEGORIA'),
-        AppTableColumn(label: 'FORNECEDOR'),
-        AppTableColumn(label: 'ESTOQUE'),
-        AppTableColumn(label: 'V. VENDA'),
-        AppTableColumn(label: 'STATUS'),
-        AppTableColumn(label: 'AÇÕES', width: 140),
+        AppTableColumn(label: 'PRODUTO', flex: 3),
+        AppTableColumn(label: 'MÓDULO/CATEGORIA', flex: 2),
+        AppTableColumn(label: 'FORNECEDOR', flex: 2),
+        AppTableColumn(label: 'ESTOQUE', width: 90),
+        AppTableColumn(label: 'V. VENDA', width: 110),
+        AppTableColumn(label: 'STATUS', width: 90),
+        AppTableColumn(label: 'AÇÕES', width: 130),
       ],
       rows: filtered.map((p) {
         final isLowStock = p.stock <= p.minStock;

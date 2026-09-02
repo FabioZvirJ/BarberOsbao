@@ -10,7 +10,7 @@ class AppContainer extends StatelessWidget {
   const AppContainer({
     super.key,
     required this.child,
-    this.maxWidth = 1800.0,
+    this.maxWidth = 1440.0,
     this.padding,
     this.scrollable = true,
   });

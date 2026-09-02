@@ -315,13 +315,13 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
     return AppTable(
       minWidth: 850,
       columns: [
-        AppTableColumn(label: 'DESCRIÇÃO', width: 250),
-        AppTableColumn(label: 'CATEGORIA'),
-        AppTableColumn(label: 'FORMA DE PAG.'),
-        AppTableColumn(label: 'DATA'),
-        AppTableColumn(label: 'TIPO'),
-        AppTableColumn(label: 'VALOR'),
-        AppTableColumn(label: 'STATUS'),
+        AppTableColumn(label: 'DESCRIÇÃO', flex: 3),
+        AppTableColumn(label: 'CATEGORIA', flex: 2),
+        AppTableColumn(label: 'FORMA DE PAG.', flex: 2),
+        AppTableColumn(label: 'DATA', width: 110),
+        AppTableColumn(label: 'TIPO', width: 90),
+        AppTableColumn(label: 'VALOR', width: 120),
+        AppTableColumn(label: 'STATUS', width: 90),
       ],
       rows: filtered.map((entry) {
         final isIncome = entry.type == 'income';

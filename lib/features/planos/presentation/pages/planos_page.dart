@@ -96,13 +96,13 @@ class PlanosPage extends ConsumerWidget {
       builder: (context, constraints) {
         if (AppBreakpoints.isDesktop(context)) {
           return AppTable(
-            minWidth: 1120,
+            minWidth: 960,
             columns: [
-              AppTableColumn(label: 'PLANO', width: 220),
-              AppTableColumn(label: 'VALOR RECORRENTE', width: 150),
+              AppTableColumn(label: 'PLANO', flex: 3),
+              AppTableColumn(label: 'VALOR RECORRENTE', width: 140),
               AppTableColumn(label: 'COBRANÇA', width: 110),
-              AppTableColumn(label: 'LIMITES (CORTES/DESCONTOS)', width: 180),
-              AppTableColumn(label: 'BENEFÍCIOS INCLUSOS', width: 280),
+              AppTableColumn(label: 'LIMITES (CORTES/DESCONTOS)', flex: 2),
+              AppTableColumn(label: 'BENEFÍCIOS INCLUSOS', flex: 4),
               AppTableColumn(label: 'STATUS', width: 90),
               AppTableColumn(label: 'AÇÕES', width: 90),
             ],
