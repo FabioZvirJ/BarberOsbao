@@ -96,32 +96,33 @@ class PlanosPage extends ConsumerWidget {
       builder: (context, constraints) {
         if (AppBreakpoints.isDesktop(context)) {
           return AppTable(
-            minWidth: 1000,
+            minWidth: 1120,
             columns: [
-              AppTableColumn(label: 'PLANO'),
-              AppTableColumn(label: 'VALOR RECORRENTE'),
-              AppTableColumn(label: 'COBRANÇA'),
-              AppTableColumn(label: 'LIMITES (CORTES/DESCONTOS)'),
-              AppTableColumn(label: 'BENEFÍCIOS INCLUSOS', width: 350),
-              AppTableColumn(label: 'STATUS'),
-              AppTableColumn(label: 'AÇÕES', width: 100),
+              AppTableColumn(label: 'PLANO', width: 220),
+              AppTableColumn(label: 'VALOR RECORRENTE', width: 150),
+              AppTableColumn(label: 'COBRANÇA', width: 110),
+              AppTableColumn(label: 'LIMITES (CORTES/DESCONTOS)', width: 180),
+              AppTableColumn(label: 'BENEFÍCIOS INCLUSOS', width: 280),
+              AppTableColumn(label: 'STATUS', width: 90),
+              AppTableColumn(label: 'AÇÕES', width: 90),
             ],
             rows: data.map((plan) {
               return AppTableRow(
                 cells: [
-                  Row(
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 4,
                     children: [
                       Text(
                         plan.name,
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      if (plan.recommended) ...[
-                        const SizedBox(width: 8),
+                      if (plan.recommended)
                         const AppStatusChip(
                           label: 'Destaque',
                           type: AppStatusType.info,
                         ),
-                      ],
                     ],
                   ),
                   Text(

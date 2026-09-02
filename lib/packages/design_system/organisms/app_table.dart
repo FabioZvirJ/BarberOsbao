@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
-import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
 
 class AppTableColumn {
   final String label;
@@ -34,7 +33,6 @@ class AppTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isDesktop = AppBreakpoints.isDesktop(context);
 
     final tableContent = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -117,15 +115,20 @@ class AppTable extends StatelessWidget {
       ],
     );
 
-    // On desktop show the table full-width; on tablet/mobile wrap in horizontal scroll.
-    if (isDesktop) return tableContent;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth;
+        final effectiveWidth =
+            availableWidth > minWidth ? availableWidth : minWidth;
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minWidth: minWidth),
-        child: tableContent,
-      ),
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: effectiveWidth,
+            child: tableContent,
+          ),
+        );
+      },
     );
   }
 }
