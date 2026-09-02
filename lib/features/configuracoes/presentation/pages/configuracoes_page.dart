@@ -256,26 +256,36 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               DropdownButtonFormField<String>(
-                                dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                                dropdownColor: isDark
+                                    ? ThemeColors.darkSurface
+                                    : Colors.white,
                                 initialValue: settings.slotInterval,
                                 decoration: InputDecoration(
                                   labelText: 'Tempo entre Atendimentos',
                                   labelStyle: TextStyle(
-                                    color: isDark ? Colors.white70 : Colors.black87,
+                                    color: isDark
+                                        ? Colors.white70
+                                        : Colors.black87,
                                     fontSize: 13,
                                   ),
                                   filled: true,
-                                  fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                                  fillColor: isDark
+                                      ? ThemeColors.darkSurface
+                                      : Colors.grey.shade50,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
                                     borderSide: BorderSide(
-                                      color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                      color: isDark
+                                          ? ThemeColors.darkBorder
+                                          : Colors.grey.shade300,
                                     ),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
                                     borderSide: BorderSide(
-                                      color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                      color: isDark
+                                          ? ThemeColors.darkBorder
+                                          : Colors.grey.shade300,
                                     ),
                                   ),
                                 ),
@@ -391,31 +401,43 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 DropdownButtonFormField<String>(
-                                  dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                                  dropdownColor: isDark
+                                      ? ThemeColors.darkSurface
+                                      : Colors.white,
                                   initialValue: settings.slotInterval,
                                   decoration: InputDecoration(
                                     labelText: 'Tempo entre Atendimentos',
                                     labelStyle: TextStyle(
-                                      color: isDark ? Colors.white70 : Colors.black87,
+                                      color: isDark
+                                          ? Colors.white70
+                                          : Colors.black87,
                                       fontSize: 13,
                                     ),
                                     filled: true,
-                                    fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                                    fillColor: isDark
+                                        ? ThemeColors.darkSurface
+                                        : Colors.grey.shade50,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                       borderSide: BorderSide(
-                                        color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                        color: isDark
+                                            ? ThemeColors.darkBorder
+                                            : Colors.grey.shade300,
                                       ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                       borderSide: BorderSide(
-                                        color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                        color: isDark
+                                            ? ThemeColors.darkBorder
+                                            : Colors.grey.shade300,
                                       ),
                                     ),
                                   ),
                                   style: TextStyle(
-                                    color: isDark ? Colors.white : Colors.black87,
+                                    color: isDark
+                                        ? Colors.white
+                                        : Colors.black87,
                                     fontSize: 14,
                                   ),
                                   items: const [

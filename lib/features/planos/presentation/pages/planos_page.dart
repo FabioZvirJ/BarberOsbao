@@ -415,7 +415,9 @@ class PlanosPage extends ConsumerWidget {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: ThemeColors.danger,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
             ),
             onPressed: () {
               ref.read(planosControllerProvider.notifier).removePlano(plan.id);
@@ -543,23 +545,34 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
                         ),
                         const SizedBox(height: 6),
                         DropdownButtonFormField<String>(
-                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          dropdownColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.white,
                           initialValue: _period,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            fillColor: isDark
+                                ? ThemeColors.darkSurface
+                                : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
@@ -581,7 +594,10 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
                               value: 'semestral',
                               child: Text('Semestral'),
                             ),
-                            DropdownMenuItem(value: 'anual', child: Text('Anual')),
+                            DropdownMenuItem(
+                              value: 'anual',
+                              child: Text('Anual'),
+                            ),
                           ],
                           onChanged: (val) {
                             if (val != null) setState(() => _period = val);
@@ -741,7 +757,9 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: ThemeColors.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
           ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
@@ -767,7 +785,10 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
               Navigator.of(context).pop();
             }
           },
-          child: const Text('Salvar', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          child: const Text(
+            'Salvar',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );

@@ -342,19 +342,28 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
               initialValue: _selectedProductId,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                fillColor: isDark
+                    ? ThemeColors.darkSurface
+                    : Colors.grey.shade50,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(
-                    color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                    color: isDark
+                        ? ThemeColors.darkBorder
+                        : Colors.grey.shade300,
                     width: 1.0,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(
-                    color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                    color: isDark
+                        ? ThemeColors.darkBorder
+                        : Colors.grey.shade300,
                     width: 1.0,
                   ),
                 ),
@@ -390,19 +399,28 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
               initialValue: _type,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                fillColor: isDark
+                    ? ThemeColors.darkSurface
+                    : Colors.grey.shade50,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(
-                    color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                    color: isDark
+                        ? ThemeColors.darkBorder
+                        : Colors.grey.shade300,
                     width: 1.0,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(
-                    color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                    color: isDark
+                        ? ThemeColors.darkBorder
+                        : Colors.grey.shade300,
                     width: 1.0,
                   ),
                 ),
@@ -465,7 +483,9 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: ThemeColors.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
           ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
@@ -482,7 +502,10 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
               Navigator.of(context).pop();
             }
           },
-          child: const Text('Confirmar', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          child: const Text(
+            'Confirmar',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );

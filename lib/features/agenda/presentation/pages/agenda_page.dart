@@ -175,7 +175,9 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                       ),
                       const SizedBox(width: 6),
                       DropdownButton<String>(
-                        dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                        dropdownColor: isDark
+                            ? ThemeColors.darkSurface
+                            : Colors.white,
                         value: _selectedBarber,
                         underline: const SizedBox(),
                         style: TextStyle(
@@ -205,7 +207,9 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                       ),
                       const SizedBox(width: 6),
                       DropdownButton<String>(
-                        dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                        dropdownColor: isDark
+                            ? ThemeColors.darkSurface
+                            : Colors.white,
                         value: _selectedStatus,
                         underline: const SizedBox(),
                         style: TextStyle(
@@ -525,9 +529,17 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
             _buildDetailRow('Cliente:', apt.clientName, isDark),
             _buildDetailRow('Barbeiro:', apt.barberName, isDark),
             _buildDetailRow('Serviços:', apt.services, isDark),
-            _buildDetailRow('Data:', apt.date.split('-').reversed.join('/'), isDark),
+            _buildDetailRow(
+              'Data:',
+              apt.date.split('-').reversed.join('/'),
+              isDark,
+            ),
             _buildDetailRow('Horário:', apt.time, isDark),
-            _buildDetailRow('Valor:', 'R\$ ${apt.price.toStringAsFixed(2)}', isDark),
+            _buildDetailRow(
+              'Valor:',
+              'R\$ ${apt.price.toStringAsFixed(2)}',
+              isDark,
+            ),
             _buildDetailRow('Status:', apt.status.toUpperCase(), isDark),
             const SizedBox(height: 12),
             const Text(
@@ -778,19 +790,28 @@ class _AppointmentFormDialogState
                 initialValue: _selectedClient,
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  fillColor: isDark
+                      ? ThemeColors.darkSurface
+                      : Colors.grey.shade50,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(
-                      color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                      color: isDark
+                          ? ThemeColors.darkBorder
+                          : Colors.grey.shade300,
                       width: 1.0,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(
-                      color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                      color: isDark
+                          ? ThemeColors.darkBorder
+                          : Colors.grey.shade300,
                       width: 1.0,
                     ),
                   ),
@@ -823,23 +844,34 @@ class _AppointmentFormDialogState
                         ),
                         const SizedBox(height: 6),
                         DropdownButtonFormField<String>(
-                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          dropdownColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.white,
                           initialValue: _selectedBarber,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            fillColor: isDark
+                                ? ThemeColors.darkSurface
+                                : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
@@ -850,7 +882,8 @@ class _AppointmentFormDialogState
                           ),
                           items: _barbers
                               .map(
-                                (b) => DropdownMenuItem(value: b, child: Text(b)),
+                                (b) =>
+                                    DropdownMenuItem(value: b, child: Text(b)),
                               )
                               .toList(),
                           onChanged: (val) {
@@ -880,23 +913,34 @@ class _AppointmentFormDialogState
                         ),
                         const SizedBox(height: 6),
                         DropdownButtonFormField<String>(
-                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          dropdownColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.white,
                           initialValue: _selectedService,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            fillColor: isDark
+                                ? ThemeColors.darkSurface
+                                : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
@@ -907,7 +951,8 @@ class _AppointmentFormDialogState
                           ),
                           items: _services
                               .map(
-                                (s) => DropdownMenuItem(value: s, child: Text(s)),
+                                (s) =>
+                                    DropdownMenuItem(value: s, child: Text(s)),
                               )
                               .toList(),
                           onChanged: (val) {
@@ -988,23 +1033,34 @@ class _AppointmentFormDialogState
                         ),
                         const SizedBox(height: 6),
                         DropdownButtonFormField<String>(
-                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          dropdownColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.white,
                           initialValue: _status,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            fillColor: isDark
+                                ? ThemeColors.darkSurface
+                                : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
@@ -1062,7 +1118,9 @@ class _AppointmentFormDialogState
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: ThemeColors.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
           ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {

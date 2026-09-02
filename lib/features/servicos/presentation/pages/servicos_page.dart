@@ -337,7 +337,9 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: ThemeColors.danger,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
             ),
             onPressed: () {
               ref
@@ -364,7 +366,6 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
     );
   }
 }
-
 
 class _ServicoFormDialog extends ConsumerStatefulWidget {
   final List<String> categories;
@@ -468,23 +469,34 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
                         ),
                         const SizedBox(height: 6),
                         DropdownButtonFormField<String>(
-                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          dropdownColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.white,
                           initialValue: _category,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            fillColor: isDark
+                                ? ThemeColors.darkSurface
+                                : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
@@ -495,7 +507,8 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
                           ),
                           items: widget.categories
                               .map(
-                                (c) => DropdownMenuItem(value: c, child: Text(c)),
+                                (c) =>
+                                    DropdownMenuItem(value: c, child: Text(c)),
                               )
                               .toList(),
                           onChanged: (val) {
@@ -550,23 +563,34 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
                         ),
                         const SizedBox(height: 6),
                         DropdownButtonFormField<String>(
-                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          dropdownColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.white,
                           initialValue: _colorHex,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            fillColor: isDark
+                                ? ThemeColors.darkSurface
+                                : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
@@ -586,7 +610,10 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
                                         height: 12,
                                         decoration: BoxDecoration(
                                           color: Color(
-                                            int.parse('FF${c['hex']!}', radix: 16),
+                                            int.parse(
+                                              'FF${c['hex']!}',
+                                              radix: 16,
+                                            ),
                                           ),
                                           shape: BoxShape.circle,
                                         ),
@@ -648,7 +675,9 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: ThemeColors.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
           ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
@@ -679,7 +708,10 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
               Navigator.of(context).pop();
             }
           },
-          child: const Text('Salvar', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          child: const Text(
+            'Salvar',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );

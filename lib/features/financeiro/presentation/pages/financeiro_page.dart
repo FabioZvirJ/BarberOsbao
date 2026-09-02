@@ -446,19 +446,28 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
                 initialValue: _type,
                 decoration: InputDecoration(
                   filled: true,
-                  fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  fillColor: isDark
+                      ? ThemeColors.darkSurface
+                      : Colors.grey.shade50,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(
-                      color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                      color: isDark
+                          ? ThemeColors.darkBorder
+                          : Colors.grey.shade300,
                       width: 1.0,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(
-                      color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                      color: isDark
+                          ? ThemeColors.darkBorder
+                          : Colors.grey.shade300,
                       width: 1.0,
                     ),
                   ),
@@ -522,23 +531,34 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
                         ),
                         const SizedBox(height: 6),
                         DropdownButtonFormField<String>(
-                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          dropdownColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.white,
                           initialValue: _category,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            fillColor: isDark
+                                ? ThemeColors.darkSurface
+                                : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
@@ -549,7 +569,8 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
                           ),
                           items: categories
                               .map(
-                                (c) => DropdownMenuItem(value: c, child: Text(c)),
+                                (c) =>
+                                    DropdownMenuItem(value: c, child: Text(c)),
                               )
                               .toList(),
                           onChanged: (val) {
@@ -578,23 +599,34 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
                         ),
                         const SizedBox(height: 6),
                         DropdownButtonFormField<String>(
-                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          dropdownColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.white,
                           initialValue: _paymentMethod,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            fillColor: isDark
+                                ? ThemeColors.darkSurface
+                                : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
@@ -627,8 +659,8 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
                             ),
                           ],
                           onChanged: (val) {
-                            if (val != null) setState(() => _paymentMethod = val);
-                          },
+                            if (val != null) {
+                            }
                         ),
                       ],
                     ),
@@ -648,23 +680,34 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
                         ),
                         const SizedBox(height: 6),
                         DropdownButtonFormField<String>(
-                          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                          dropdownColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.white,
                           initialValue: _status,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            fillColor: isDark
+                                ? ThemeColors.darkSurface
+                                : Colors.grey.shade50,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                                color: isDark
+                                    ? ThemeColors.darkBorder
+                                    : Colors.grey.shade300,
                                 width: 1.0,
                               ),
                             ),
@@ -715,7 +758,9 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: ThemeColors.primary,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
           ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
@@ -735,7 +780,10 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
               Navigator.of(context).pop();
             }
           },
-          child: const Text('Confirmar', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          child: const Text(
+            'Confirmar',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
         ),
       ],
     );

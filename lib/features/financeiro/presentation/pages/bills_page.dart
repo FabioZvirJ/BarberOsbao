@@ -210,7 +210,10 @@ class _BillsPageState extends ConsumerState<BillsPage> {
         ),
         actions: [
           TextButton(
-            child: Text('Cancelar', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54)),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            ),
             onPressed: () => Navigator.pop(ctx),
           ),
           AppButton(
@@ -354,7 +357,9 @@ class _CheckoutBillDialogState extends ConsumerState<_CheckoutBillDialog> {
                         ],
                       ),
                     ),
-                    Divider(color: isDark ? Colors.white10 : Colors.grey.shade300),
+                    Divider(
+                      color: isDark ? Colors.white10 : Colors.grey.shade300,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -700,19 +705,27 @@ class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
               dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
               decoration: InputDecoration(
                 labelText: 'Selecione o item',
-                labelStyle: TextStyle(color: isDark ? Colors.grey : Colors.grey.shade600),
+                labelStyle: TextStyle(
+                  color: isDark ? Colors.grey : Colors.grey.shade600,
+                ),
                 filled: true,
-                fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                fillColor: isDark
+                    ? ThemeColors.darkSurface
+                    : Colors.grey.shade50,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(
-                    color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                    color: isDark
+                        ? ThemeColors.darkBorder
+                        : Colors.grey.shade300,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(
-                    color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                    color: isDark
+                        ? ThemeColors.darkBorder
+                        : Colors.grey.shade300,
                   ),
                 ),
               ),
@@ -727,19 +740,27 @@ class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
                 dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
                 decoration: InputDecoration(
                   labelText: 'Barbeiro Responsável',
-                  labelStyle: TextStyle(color: isDark ? Colors.grey : Colors.grey.shade600),
+                  labelStyle: TextStyle(
+                    color: isDark ? Colors.grey : Colors.grey.shade600,
+                  ),
                   filled: true,
-                  fillColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                  fillColor: isDark
+                      ? ThemeColors.darkSurface
+                      : Colors.grey.shade50,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(
-                      color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                      color: isDark
+                          ? ThemeColors.darkBorder
+                          : Colors.grey.shade300,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(
-                      color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                      color: isDark
+                          ? ThemeColors.darkBorder
+                          : Colors.grey.shade300,
                     ),
                   ),
                 ),
@@ -756,12 +777,17 @@ class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
               children: [
                 Text(
                   'Quantidade:',
-                  style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
                 ),
                 Row(
                   children: [
                     IconButton(
-                      icon: Icon(Icons.remove, color: isDark ? Colors.white : Colors.black87),
+                      icon: Icon(
+                        Icons.remove,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
                       onPressed: _quantity > 1
                           ? () => setState(() => _quantity--)
                           : null,
@@ -774,7 +800,10 @@ class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.add, color: isDark ? Colors.white : Colors.black87),
+                      icon: Icon(
+                        Icons.add,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
                       onPressed: () => setState(() => _quantity++),
                     ),
                   ],
@@ -786,7 +815,10 @@ class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
       ),
       actions: [
         TextButton(
-          child: Text('Cancelar', style: TextStyle(color: isDark ? Colors.white70 : Colors.black54)),
+          child: Text(
+            'Cancelar',
+            style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         AppButton(
