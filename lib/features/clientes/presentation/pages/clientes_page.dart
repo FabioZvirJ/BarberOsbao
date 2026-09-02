@@ -11,6 +11,7 @@ import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_avatar.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
+import 'package:barber_osbao/packages/design_system/molecules/app_image_upload.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/clientes/domain/models/cliente.dart';
 import 'package:barber_osbao/features/clientes/presentation/controllers/clientes_controller.dart';
@@ -626,10 +627,11 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
                 controller: _emailController,
               ),
               const SizedBox(height: 12),
-              AppInput(
-                label: 'URL da Foto (Avatar)',
-                placeholder: 'Ex: https://images.unsplash.com/...',
+              AppImageUpload(
+                label: 'Foto do Cliente (Avatar)',
                 controller: _avatarUrlController,
+                height: 130,
+                helperText: 'Upload do arquivo ou informe o link',
               ),
               const SizedBox(height: 12),
               Row(
