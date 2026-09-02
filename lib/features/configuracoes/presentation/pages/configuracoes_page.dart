@@ -6,6 +6,7 @@ import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_section.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_card.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
+import 'package:barber_osbao/packages/design_system/molecules/app_image_upload.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/core/auth/application/auth_controller.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
@@ -104,42 +105,23 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
               child: AppCard(
                 child: Column(
                   children: [
-                    // Responsive 2-col layout
                     AppBreakpoints.isMobile(context)
                         ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              AppImageUpload(
+                                label: 'Logotipo da Barbearia',
+                                controller: _logoController,
+                                height: 160,
+                                helperText:
+                                    'Upload direto ou cole o link (PNG, JPG, WEBP)',
+                              ),
+                              const SizedBox(height: 16),
                               AppInput(
                                 label: 'Nome Comercial',
                                 controller: _nameController,
                               ),
                               const SizedBox(height: 16),
-                              AppInput(
-                                label: 'Link do Logotipo (URL)',
-                                controller: _logoController,
-                              ),
-                            ],
-                          )
-                        : Row(
-                            children: [
-                              Expanded(
-                                child: AppInput(
-                                  label: 'Nome Comercial',
-                                  controller: _nameController,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: AppInput(
-                                  label: 'Link do Logotipo (URL)',
-                                  controller: _logoController,
-                                ),
-                              ),
-                            ],
-                          ),
-                    const SizedBox(height: 16),
-                    AppBreakpoints.isMobile(context)
-                        ? Column(
-                            children: [
                               AppInput(
                                 label: 'Telefone de Contato',
                                 controller: _phoneController,
@@ -151,20 +133,50 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                               ),
                             ],
                           )
-                        : Row(
+                        : Column(
                             children: [
-                              Expanded(
-                                child: AppInput(
-                                  label: 'Telefone de Contato',
-                                  controller: _phoneController,
-                                ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 2,
+                                    child: AppImageUpload(
+                                      label: 'Logotipo da Barbearia',
+                                      controller: _logoController,
+                                      height: 160,
+                                      helperText:
+                                          'Upload direto ou cole o link (PNG, JPG, WEBP)',
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Column(
+                                      children: [
+                                        AppInput(
+                                          label: 'Nome Comercial',
+                                          controller: _nameController,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        AppInput(
+                                          label: 'Telefone de Contato',
+                                          controller: _phoneController,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: AppInput(
-                                  label: 'Chave PIX Recebimento',
-                                  controller: _pixController,
-                                ),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: AppInput(
+                                      label: 'Chave PIX Recebimento',
+                                      controller: _pixController,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

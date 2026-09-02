@@ -8,6 +8,7 @@ import 'package:barber_osbao/packages/design_system/molecules/app_card.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
+import 'package:barber_osbao/packages/design_system/molecules/app_image_upload.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/clube/domain/models/beneficio_clube.dart';
 import 'package:barber_osbao/features/clube/presentation/controllers/clube_controller.dart';
@@ -478,10 +479,11 @@ class _ClubeFormDialogState extends ConsumerState<_ClubeFormDialog> {
                     : null,
               ),
               const SizedBox(height: 12),
-              AppInput(
-                label: 'URL da Imagem Ilustrativa',
-                placeholder: 'Ex: https://unsplash.com/...',
+              AppImageUpload(
+                label: 'Imagem do Benefício',
                 controller: _imageUrlController,
+                height: 130,
+                helperText: 'Upload do arquivo ou informe o link',
               ),
               const SizedBox(height: 12),
               AppInput(
