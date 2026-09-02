@@ -234,8 +234,6 @@ class RelatoriosPage extends ConsumerWidget {
   }
 
   void _exportMock(BuildContext context, String title, String format) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -256,19 +254,13 @@ class RelatoriosPage extends ConsumerWidget {
 
         return AlertDialog(
           backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const CircularProgressIndicator(color: ThemeColors.primary),
               const SizedBox(height: 16),
               Text(
                 'Compilando base de dados para $format...',
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
-              ),
-            ],
+                style: TextStyle(color: isDark ? Colors.white : Colors.black87            ],
           ),
         );
       },

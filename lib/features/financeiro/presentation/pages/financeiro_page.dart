@@ -660,7 +660,9 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
                           ],
                           onChanged: (val) {
                             if (val != null) {
+                              setState(() => _paymentMethod = val);
                             }
+                          },
                         ),
                       ],
                     ),
