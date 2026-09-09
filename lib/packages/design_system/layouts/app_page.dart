@@ -23,13 +23,14 @@ class AppPage extends StatelessWidget {
     this.onSearch,
     this.onProfileTap,
     this.scrollable = true,
-    this.maxWidth = 1200.0,
+    this.maxWidth = 1440.0,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
+    return Material(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: Column(
         children: [
           AppHeader(
             userName: userName,

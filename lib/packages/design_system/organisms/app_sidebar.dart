@@ -52,7 +52,7 @@ class AppSidebar extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: ThemeColors.primary.withOpacity(0.12),
+                    color: ThemeColors.primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
@@ -111,11 +111,11 @@ class AppSidebar extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       decoration: BoxDecoration(
                         color: isActive
-                            ? ThemeColors.primary.withOpacity(isDark ? 0.15 : 0.08)
+                            ? ThemeColors.primary.withValues(alpha: isDark ? 0.15 : 0.08)
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(12),
                         border: isActive
-                            ? Border.all(color: ThemeColors.primary.withOpacity(0.3), width: 1)
+                            ? Border.all(color: ThemeColors.primary.withValues(alpha: 0.3), width: 1)
                             : Border.all(color: Colors.transparent, width: 1),
                       ),
                       child: Row(
@@ -166,7 +166,7 @@ class AppSidebar extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: ThemeColors.danger.withOpacity(0.8),
+                          color: ThemeColors.danger.withValues(alpha: 0.8),
                         ),
                       ),
                     ],

@@ -26,7 +26,7 @@ class AppCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(ThemeColors.radius),
       border: Border.all(
         color: borderColor ?? (borderGlow 
-            ? ThemeColors.primary.withOpacity(0.5)
+            ? ThemeColors.primary.withValues(alpha: 0.5)
             : (isDark ? ThemeColors.darkBorder : Colors.grey.shade100)),
         width: 1.5,
       ),

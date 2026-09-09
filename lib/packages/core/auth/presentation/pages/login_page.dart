@@ -106,9 +106,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                       decoration: BoxDecoration(
-                        color: ThemeColors.danger.withOpacity(0.15),
+                        color: ThemeColors.danger.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: ThemeColors.danger.withOpacity(0.3)),
+                        border: Border.all(color: ThemeColors.danger.withValues(alpha: 0.3)),
                       ),
                       child: Text(
                         _errorMessage!,
@@ -198,7 +198,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       Expanded(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: ThemeColors.primary.withOpacity(0.15),
+                            backgroundColor: ThemeColors.primary.withValues(alpha: 0.15),
                             foregroundColor: ThemeColors.primary,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(

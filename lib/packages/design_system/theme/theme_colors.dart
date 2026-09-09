@@ -11,17 +11,16 @@ class ThemeColors {
   static const Color success = Color(0xFF22C55E);
   static const Color warning = Color(0xFFF59E0B);
   static const Color danger = Color(0xFFEF4444);
-  
+
   static const Color darkBackground = Color(0xFF111111);
   static const Color darkBg = Color(0xFF111111);
   static const Color darkSurface = Color(0xFF1A1A1A);
   static const Color darkBorder = Color(0xFF2A2A2A);
-
-  static const double radius = 20.0;
+  static const double radius = 10.0;
 
   static List<BoxShadow> get softShadow => [
     BoxShadow(
-      color: Colors.black.withOpacity(0.04),
+      color: Colors.black.withValues(alpha: 0.04),
       blurRadius: 20,
       offset: const Offset(0, 10),
     ),
@@ -29,14 +28,17 @@ class ThemeColors {
 
   static List<BoxShadow> get goldGlow => [
     BoxShadow(
-      color: primary.withOpacity(0.2),
+      color: primary.withValues(alpha: 0.2),
       blurRadius: 15,
       offset: const Offset(0, 5),
     ),
   ];
 
+  static ThemeData? _lightTheme;
+  static ThemeData? _darkTheme;
+
   static ThemeData getLightTheme() {
-    return ThemeData(
+    return _lightTheme ??= ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
       primaryColor: primary,
@@ -55,7 +57,7 @@ class ThemeColors {
   }
 
   static ThemeData getDarkTheme() {
-    return ThemeData(
+    return _darkTheme ??= ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       primaryColor: primary,

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/design_system/layouts/app_container.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_card.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_select.dart';
-import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/packages/core/auth/application/auth_controller.dart';
 
@@ -13,7 +12,6 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userState = ref.watch(authControllerProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: AppContainer(
@@ -67,7 +65,7 @@ class SettingsPage extends ConsumerWidget {
                               ),
                               Switch(
                                 value: user.theme == 'dark',
-                                activeColor: ThemeColors.primary,
+                                activeThumbColor: ThemeColors.primary,
                                 onChanged: (val) {
                                   final updated = user.copyWith(theme: val ? 'dark' : 'light');
                                   ref.read(authControllerProvider.notifier).updateUser(updated);
@@ -190,7 +188,7 @@ class SettingsPage extends ConsumerWidget {
         const SizedBox(width: 16),
         Switch(
           value: value,
-          activeColor: ThemeColors.primary,
+          activeThumbColor: ThemeColors.primary,
           onChanged: onChanged,
         ),
       ],

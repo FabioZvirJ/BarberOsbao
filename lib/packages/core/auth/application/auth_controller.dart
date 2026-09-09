@@ -58,6 +58,23 @@ class AuthController extends AsyncNotifier<User?> {
       return await repo.login(email, password);
     });
   }
+
+  Future<void> toggleTheme() async {
+    final currentUser = state.value;
+    if (currentUser != null) {
+      final newTheme = currentUser.theme == 'light' ? 'dark' : 'light';
+      final updated = currentUser.copyWith(theme: newTheme);
+      await updateUser(updated);
+    }
+  }
+
+  Future<void> setTheme(String newTheme) async {
+    final currentUser = state.value;
+    if (currentUser != null) {
+      final updated = currentUser.copyWith(theme: newTheme);
+      await updateUser(updated);
+    }
+  }
 }
 
 final authControllerProvider = AsyncNotifierProvider<AuthController, User?>(

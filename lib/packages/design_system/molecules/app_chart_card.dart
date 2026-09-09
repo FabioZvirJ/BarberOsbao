@@ -68,7 +68,7 @@ class AppChartCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: chartColor.withOpacity(0.1),
+                  color: chartColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -138,7 +138,7 @@ class _LineChartPainter extends CustomPainter {
 
     // Draw horizontal grid lines (subtle)
     final gridPaint = Paint()
-      ..color = isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03)
+      ..color = isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03)
       ..strokeWidth = 1.0;
 
     for (var i = 0; i < 4; i++) {
@@ -183,8 +183,8 @@ class _LineChartPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          chartColor.withOpacity(0.25),
-          chartColor.withOpacity(0.0),
+          chartColor.withValues(alpha: 0.25),
+          chartColor.withValues(alpha: 0.0),
         ],
       ).createShader(Rect.fromLTRB(0, 0, width, height))
       ..style = PaintingStyle.fill;

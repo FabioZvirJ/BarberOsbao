@@ -1,0 +1,867 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
+import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
+import 'package:barber_osbao/packages/design_system/layouts/app_page.dart';
+import 'package:barber_osbao/packages/design_system/layouts/app_section.dart';
+import 'package:barber_osbao/packages/design_system/organisms/app_table.dart';
+import 'package:barber_osbao/packages/design_system/molecules/app_filters.dart';
+import 'package:barber_osbao/packages/design_system/molecules/app_search_bar.dart';
+import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
+import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
+import 'package:barber_osbao/packages/design_system/atoms/app_avatar.dart';
+import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
+import 'package:barber_osbao/packages/design_system/molecules/app_image_upload.dart';
+import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
+import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
+import 'package:barber_osbao/features/clientes/domain/models/cliente.dart';
+import 'package:barber_osbao/features/clientes/presentation/controllers/clientes_controller.dart';
+
+class ClientesPage extends ConsumerStatefulWidget {
+  const ClientesPage({super.key});
+
+  @override
+  ConsumerState<ClientesPage> createState() => _ClientesPageState();
+}
+
+class _ClientesPageState extends ConsumerState<ClientesPage> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _selectedStatus = 'Todos';
+  String _orderBy = 'Nome'; // 'Nome', 'Gasto', 'Visita'
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(clientesControllerProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isMobile = AppBreakpoints.isMobile(context);
+
+    return AppPage(
+      title: 'Clientes',
+      userName: 'Fábio Zvir',
+      userAvatarUrl:
+          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&width=150',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Responsive toolbar
+          if (isMobile) ...[
+            AppSearchBar(
+              controller: _searchController,
+              placeholder: 'Pesquisar por nome, email ou telefone...',
+              onChanged: (val) =>
+                  setState(() => _searchQuery = val.toLowerCase()),
+              onClear: () => setState(() => _searchQuery = ''),
+            ),
+            const SizedBox(height: 10),
+            AppButton(
+              label: 'Novo Cliente',
+              icon: const Icon(Icons.add, size: 16),
+              onPressed: () => _showFormDialog(context),
+            ),
+          ] else
+            Row(
+              children: [
+                Expanded(
+                  child: AppSearchBar(
+                    controller: _searchController,
+                    placeholder: 'Pesquisar por nome, email ou telefone...',
+                    onChanged: (val) =>
+                        setState(() => _searchQuery = val.toLowerCase()),
+                    onClear: () => setState(() => _searchQuery = ''),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                AppButton(
+                  label: 'Novo Cliente',
+                  icon: const Icon(Icons.add, size: 16),
+                  onPressed: () => _showFormDialog(context),
+                ),
+              ],
+            ),
+          const SizedBox(height: 16),
+          // Filters — Wrap so they reflow on smaller screens
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              AppFilters(
+                options: const ['Todos', 'Ativos', 'Inativos'],
+                selectedOption: _selectedStatus,
+                onSelected: (val) => setState(() => _selectedStatus = val),
+              ),
+              // Sorting dropdown
+              Row(
+                children: [
+                  const Text(
+                    'Ordenar por: ',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(width: 8),
+                  DropdownButton<String>(
+                    dropdownColor: isDark
+                        ? ThemeColors.darkSurface
+                        : Colors.white,
+                    value: _orderBy,
+                    underline: const SizedBox(),
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'Nome', child: Text('Nome')),
+                      DropdownMenuItem(
+                        value: 'Gasto',
+                        child: Text('Total Gasto'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Visita',
+                        child: Text('Última Visita'),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) setState(() => _orderBy = val);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+
+          AppSection(
+            title: 'Base de Clientes',
+            subtitle: 'Lista de clientes cadastrados no sistema ERP',
+            child: _buildContent(state, isDark),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(AppState<List<Cliente>> state, bool isDark) {
+    if (state is AppLoading) {
+      return const Padding(
+        padding: EdgeInsets.all(40.0),
+        child: Center(
+          child: CircularProgressIndicator(color: ThemeColors.primary),
+        ),
+      );
+    }
+
+    if (state is AppError) {
+      return Padding(
+        padding: const EdgeInsets.all(40.0),
+        child: Center(
+          child: Text(
+            'Erro: ${(state as AppError).message}',
+            style: const TextStyle(color: ThemeColors.danger),
+          ),
+        ),
+      );
+    }
+
+    final data = state.data ?? [];
+    if (state is AppEmpty || data.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(40),
+        alignment: Alignment.center,
+        child: Text(
+          'Nenhum cliente cadastrado.',
+          style: TextStyle(color: isDark ? Colors.white30 : Colors.grey),
+        ),
+      );
+    }
+
+    // Apply filters
+    var filtered = data.where((c) {
+      final matchesSearch =
+          c.name.toLowerCase().contains(_searchQuery) ||
+          c.email.toLowerCase().contains(_searchQuery) ||
+          c.phone.contains(_searchQuery);
+
+      final matchesStatus =
+          _selectedStatus == 'Todos' ||
+          (_selectedStatus == 'Ativos' && c.status == 'active') ||
+          (_selectedStatus == 'Inativos' && c.status == 'inactive');
+
+      return matchesSearch && matchesStatus;
+    }).toList();
+
+    // Apply sorting
+    if (_orderBy == 'Nome') {
+      filtered.sort(
+        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+      );
+    } else if (_orderBy == 'Gasto') {
+      filtered.sort((a, b) => b.totalGasto.compareTo(a.totalGasto));
+    } else if (_orderBy == 'Visita') {
+      filtered.sort((a, b) => b.ultimaVisita.compareTo(a.ultimaVisita));
+    }
+
+    if (filtered.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(40),
+        alignment: Alignment.center,
+        child: Text(
+          'Nenhum cliente correspondente aos filtros.',
+          style: TextStyle(color: isDark ? Colors.white30 : Colors.grey),
+        ),
+      );
+    }
+
+    return AppTable(
+      minWidth: 1000,
+      columns: [
+        AppTableColumn(label: 'FOTO', width: 50),
+        AppTableColumn(label: 'NOME', flex: 3),
+        AppTableColumn(label: 'TELEFONE', width: 130),
+        AppTableColumn(label: 'EMAIL', flex: 2),
+        AppTableColumn(label: 'NASCIMENTO', width: 100),
+        AppTableColumn(label: 'PLANO', width: 100),
+        AppTableColumn(label: 'ÚLT. VISITA', width: 100),
+        AppTableColumn(label: 'TOTAL GASTO', width: 110),
+        AppTableColumn(label: 'STATUS', width: 85),
+        AppTableColumn(label: 'AÇÕES', width: 130),
+      ],
+      rows: filtered.map((c) {
+        return AppTableRow(
+          cells: [
+            AppAvatar(url: c.avatarUrl, size: 36),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  c.name,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                if (c.observacoes.isNotEmpty)
+                  Text(
+                    c.observacoes,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey,
+                      fontStyle: FontStyle.italic,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
+            ),
+            Text(c.phone),
+            Text(c.email),
+            Text(c.nascimento),
+            Text(
+              c.plano,
+              style: TextStyle(
+                fontWeight: c.plano != 'Nenhum'
+                    ? FontWeight.bold
+                    : FontWeight.normal,
+                color: c.plano != 'Nenhum' ? ThemeColors.primary : null,
+              ),
+            ),
+            Text(c.ultimaVisita),
+            Text(
+              'R\$ ${c.totalGasto.toStringAsFixed(2)}',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: ThemeColors.success,
+              ),
+            ),
+            AppStatusChip(
+              label: c.status == 'active' ? 'Ativo' : 'Inativo',
+              type: c.status == 'active'
+                  ? AppStatusType.success
+                  : AppStatusType.danger,
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
+                  icon: const Icon(Icons.history, size: 18),
+                  onPressed: () => _showHistoryDialog(context, c),
+                  tooltip: 'Visualizar Histórico',
+                ),
+                const SizedBox(width: 4),
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  onPressed: () => _showFormDialog(context, c),
+                  tooltip: 'Editar',
+                ),
+                const SizedBox(width: 4),
+                IconButton(
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    size: 18,
+                    color: ThemeColors.danger,
+                  ),
+                  onPressed: () => _showDeleteDialog(context, c),
+                  tooltip: 'Excluir',
+                ),
+              ],
+            ),
+          ],
+        );
+      }).toList(),
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context, Cliente customer) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        title: Text(
+          'Excluir Cliente',
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'Tem certeza que deseja excluir o cliente "${customer.name}"? Isso apagará permanentemente o registro comercial.',
+          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ThemeColors.danger,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+            onPressed: () {
+              ref
+                  .read(clientesControllerProvider.notifier)
+                  .removeCliente(customer.id);
+              Navigator.of(ctx).pop();
+            },
+            child: const Text('Excluir', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showHistoryDialog(BuildContext context, Cliente customer) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AppResponsiveDialog(
+        title: customer.name,
+        subtitle: '${customer.email} • Plano: ${customer.plano}',
+        maxWidth: 520,
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ThemeColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text(
+              'Fechar',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                AppAvatar(url: customer.avatarUrl, size: 48),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        customer.name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Telefone: ${customer.phone}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isDark ? Colors.white60 : Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Histórico de Visitas Recentes',
+              style: TextStyle(
+                color: ThemeColors.primary,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(
+                Icons.check_circle,
+                color: ThemeColors.success,
+              ),
+              title: Text(
+                'Corte + Barba (Arthur Santos)',
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 13,
+                ),
+              ),
+              subtitle: Text(
+                'Data: ${customer.ultimaVisita} - R\$ 80.00',
+                style: const TextStyle(color: Colors.grey, fontSize: 11),
+              ),
+            ),
+            Divider(color: isDark ? Colors.white10 : Colors.grey.shade200),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(
+                Icons.check_circle,
+                color: ThemeColors.success,
+              ),
+              title: Text(
+                'Corte Degradê (Marcos Silva)',
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 13,
+                ),
+              ),
+              subtitle: const Text(
+                'Data: 10/05/2026 - R\$ 45.00',
+                style: TextStyle(color: Colors.grey, fontSize: 11),
+              ),
+            ),
+            Divider(color: isDark ? Colors.white10 : Colors.grey.shade200),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(
+                Icons.check_circle,
+                color: ThemeColors.success,
+              ),
+              title: Text(
+                'Design de Sobrancelha (Gabriel Neves)',
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 13,
+                ),
+              ),
+              subtitle: const Text(
+                'Data: 15/04/2026 - R\$ 20.00',
+                style: TextStyle(color: Colors.grey, fontSize: 11),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.03)
+                    : Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Total Consumido:',
+                    style: TextStyle(
+                      color: isDark ? Colors.white70 : Colors.black87,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    'R\$ ${customer.totalGasto.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      color: ThemeColors.success,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showFormDialog(BuildContext context, [Cliente? customer]) {
+    showDialog(
+      context: context,
+      builder: (ctx) => _ClienteFormDialog(customer: customer),
+    );
+  }
+}
+
+class _ClienteFormDialog extends ConsumerStatefulWidget {
+  final Cliente? customer;
+
+  const _ClienteFormDialog({this.customer});
+
+  @override
+  ConsumerState<_ClienteFormDialog> createState() => _ClienteFormDialogState();
+}
+
+class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _phoneController;
+  late final TextEditingController _nascimentoController;
+  late final TextEditingController _avatarUrlController;
+  late final TextEditingController _observacoesController;
+  late String _plano;
+  late String _status;
+
+  @override
+  void initState() {
+    super.initState();
+    final c = widget.customer;
+    _nameController = TextEditingController(text: c?.name ?? '');
+    _emailController = TextEditingController(text: c?.email ?? '');
+    _phoneController = TextEditingController(text: c?.phone ?? '');
+    _nascimentoController = TextEditingController(text: c?.nascimento ?? '');
+    _avatarUrlController = TextEditingController(text: c?.avatarUrl ?? '');
+    _observacoesController = TextEditingController(text: c?.observacoes ?? '');
+    _plano = c?.plano ?? 'Nenhum';
+    _status = c?.status ?? 'active';
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _nascimentoController.dispose();
+    _avatarUrlController.dispose();
+    _observacoesController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final customer = widget.customer;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return AppResponsiveDialog(
+      title: customer == null ? 'Cadastrar Cliente' : 'Editar Cliente',
+      subtitle: customer == null
+          ? 'Preencha os dados cadastrais e preferências do cliente'
+          : 'Atualize os dados de contato, plano e observações',
+      maxWidth: 640,
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(
+            'Cancelar',
+            style: TextStyle(
+              color: isDark ? Colors.white70 : Colors.black54,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ThemeColors.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          onPressed: () {
+            if (_formKey.currentState?.validate() ?? false) {
+              final newCli = Cliente(
+                id: customer?.id ?? '',
+                name: _nameController.text.trim(),
+                email: _emailController.text.trim(),
+                phone: _phoneController.text.trim(),
+                avatarUrl: _avatarUrlController.text.isNotEmpty
+                    ? _avatarUrlController.text.trim()
+                    : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&width=150',
+                nascimento: _nascimentoController.text.trim(),
+                plano: _plano,
+                ultimaVisita: customer?.ultimaVisita ?? 'Nunca',
+                totalGasto: customer?.totalGasto ?? 0.0,
+                observacoes: _observacoesController.text.trim(),
+                status: _status,
+              );
+
+              if (customer == null) {
+                ref
+                    .read(clientesControllerProvider.notifier)
+                    .addCliente(newCli);
+              } else {
+                ref
+                    .read(clientesControllerProvider.notifier)
+                    .editCliente(newCli);
+              }
+              Navigator.of(context).pop();
+            }
+          },
+          child: const Text(
+            'Salvar Cliente',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AppInput(
+              label: 'Nome Completo',
+              placeholder: 'Ex: João Carlos da Silva',
+              controller: _nameController,
+              validator: (val) =>
+                  val == null || val.isEmpty ? 'Nome obrigatório' : null,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'Telefone',
+                    placeholder: 'Ex: (11) 99999-9999',
+                    controller: _phoneController,
+                    validator: (val) => val == null || val.isEmpty
+                        ? 'Telefone obrigatório'
+                        : null,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: AppInput(
+                    label: 'Nascimento',
+                    placeholder: 'Ex: 15/08/1990',
+                    controller: _nascimentoController,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: AppInput(
+                    label: 'E-mail',
+                    placeholder: 'Ex: joao@gmail.com',
+                    controller: _emailController,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Plano do Clube',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      DropdownButtonFormField<String>(
+                        dropdownColor: isDark
+                            ? ThemeColors.darkSurface
+                            : Colors.white,
+                        initialValue: _plano,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.grey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 14,
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'Nenhum',
+                            child: Text('Nenhum'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Plano Cavalheiro',
+                            child: Text('Plano Cavalheiro'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Plano Barão',
+                            child: Text('Plano Barão'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Plano Imperial',
+                            child: Text('Plano Imperial'),
+                          ),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) setState(() => _plano = val);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            AppImageUpload(
+              label: 'Foto do Cliente (Avatar)',
+              controller: _avatarUrlController,
+              height: 140,
+              helperText: 'Upload do arquivo ou informe o link',
+            ),
+            const SizedBox(height: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Status do Cadastro',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                DropdownButtonFormField<String>(
+                  dropdownColor: isDark
+                      ? ThemeColors.darkSurface
+                      : Colors.white,
+                  initialValue: _status,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: isDark
+                        ? ThemeColors.darkSurface
+                        : Colors.grey.shade50,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? ThemeColors.darkBorder
+                            : Colors.grey.shade300,
+                        width: 1.0,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark
+                            ? ThemeColors.darkBorder
+                            : Colors.grey.shade300,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'active', child: Text('Ativo')),
+                    DropdownMenuItem(value: 'inactive', child: Text('Inativo')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setState(() => _status = val);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            AppInput(
+              label: 'Observações / Preferências',
+              placeholder:
+                  'Ex: Alérgico a produtos mentolados, prefere café expresso...',
+              controller: _observacoesController,
+              maxLines: 3,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

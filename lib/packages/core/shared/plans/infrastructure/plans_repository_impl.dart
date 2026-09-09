@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:barber_osbao/packages/core/models/plan.dart';
 import 'package:barber_osbao/packages/core/models/membership.dart';
 import 'package:barber_osbao/packages/core/utils/mock_data.dart';
@@ -7,8 +6,6 @@ import 'package:barber_osbao/packages/core/shared/plans/domain/plans_repository.
 
 class PlansRepositoryImpl implements PlansRepository {
   final PrefHelper _prefHelper;
-
-  static const String _keyMembership = 'active_membership';
 
   PlansRepositoryImpl(this._prefHelper);
 
@@ -24,8 +21,6 @@ class PlansRepositoryImpl implements PlansRepository {
     final cached = _prefHelper.getUserJson(); // Retrieve from storage helper
     if (cached == null) return null;
     
-    // We can also store/retrieve membership JSON specifically
-    final memJson = _prefHelper.getUserJson(); // For mock simplicity, we keep a separate field in Prefs if we want
     // Let's check if we have a membership stored, if not return active mock
     return MockData.activeMembership;
   }
