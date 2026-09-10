@@ -16,4 +16,17 @@ const swaggerSpec = {
   }
 };
 
+// Add simple components/schemas
+swaggerSpec.components = {
+  schemas: {
+    Service: {
+      type: 'object',
+      properties: { id: { type: 'string' }, title: { type: 'string' }, price: { type: 'number' }, durationMin: { type: 'integer' } }
+    },
+    Client: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' }, phone: { type: 'string' }, email: { type: 'string' } } },
+    Appointment: { type: 'object', properties: { id: { type: 'string' }, clientId: { type: 'string' }, serviceId: { type: 'string' }, startAt: { type: 'string' }, endAt: { type: 'string' } } },
+    Payment: { type: 'object', properties: { id: { type: 'string' }, appointmentId: { type: 'string' }, amount: { type: 'number' }, method: { type: 'string' } } }
+  }
+};
+
 export default swaggerSpec;
