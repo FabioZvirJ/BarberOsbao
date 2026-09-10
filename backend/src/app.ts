@@ -1,5 +1,5 @@
 import express from 'express';
-import cors from 'cors';
+const cors = require('cors');
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 import authRoutes from './routes/auth';
@@ -7,7 +7,7 @@ import clientsRoutes from './routes/clients';
 import appointmentsRoutes from './routes/appointments';
 import servicesRoutes from './routes/services';
 import paymentsRoutes from './routes/payments';
-import swaggerUi from 'swagger-ui-express';
+const swaggerUi = require('swagger-ui-express');
 import swaggerSpec from './swagger';
 
 dotenv.config();

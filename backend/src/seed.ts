@@ -9,10 +9,14 @@ async function main() {
   ];
 
   for (const s of services) {
-    await prisma.service.upsert({ where: { title: s.title }, update: {}, create: s });
+    const exists = await prisma.service.findFirst({ where: { title: s.title } });
+    if (!exists) await prisma.service.create({ data: s });
   }
 
-  const client = await prisma.client.upsert({ where: { email: 'cliente@exemplo.com' }, update: {}, create: { name: 'Cliente Demo', email: 'cliente@exemplo.com', phone: '0000' } });
+  let client = await prisma.client.findFirst({ where: { email: 'cliente@exemplo.com' } });
+  if (!client) {
+    client = await prisma.client.create({ data: { name: 'Cliente Demo', email: 'cliente@exemplo.com', phone: '0000' } });
+  }
 
   const service = await prisma.service.findFirst();
   if (service) {
