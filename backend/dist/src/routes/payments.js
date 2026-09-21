@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const express_validator_1 = require("express-validator");
+const paymentsController_1 = require("../controllers/paymentsController");
+const validate_1 = require("../middleware/validate");
+const router = (0, express_1.Router)();
+router.get('/', paymentsController_1.listPayments);
+router.get('/:id', [(0, express_validator_1.param)('id').notEmpty()], validate_1.validateRequest, paymentsController_1.getPayment);
+router.post('/', [(0, express_validator_1.body)('appointmentId').notEmpty(), (0, express_validator_1.body)('amount').isNumeric()], validate_1.validateRequest, paymentsController_1.createPayment);
+exports.default = router;

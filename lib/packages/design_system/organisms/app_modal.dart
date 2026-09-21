@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 
 class AppModal extends StatelessWidget {
@@ -21,9 +22,9 @@ class AppModal extends StatelessWidget {
     required Widget child,
     Widget? footer,
   }) {
-    // If the screen width is larger than 650, we display a centered Dialog.
-    // Otherwise, we keep the bottom sheet layout.
-    final isLargeScreen = MediaQuery.of(context).size.width > 650;
+    // On web prefer a centered Dialog for better UX. Otherwise, use
+    // a bottom sheet on small/mobile screens.
+    final isLargeScreen = kIsWeb || MediaQuery.of(context).size.width > 650;
 
     if (isLargeScreen) {
       return showDialog<T>(

@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const express_validator_1 = require("express-validator");
+const clientsController_1 = require("../controllers/clientsController");
+const validate_1 = require("../middleware/validate");
+const router = (0, express_1.Router)();
+router.get('/', clientsController_1.listClients);
+router.post('/', [(0, express_validator_1.body)('name').notEmpty().withMessage('name is required')], validate_1.validateRequest, clientsController_1.createClient);
+exports.default = router;
