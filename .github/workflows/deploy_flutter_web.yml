@@ -24,7 +24,11 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          flutter-version: '3.24.4'
+          channel: 'stable'
+
+      - name: Flutter doctor
+        run: flutter doctor -v
 
       - name: Install dependencies
         run: flutter pub get
@@ -32,7 +36,7 @@ jobs:
       - name: Build web for GitHub Pages
         run: flutter build web --release --base-href /BarberOsbao/
 
-      - name: Upload Pages artifact
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
