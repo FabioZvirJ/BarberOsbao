@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/packages/design_system/theme/app_breakpoints.dart';
@@ -14,6 +15,7 @@ import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/agenda/domain/models/agendamento.dart';
 import 'package:barber_osbao/features/agenda/presentation/controllers/agenda_controller.dart';
+import 'package:barber_osbao/features/agenda/presentation/utils/agenda_validators.dart';
 import 'package:barber_osbao/features/clientes/presentation/controllers/clientes_controller.dart';
 import 'package:barber_osbao/features/funcionarios/presentation/controllers/funcionarios_controller.dart';
 import 'package:barber_osbao/features/servicos/presentation/controllers/servicos_controller.dart';
@@ -425,9 +427,13 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                       size: 18,
                       color: ThemeColors.success,
                     ),
-                    onPressed: () => ref
-                        .read(agendaControllerProvider.notifier)
-                        .updateStatus(apt.id, 'confirmed'),
+                    onPressed: () => _confirmStatusChange(
+                      context,
+                      apt,
+                      'confirmed',
+                      'Confirmar agendamento',
+                      'Deseja confirmar este agendamento?',
+                    ),
                     tooltip: 'Confirmar',
                   ),
                 ],
@@ -438,9 +444,13 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                       size: 18,
                       color: Colors.blue,
                     ),
-                    onPressed: () => ref
-                        .read(agendaControllerProvider.notifier)
-                        .updateStatus(apt.id, 'completed'),
+                    onPressed: () => _confirmStatusChange(
+                      context,
+                      apt,
+                      'completed',
+                      'Finalizar agendamento',
+                      'Este agendamento será marcado como finalizado. Essa ação não pode ser desfeita.',
+                    ),
                     tooltip: 'Finalizar',
                   ),
                 ],
@@ -451,9 +461,13 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                       size: 18,
                       color: ThemeColors.danger,
                     ),
-                    onPressed: () => ref
-                        .read(agendaControllerProvider.notifier)
-                        .updateStatus(apt.id, 'cancelled'),
+                    onPressed: () => _confirmStatusChange(
+                      context,
+                      apt,
+                      'cancelled',
+                      'Cancelar agendamento',
+                      'Deseja cancelar este agendamento? Ele será removido do fluxo ativo.',
+                    ),
                     tooltip: 'Cancelar',
                   ),
                   IconButton(
@@ -506,6 +520,35 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
         _selectedDateRange = 'Todos'; // override quick filter
       });
     }
+  }
+
+  void _confirmStatusChange(
+    BuildContext context,
+    Agendamento apt,
+    String nextStatus,
+    String title,
+    String message,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Voltar'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              ref.read(agendaControllerProvider.notifier).updateStatus(apt.id, nextStatus);
+            },
+            child: Text(nextStatus == 'cancelled' ? 'Cancelar' : 'Confirmar'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showDetailDialog(BuildContext context, Agendamento apt) {
@@ -663,10 +706,10 @@ class _AppointmentFormDialogState
     super.initState();
     final apt = widget.appointment;
     _notesController = TextEditingController(text: apt?.notes ?? '');
-    _dateController = TextEditingController(text: apt?.date ?? '2026-07-09');
+    _dateController = TextEditingController(text: apt?.date ?? DateTime.now().toIso8601String().split('T').first);
     _timeController = TextEditingController(text: apt?.time ?? '09:00');
     _priceController = TextEditingController(
-      text: apt?.price.toString() ?? '50.00',
+      text: apt?.price.toStringAsFixed(2) ?? '50.00',
     );
 
     // Extract dynamic dropdown items
@@ -707,9 +750,9 @@ class _AppointmentFormDialogState
       ]);
     }
 
-    _selectedClient = apt?.clientName ?? _clients[0];
-    _selectedBarber = apt?.barberName ?? _barbers[0];
-    _selectedService = apt?.services.split(',')[0] ?? _services[0];
+    _selectedClient = apt?.clientName ?? (_clients.isNotEmpty ? _clients.first : 'João Silva');
+    _selectedBarber = apt?.barberName ?? (_barbers.isNotEmpty ? _barbers.first : 'Marcos Silva');
+    _selectedService = apt?.services.split(',').first.trim() ?? (_services.isNotEmpty ? _services.first : 'Corte de Cabelo');
     _status = apt?.status ?? 'pending';
   }
 
@@ -780,14 +823,63 @@ class _AppointmentFormDialogState
                 }
               }
 
+              final normalizedPrice = AgendaValidators.normalizePriceText(_priceController.text.trim());
+              final parsedPrice = double.tryParse(normalizedPrice) ?? 0.0;
+              final normalizedDate = _dateController.text.trim();
+              final normalizedTime = _timeController.text.trim();
+
+              if (!AgendaValidators.isValidDate(normalizedDate)) {
+                setState(() => _conflictError = 'Informe uma data válida no formato AAAA-MM-DD.');
+                return;
+              }
+
+              if (!AgendaValidators.isValidTime(normalizedTime)) {
+                setState(() => _conflictError = 'Informe um horário válido no formato HH:MM.');
+                return;
+              }
+
+              if (!AgendaValidators.isValidPrice(_priceController.text.trim())) {
+                setState(() => _conflictError = 'O preço deve conter apenas números e até 2 casas decimais.');
+                return;
+              }
+
+              final duration = 60;
+              if (_status != 'cancelled') {
+                final agendaState = ref.read(agendaControllerProvider);
+                final existingList = agendaState.data ?? [];
+                final hasConflict = AgendaValidators.hasScheduleConflict(
+                  barberName: _selectedBarber,
+                  date: normalizedDate,
+                  time: normalizedTime,
+                  durationMinutes: duration,
+                  existingAppointments: existingList
+                      .where((a) => a.id != appointment?.id && a.status != 'cancelled')
+                      .map((a) => AgendaAppointmentSnapshot(
+                            barberName: a.barberName,
+                            date: a.date,
+                            time: a.time,
+                            durationMinutes: 60,
+                          ))
+                      .toList(),
+                );
+
+                if (hasConflict) {
+                  setState(() {
+                    _conflictError =
+                        'O barbeiro $_selectedBarber já possui agendamento para $normalizedDate às $normalizedTime.';
+                  });
+                  return;
+                }
+              }
+
               final newApt = Agendamento(
                 id: appointment?.id ?? '',
                 clientName: _selectedClient,
                 barberName: _selectedBarber,
                 services: _selectedService,
-                date: targetDate,
-                time: targetTime,
-                price: double.tryParse(_priceController.text.trim()) ?? 0.0,
+                date: normalizedDate,
+                time: normalizedTime,
+                price: parsedPrice,
                 status: _status,
                 notes: _notesController.text.trim(),
               );
@@ -1057,22 +1149,40 @@ class _AppointmentFormDialogState
               children: [
                 Expanded(
                   child: AppInput(
-                    label: 'Data (AAAA-MM-DD)',
-                    placeholder: 'Ex: 2026-07-09',
+                    label: 'Data',
+                    placeholder: 'AAAA-MM-DD',
                     controller: _dateController,
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Data obrigatória' : null,
+                    keyboardType: TextInputType.datetime,
+                    validator: (val) => !AgendaValidators.isValidDate(val)
+                        ? 'Data inválida (AAAA-MM-DD)'
+                        : null,
                     onChanged: (_) => setState(() => _conflictError = null),
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.tryParse(_dateController.text) ?? DateTime.now(),
+                        firstDate: DateTime(2024),
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          _dateController.text = picked.toIso8601String().split('T').first;
+                          _conflictError = null;
+                        });
+                      }
+                    },
+                    readOnly: true,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: AppInput(
-                    label: 'Horário (HH:MM)',
+                    label: 'Horário',
                     placeholder: 'Ex: 14:30',
                     controller: _timeController,
-                    validator: (val) => val == null || val.isEmpty
-                        ? 'Horário obrigatório'
+                    keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                    validator: (val) => !AgendaValidators.isValidTime(val)
+                        ? 'Horário inválido (HH:MM)'
                         : null,
                     onChanged: (_) => setState(() => _conflictError = null),
                   ),
@@ -1084,14 +1194,28 @@ class _AppointmentFormDialogState
               children: [
                 Expanded(
                   child: AppInput(
-                    label: 'Valor Cobrado (R\$)',
+                    label: 'Valor Cobrado',
                     placeholder: 'Ex: 80.00',
                     controller: _priceController,
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[0-9,\.]')),
+                    ],
+                    validator: (val) => !AgendaValidators.isValidPrice(val)
+                        ? 'Use apenas números e até 2 casas decimais'
+                        : null,
+                    onChanged: (value) {
+                      final normalized = AgendaValidators.normalizePriceText(value);
+                      if (normalized != value) {
+                        _priceController.value = TextEditingValue(
+                          text: normalized,
+                          selection: TextSelection.collapsed(offset: normalized.length),
+                        );
+                      }
+                      setState(() => _conflictError = null);
+                    },
                   ),
                 ),
                 const SizedBox(width: 16),

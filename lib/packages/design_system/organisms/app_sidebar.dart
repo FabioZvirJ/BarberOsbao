@@ -89,7 +89,7 @@ class AppSidebar extends StatelessWidget {
             ),
           ),
           
-          const Divider(height: 1),
+          Divider(height: 1, color: isDark ? ThemeColors.darkDivider : Colors.grey.shade200),
           const SizedBox(height: 20),
 
           // Menu Items
@@ -145,7 +145,7 @@ class AppSidebar extends StatelessWidget {
 
           // Logout button
           if (onLogout != null) ...[
-            const Divider(height: 1),
+            Divider(height: 1, color: isDark ? ThemeColors.darkDivider : Colors.grey.shade200),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: InkWell(

@@ -16,6 +16,7 @@ class ThemeColors {
   static const Color darkBg = Color(0xFF111111);
   static const Color darkSurface = Color(0xFF1A1A1A);
   static const Color darkBorder = Color(0xFF2A2A2A);
+  static const Color darkDivider = Color(0xFF3A3A3A);
   static const double radius = 10.0;
 
   static List<BoxShadow> get softShadow => [
@@ -71,6 +72,7 @@ class ThemeColors {
         onPrimary: Colors.black,
         onSecondary: Colors.black,
       ),
+      dividerColor: darkDivider,
       textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
     );
   }

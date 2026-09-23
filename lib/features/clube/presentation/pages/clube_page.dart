@@ -13,6 +13,7 @@ import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/clube/domain/models/beneficio_clube.dart';
 import 'package:barber_osbao/features/clube/presentation/controllers/clube_controller.dart';
+import 'package:barber_osbao/features/clube/presentation/utils/clube_validators.dart';
 
 class ClubePage extends ConsumerWidget {
   const ClubePage({super.key});
@@ -450,17 +451,39 @@ class _ClubeFormDialogState extends ConsumerState<_ClubeFormDialog> {
           ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
+              final points = int.tryParse(_pointsController.text.trim()) ?? 0;
+              final expiration = _expirationController.text.trim();
+
+              if (!ClubeValidators.isValidPoints(_pointsController.text)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Pontos necessários devem ser maiores que zero.'),
+                    backgroundColor: ThemeColors.warning,
+                  ),
+                );
+                return;
+              }
+
+              if (!ClubeValidators.isValidDate(expiration)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('A data de validade deve seguir o formato AAAA-MM-DD.'),
+                    backgroundColor: ThemeColors.warning,
+                  ),
+                );
+                return;
+              }
+
               final newBenefit = BeneficioClube(
                 id: benefit?.id ?? '',
                 name: _nameController.text.trim(),
                 description: _descriptionController.text.trim(),
-                pointsRequired:
-                    int.tryParse(_pointsController.text.trim()) ?? 100,
+                pointsRequired: points,
                 benefitValue: _benefitValueController.text.trim(),
                 imageUrl: _imageUrlController.text.isNotEmpty
                     ? _imageUrlController.text.trim()
                     : 'https://images.unsplash.com/photo-1571613316887-6f8d5cbf7ef7?q=80&width=150',
-                expirationDate: _expirationController.text.trim(),
+                expirationDate: expiration,
                 active: _active,
               );
 
@@ -504,7 +527,9 @@ class _ClubeFormDialogState extends ConsumerState<_ClubeFormDialog> {
                     controller: _pointsController,
                     keyboardType: TextInputType.number,
                     validator: (val) =>
-                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                        val == null || val.trim().isEmpty || !ClubeValidators.isValidPoints(val)
+                            ? 'Informe pontos válidos (> 0)'
+                            : null,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -514,7 +539,9 @@ class _ClubeFormDialogState extends ConsumerState<_ClubeFormDialog> {
                     placeholder: 'Ex: 2026-12-31',
                     controller: _expirationController,
                     validator: (val) =>
-                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                        val == null || val.trim().isEmpty || !ClubeValidators.isValidDate(val)
+                            ? 'Data inválida'
+                            : null,
                   ),
                 ),
               ],

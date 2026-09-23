@@ -17,6 +17,7 @@ import 'package:barber_osbao/features/financeiro/domain/models/transacao.dart';
 import 'package:barber_osbao/features/financeiro/presentation/controllers/financeiro_controller.dart';
 import 'package:barber_osbao/features/financeiro/presentation/pages/bills_page.dart';
 import 'package:barber_osbao/features/financeiro/presentation/pages/cash_page.dart';
+import 'package:barber_osbao/features/financeiro/presentation/utils/financeiro_validators.dart';
 
 class FinanceiroPage extends ConsumerStatefulWidget {
   const FinanceiroPage({super.key});
@@ -442,13 +443,47 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
           ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
+              final description = _descriptionController.text.trim();
+              final amountText = _amountController.text.trim();
+              final dateText = _dateController.text.trim();
+
+              if (!FinanceiroValidators.isValidDescription(description)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('A descrição da transação é obrigatória.'),
+                    backgroundColor: ThemeColors.warning,
+                  ),
+                );
+                return;
+              }
+
+              if (!FinanceiroValidators.isValidAmount(amountText)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('O valor deve ser maior que zero.'),
+                    backgroundColor: ThemeColors.warning,
+                  ),
+                );
+                return;
+              }
+
+              if (!FinanceiroValidators.isValidDate(dateText)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('A data deve seguir o formato AAAA-MM-DD.'),
+                    backgroundColor: ThemeColors.warning,
+                  ),
+                );
+                return;
+              }
+
               final newT = TransacaoFinanceira(
                 id: '',
                 type: _type,
-                description: _descriptionController.text.trim(),
-                amount: double.tryParse(_amountController.text.trim()) ?? 0.0,
+                description: description,
+                amount: double.tryParse(amountText) ?? 0.0,
                 category: _category,
-                date: _dateController.text.trim(),
+                date: dateText,
                 paymentMethod: _paymentMethod,
                 status: _status,
               );
@@ -545,7 +580,9 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
               placeholder: 'Ex: Conta de internet ou pagamento avulso...',
               controller: _descriptionController,
               validator: (val) =>
-                  val == null || val.isEmpty ? 'Descrição obrigatória' : null,
+                  val == null || val.trim().isEmpty || !FinanceiroValidators.isValidDescription(val)
+                      ? 'Descrição obrigatória'
+                      : null,
             ),
             const SizedBox(height: 16),
             Row(
@@ -559,7 +596,9 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
                       decimal: true,
                     ),
                     validator: (val) =>
-                        val == null || val.isEmpty ? 'Valor obrigatório' : null,
+                        val == null || val.trim().isEmpty || !FinanceiroValidators.isValidAmount(val)
+                            ? 'Valor deve ser maior que zero'
+                            : null,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -788,7 +827,9 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
               placeholder: 'Ex: 2026-07-09',
               controller: _dateController,
               validator: (val) =>
-                  val == null || val.isEmpty ? 'Data obrigatória' : null,
+                  val == null || val.trim().isEmpty || !FinanceiroValidators.isValidDate(val)
+                      ? 'Data inválida'
+                      : null,
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 
 class AppInput extends StatelessWidget {
@@ -6,12 +7,15 @@ class AppInput extends StatelessWidget {
   final String? placeholder;
   final TextEditingController? controller;
   final bool obscureText;
+  final bool readOnly;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
   final TextInputType keyboardType;
   final FormFieldValidator<String>? validator;
   final ValueChanged<String>? onChanged;
   final int maxLines;
+  final List<TextInputFormatter>? inputFormatters;
+  final VoidCallback? onTap;
 
   const AppInput({
     super.key,
@@ -19,12 +23,15 @@ class AppInput extends StatelessWidget {
     this.placeholder,
     this.controller,
     this.obscureText = false,
+    this.readOnly = false,
     this.prefixIcon,
     this.suffixIcon,
     this.keyboardType = TextInputType.text,
     this.validator,
     this.onChanged,
     this.maxLines = 1,
+    this.inputFormatters,
+    this.onTap,
   });
 
   @override
@@ -50,6 +57,9 @@ class AppInput extends StatelessWidget {
           maxLines: maxLines,
           validator: validator,
           onChanged: onChanged,
+          readOnly: readOnly,
+          inputFormatters: inputFormatters,
+          onTap: onTap,
           style: TextStyle(
             fontSize: 14,
             color: isDark ? Colors.white : Colors.black87,

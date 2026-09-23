@@ -498,6 +498,46 @@ class _FuncionarioFormDialogState
   late List<String> _selectedFolgas;
   late bool _active;
 
+  String? _validatePhone(String? value) {
+    final phone = value?.trim() ?? '';
+    if (phone.isEmpty) return 'Telefone obrigatório';
+    final digits = phone.replaceAll(RegExp(r'\D'), '');
+    if (digits.length < 10) return 'Telefone inválido';
+    return null;
+  }
+
+  String? _validateEmail(String? value) {
+    final email = value?.trim() ?? '';
+    if (email.isEmpty) return 'E-mail obrigatório';
+    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (!emailRegex.hasMatch(email)) return 'E-mail inválido';
+    return null;
+  }
+
+  String? _validateCpf(String? value) {
+    final cpf = value?.trim() ?? '';
+    if (cpf.isEmpty) return 'CPF obrigatório';
+    final clean = cpf.replaceAll(RegExp(r'\D'), '');
+    if (clean.length != 11) return 'CPF deve conter 11 dígitos';
+    return null;
+  }
+
+  String? _validateCommission(String? value) {
+    final parsed = double.tryParse(value?.trim() ?? '');
+    if (parsed == null || parsed <= 0 || parsed > 100) {
+      return 'Informe uma comissão entre 1 e 100%';
+    }
+    return null;
+  }
+
+  String? _validateSchedule(String? value) {
+    final schedule = value?.trim() ?? '';
+    if (schedule.isEmpty) return 'Horário obrigatório';
+    final match = RegExp(r'^\d{2}:\d{2}\s*-\s*\d{2}:\d{2}$').hasMatch(schedule);
+    if (!match) return 'Use o formato 09:00 - 18:00';
+    return null;
+  }
+
   final _weekDays = [
     'Segunda',
     'Terça',
@@ -593,6 +633,16 @@ class _FuncionarioFormDialogState
                       30.0) /
                   100.0;
 
+              if (_selectedDays.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Selecione ao menos um dia disponível para o profissional.'),
+                    backgroundColor: ThemeColors.danger,
+                  ),
+                );
+                return;
+              }
+
               final newFunc = Funcionario(
                 id: employee?.id ?? '',
                 name: _nameController.text.trim(),
@@ -661,9 +711,7 @@ class _FuncionarioFormDialogState
                     placeholder: 'Ex: 30',
                     controller: _commissionRateController,
                     keyboardType: TextInputType.number,
-                    validator: (val) => val == null || val.isEmpty
-                        ? 'Comissão obrigatória'
-                        : null,
+                    validator: _validateCommission,
                   ),
                 ),
               ],
@@ -676,6 +724,7 @@ class _FuncionarioFormDialogState
                     label: 'Telefone',
                     placeholder: 'Ex: (11) 97777-2222',
                     controller: _phoneController,
+                    validator: _validatePhone,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -684,6 +733,7 @@ class _FuncionarioFormDialogState
                     label: 'CPF',
                     placeholder: 'Ex: 123.456.789-00',
                     controller: _cpfController,
+                    validator: _validateCpf,
                   ),
                 ),
               ],
@@ -696,6 +746,7 @@ class _FuncionarioFormDialogState
                     label: 'E-mail',
                     placeholder: 'Ex: arthur@barberosbao.com',
                     controller: _emailController,
+                    validator: _validateEmail,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -704,6 +755,7 @@ class _FuncionarioFormDialogState
                     label: 'Horário de Trabalho',
                     placeholder: 'Ex: 09:00 - 18:00',
                     controller: _horarioController,
+                    validator: _validateSchedule,
                   ),
                 ),
               ],
@@ -731,6 +783,17 @@ class _FuncionarioFormDialogState
               ),
             ),
             const SizedBox(height: 8),
+            if (_selectedDays.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Text(
+                  'Selecione pelo menos um dia disponível.',
+                  style: TextStyle(
+                    color: ThemeColors.danger,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
             Wrap(
               spacing: 8,
               runSpacing: 8,

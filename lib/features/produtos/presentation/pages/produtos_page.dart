@@ -495,6 +495,18 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
   late String _category;
   late bool _status;
 
+  String? _validatePositivePrice(String? value, {String fieldName = 'valor'}) {
+    final amount = double.tryParse((value ?? '').trim());
+    if (amount == null || amount <= 0) return '$fieldName deve ser maior que zero';
+    return null;
+  }
+
+  String? _validatePositiveInt(String? value, {String fieldName = 'quantidade'}) {
+    final amount = int.tryParse((value ?? '').trim());
+    if (amount == null || amount < 0) return '$fieldName inválida';
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -567,6 +579,31 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
           ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
+              final costPrice = double.tryParse(_costPriceController.text.trim()) ?? 0.0;
+              final salePrice = double.tryParse(_priceController.text.trim()) ?? 0.0;
+              final stock = int.tryParse(_stockController.text.trim()) ?? 0;
+              final minStock = int.tryParse(_minStockController.text.trim()) ?? 0;
+
+              if (salePrice < costPrice) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('O preço de venda deve ser maior ou igual ao custo.'),
+                    backgroundColor: ThemeColors.warning,
+                  ),
+                );
+                return;
+              }
+
+              if (stock < minStock) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('O estoque atual não pode ficar abaixo do estoque mínimo.'),
+                    backgroundColor: ThemeColors.warning,
+                  ),
+                );
+                return;
+              }
+
               final newProd = Produto(
                 id: product?.id ?? '',
                 name: _nameController.text.trim(),
@@ -574,11 +611,10 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
                 category: _category,
                 supplier: _supplierController.text.trim(),
                 code: _codeController.text.trim(),
-                costPrice:
-                    double.tryParse(_costPriceController.text.trim()) ?? 0.0,
-                price: double.tryParse(_priceController.text.trim()) ?? 0.0,
-                stock: int.tryParse(_stockController.text.trim()) ?? 0,
-                minStock: int.tryParse(_minStockController.text.trim()) ?? 0,
+                costPrice: costPrice,
+                price: salePrice,
+                stock: stock,
+                minStock: minStock,
                 description: _descriptionController.text.trim(),
                 status: _status,
                 imageUrl: _imageUrlController.text.isNotEmpty
@@ -722,8 +758,7 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                    validator: (val) => _validatePositivePrice(val, fieldName: 'Preço de custo'),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -735,8 +770,7 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                    validator: (val) => _validatePositivePrice(val, fieldName: 'Preço de venda'),
                   ),
                 ),
               ],
@@ -750,8 +784,7 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
                     placeholder: 'Ex: 24',
                     controller: _stockController,
                     keyboardType: TextInputType.number,
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                    validator: (val) => _validatePositiveInt(val, fieldName: 'Estoque'),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -761,8 +794,7 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
                     placeholder: 'Ex: 5',
                     controller: _minStockController,
                     keyboardType: TextInputType.number,
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                    validator: (val) => _validatePositiveInt(val, fieldName: 'Estoque mínimo'),
                   ),
                 ),
               ],

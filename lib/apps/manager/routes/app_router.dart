@@ -73,6 +73,7 @@ final GoRouter managerRouter = GoRouter(
                 AppSidebarItem(id: 'clube', title: 'Clube', icon: Icons.stars_outlined),
                 AppSidebarItem(id: 'financeiro', title: 'Financeiro', icon: Icons.account_balance_wallet_outlined),
                 AppSidebarItem(id: 'relatorios', title: 'Relatórios', icon: Icons.bar_chart_outlined),
+                AppSidebarItem(id: 'categorias', title: 'Categorias', icon: Icons.category_outlined),
                 AppSidebarItem(id: 'configuracoes', title: 'Configurações', icon: Icons.settings_outlined),
               ],
               onSidebarSelected: (id) {
@@ -112,6 +113,9 @@ final GoRouter managerRouter = GoRouter(
                     break;
                   case 'configuracoes':
                     context.go('/configuracoes');
+                    break;
+                  case 'categorias':
+                    context.go('/categorias');
                     break;
                 }
               },

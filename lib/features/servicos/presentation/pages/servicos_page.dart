@@ -390,6 +390,18 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
   late String _colorHex;
   late bool _status;
 
+  String? _validatePositivePrice(String? value) {
+    final amount = double.tryParse((value ?? '').trim());
+    if (amount == null || amount <= 0) return 'Informe um valor maior que zero';
+    return null;
+  }
+
+  String? _validatePositiveDuration(String? value) {
+    final amount = int.tryParse((value ?? '').trim());
+    if (amount == null || amount <= 0) return 'A duração deve ser maior que zero';
+    return null;
+  }
+
   final _colorOptions = const [
     {'name': 'Dourado', 'hex': 'C89B3C'},
     {'name': 'Verde', 'hex': '22C55E'},
@@ -578,8 +590,7 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Preço obrigatório' : null,
+                    validator: _validatePositivePrice,
                   ),
                 ),
               ],
@@ -593,9 +604,7 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
                     placeholder: 'Ex: 30',
                     controller: _durationController,
                     keyboardType: TextInputType.number,
-                    validator: (val) => val == null || val.isEmpty
-                        ? 'Duração obrigatória'
-                        : null,
+                    validator: _validatePositiveDuration,
                   ),
                 ),
                 const SizedBox(width: 16),

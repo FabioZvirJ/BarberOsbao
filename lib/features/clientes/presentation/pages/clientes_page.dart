@@ -569,6 +569,34 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
   late String _plano;
   late String _status;
 
+  String? _validatePhone(String? value) {
+    final phone = value?.trim() ?? '';
+    if (phone.isEmpty) return 'Telefone obrigatório';
+    final digits = phone.replaceAll(RegExp(r'\D'), '');
+    if (digits.length < 10) return 'Telefone inválido';
+    return null;
+  }
+
+  String? _validateEmail(String? value) {
+    final email = value?.trim() ?? '';
+    if (email.isEmpty) return null;
+    final emailRegex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (!emailRegex.hasMatch(email)) return 'E-mail inválido';
+    return null;
+  }
+
+  String? _validateBirthDate(String? value) {
+    final raw = value?.trim() ?? '';
+    if (raw.isEmpty) return null;
+
+    final normalized = raw.replaceAll('/', '-');
+    final date = DateTime.tryParse(normalized);
+    if (date == null) return 'Data de nascimento inválida';
+
+    if (date.isAfter(DateTime.now())) return 'Data futura não é permitida';
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -681,9 +709,7 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
                     label: 'Telefone',
                     placeholder: 'Ex: (11) 99999-9999',
                     controller: _phoneController,
-                    validator: (val) => val == null || val.isEmpty
-                        ? 'Telefone obrigatório'
-                        : null,
+                    validator: _validatePhone,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -692,6 +718,7 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
                     label: 'Nascimento',
                     placeholder: 'Ex: 15/08/1990',
                     controller: _nascimentoController,
+                    validator: _validateBirthDate,
                   ),
                 ),
               ],
@@ -704,6 +731,7 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
                     label: 'E-mail',
                     placeholder: 'Ex: joao@gmail.com',
                     controller: _emailController,
+                    validator: _validateEmail,
                   ),
                 ),
                 const SizedBox(width: 16),

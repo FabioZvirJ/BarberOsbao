@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -67,6 +68,13 @@ class MyApp extends ConsumerWidget {
         return MaterialApp.router(
           title: isClient ? 'BarberOsbao' : 'BarberOsbao Manager',
           debugShowCheckedModeBanner: false,
+          locale: const Locale('pt', 'BR'),
+          supportedLocales: const [Locale('pt', 'BR')],
+          localizationsDelegates: const [
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+            DefaultCupertinoLocalizations.delegate,
+          ],
           themeMode: themeMode,
           theme: ThemeColors.getLightTheme(),
           darkTheme: ThemeColors.getDarkTheme(),

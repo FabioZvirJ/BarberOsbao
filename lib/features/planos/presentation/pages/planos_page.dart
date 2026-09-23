@@ -454,6 +454,20 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
   late bool _status;
   late List<String> _benefits;
 
+  String? _validatePrice(String? value) {
+    final amount = double.tryParse((value ?? '').trim());
+    if (amount == null || amount <= 0) return 'Informe um valor maior que zero';
+    return null;
+  }
+
+  String? _validateDiscount(String? value) {
+    final amount = double.tryParse((value ?? '').trim());
+    if (amount == null || amount < 0 || amount > 100) {
+      return 'Desconto deve estar entre 0% e 100%';
+    }
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -519,6 +533,16 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
           ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
+              if (_benefits.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Adicione pelo menos um benefício para o plano.'),
+                    backgroundColor: ThemeColors.warning,
+                  ),
+                );
+                return;
+              }
+
               final newPlan = Plano(
                 id: plan?.id ?? '',
                 name: _nameController.text.trim(),
@@ -570,8 +594,7 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Valor obrigatório' : null,
+                    validator: _validatePrice,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -661,9 +684,13 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
                     placeholder: 'Ex: 4',
                     controller: _cutsController,
                     keyboardType: TextInputType.number,
-                    validator: (val) => val == null || val.isEmpty
-                        ? 'Qtd de cortes obrigatória'
-                        : null,
+                    validator: (val) {
+                      final parsed = int.tryParse((val ?? '').trim());
+                      if (parsed == null || parsed <= 0) {
+                        return 'Informe uma quantidade válida';
+                      }
+                      return null;
+                    },
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -675,9 +702,7 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    validator: (val) => val == null || val.isEmpty
-                        ? 'Desconto obrigatório'
-                        : null,
+                    validator: _validateDiscount,
                   ),
                 ),
               ],
