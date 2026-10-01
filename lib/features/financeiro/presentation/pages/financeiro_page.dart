@@ -379,20 +379,20 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
   void _showFormDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (ctx) => const _NewTransactionDialog(),
+      builder: (ctx) => const NewTransactionDialog(),
     );
   }
 }
 
-class _NewTransactionDialog extends ConsumerStatefulWidget {
-  const _NewTransactionDialog();
+class NewTransactionDialog extends ConsumerStatefulWidget {
+  const NewTransactionDialog({super.key});
 
   @override
-  ConsumerState<_NewTransactionDialog> createState() =>
+  ConsumerState<NewTransactionDialog> createState() =>
       _NewTransactionDialogState();
 }
 
-class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
+class _NewTransactionDialogState extends ConsumerState<NewTransactionDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _descriptionController;
   late final TextEditingController _amountController;

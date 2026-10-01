@@ -676,21 +676,21 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
   void _showFormDialog(BuildContext context, [Cliente? customer]) {
     showDialog(
       context: context,
-      builder: (ctx) => _ClienteFormDialog(customer: customer),
+      builder: (ctx) => ClienteFormDialog(customer: customer),
     );
   }
 }
 
-class _ClienteFormDialog extends ConsumerStatefulWidget {
+class ClienteFormDialog extends ConsumerStatefulWidget {
   final Cliente? customer;
 
-  const _ClienteFormDialog({this.customer});
+  const ClienteFormDialog({super.key, this.customer});
 
   @override
-  ConsumerState<_ClienteFormDialog> createState() => _ClienteFormDialogState();
+  ConsumerState<ClienteFormDialog> createState() => _ClienteFormDialogState();
 }
 
-class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
+class _ClienteFormDialogState extends ConsumerState<ClienteFormDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _emailController;

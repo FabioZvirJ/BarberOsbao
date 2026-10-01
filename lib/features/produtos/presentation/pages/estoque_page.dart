@@ -260,7 +260,7 @@ class _EstoquePageState extends ConsumerState<EstoquePage> {
 
     showDialog(
       context: context,
-      builder: (ctx) => _MovimentacaoDialog(products: products),
+      builder: (ctx) => EstoqueMovimentacaoDialog(products: products),
     );
   }
 
@@ -367,17 +367,18 @@ class _EstoquePageState extends ConsumerState<EstoquePage> {
   }
 }
 
-class _MovimentacaoDialog extends ConsumerStatefulWidget {
-  final List<Produto> products;
+class EstoqueMovimentacaoDialog extends ConsumerStatefulWidget {
+  final List<Produto>? products;
 
-  const _MovimentacaoDialog({required this.products});
+  const EstoqueMovimentacaoDialog({super.key, this.products});
 
   @override
-  ConsumerState<_MovimentacaoDialog> createState() =>
-      _MovimentacaoDialogState();
+  ConsumerState<EstoqueMovimentacaoDialog> createState() =>
+      _EstoqueMovimentacaoDialogState();
 }
 
-class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
+class _EstoqueMovimentacaoDialogState
+    extends ConsumerState<EstoqueMovimentacaoDialog> {
   final _formKey = GlobalKey<FormState>();
   String? _selectedProductId;
   late String _type;
@@ -403,6 +404,8 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final availableProducts =
+        widget.products ?? (ref.watch(produtosControllerProvider).data ?? []);
 
     return AppResponsiveDialog(
       title: 'Lançar Movimentação de Estoque',
@@ -440,7 +443,7 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
               return;
             }
             if (_formKey.currentState?.validate() ?? false) {
-              final prod = widget.products.firstWhere(
+              final prod = availableProducts.firstWhere(
                 (p) => p.id == _selectedProductId,
               );
               final qty = int.tryParse(_qtyController.text.trim()) ?? 0;
@@ -531,7 +534,7 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
                   ),
                   validator: (val) =>
                       val == null ? 'Selecione um produto' : null,
-                  items: widget.products
+                  items: availableProducts
                       .map(
                         (p) => DropdownMenuItem(
                           value: p.id,
