@@ -13,7 +13,11 @@ import 'package:barber_osbao/packages/design_system/atoms/app_avatar.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_image_upload.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
+import 'package:barber_osbao/packages/core/utils/app_masks.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
+import 'package:barber_osbao/features/agenda/presentation/controllers/agenda_controller.dart';
 import 'package:barber_osbao/features/clientes/domain/models/cliente.dart';
 import 'package:barber_osbao/features/clientes/presentation/controllers/clientes_controller.dart';
 
@@ -219,15 +223,15 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
     }
 
     return AppTable(
-      minWidth: 1000,
+      minWidth: 1050,
       columns: [
         AppTableColumn(label: 'FOTO', width: 50),
         AppTableColumn(label: 'NOME', flex: 3),
-        AppTableColumn(label: 'TELEFONE', width: 130),
+        AppTableColumn(label: 'TELEFONE', width: 165),
         AppTableColumn(label: 'EMAIL', flex: 2),
-        AppTableColumn(label: 'NASCIMENTO', width: 100),
+        AppTableColumn(label: 'NASCIMENTO', width: 105),
         AppTableColumn(label: 'PLANO', width: 100),
-        AppTableColumn(label: 'ÚLT. VISITA', width: 100),
+        AppTableColumn(label: 'ÚLT. VISITA', width: 105),
         AppTableColumn(label: 'TOTAL GASTO', width: 110),
         AppTableColumn(label: 'STATUS', width: 85),
         AppTableColumn(label: 'AÇÕES', width: 130),
@@ -235,7 +239,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
       rows: filtered.map((c) {
         return AppTableRow(
           cells: [
-            AppAvatar(url: c.avatarUrl, size: 36),
+            AppAvatar(url: c.avatarUrl, name: c.name, size: 36),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -247,20 +251,63 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                   Text(
                     c.observacoes,
                     style: const TextStyle(
-                      fontSize: 10,
+                      fontSize: 11,
                       color: Colors.grey,
-                      fontStyle: FontStyle.italic,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
               ],
             ),
-            Text(c.phone),
-            Text(c.email),
-            Text(c.nascimento),
+            InkWell(
+              onTap: () async {
+                final clean = c.phone.replaceAll(RegExp(r'\D'), '');
+                if (clean.isNotEmpty) {
+                  final ddi = clean.startsWith('55') ? clean : '55$clean';
+                  final uri = Uri.parse('https://wa.me/$ddi');
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                }
+              },
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        c.phone,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          decoration: TextDecoration.underline,
+                          decorationColor: ThemeColors.success,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.chat, size: 13, color: ThemeColors.success),
+                  ],
+                ),
+              ),
+            ),
+            Text(
+              c.email,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              c.nascimento,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             Text(
               c.plano,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontWeight: c.plano != 'Nenhum'
                     ? FontWeight.bold
@@ -270,7 +317,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
             ),
             Text(c.ultimaVisita),
             Text(
-              'R\$ ${c.totalGasto.toStringAsFixed(2)}',
+              AppFormatters.formatCurrency(c.totalGasto),
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 color: ThemeColors.success,
@@ -313,13 +360,17 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                     minWidth: 32,
                     minHeight: 32,
                   ),
-                  icon: const Icon(
-                    Icons.delete_outline,
+                  icon: Icon(
+                    c.status == 'active'
+                        ? Icons.person_off_outlined
+                        : Icons.person_add_alt_1_outlined,
                     size: 18,
-                    color: ThemeColors.danger,
+                    color: c.status == 'active'
+                        ? ThemeColors.warning
+                        : ThemeColors.success,
                   ),
                   onPressed: () => _showDeleteDialog(context, c),
-                  tooltip: 'Excluir',
+                  tooltip: c.status == 'active' ? 'Inativar Cliente' : 'Reativar Cliente',
                 ),
               ],
             ),
@@ -331,22 +382,40 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
 
   void _showDeleteDialog(BuildContext context, Cliente customer) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isCurrentlyActive = customer.status == 'active';
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: Text(
-          'Excluir Cliente',
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black87,
-            fontWeight: FontWeight.bold,
-          ),
+        title: Row(
+          children: [
+            Icon(
+              isCurrentlyActive
+                  ? Icons.person_off_outlined
+                  : Icons.person_add_alt_1_outlined,
+              color: isCurrentlyActive ? ThemeColors.warning : ThemeColors.success,
+              size: 22,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              isCurrentlyActive ? 'Inativar Cliente' : 'Reativar Cliente',
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black87,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
         content: Text(
-          'Tem certeza que deseja excluir o cliente "${customer.name}"? Isso apagará permanentemente o registro comercial.',
-          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+          isCurrentlyActive
+              ? 'Deseja inativar o cliente "${customer.name}"? O cliente não aparecerá em novos agendamentos, mas todo o seu histórico de consumo de ${AppFormatters.formatCurrency(customer.totalGasto)} permanecerá seguro na base de dados.'
+              : 'Deseja reativar o cadastro do cliente "${customer.name}" para permitir novos agendamentos?',
+          style: TextStyle(
+            color: isDark ? Colors.white70 : Colors.black87,
+            fontSize: 13,
+          ),
         ),
         actions: [
           TextButton(
@@ -358,18 +427,39 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: ThemeColors.danger,
+              backgroundColor: isCurrentlyActive
+                  ? ThemeColors.warning
+                  : ThemeColors.success,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6),
               ),
             ),
             onPressed: () {
+              final newStatus = isCurrentlyActive ? 'inactive' : 'active';
               ref
                   .read(clientesControllerProvider.notifier)
-                  .removeCliente(customer.id);
+                  .editCliente(customer.copyWith(status: newStatus));
               Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    isCurrentlyActive
+                        ? 'Cliente "${customer.name}" inativado com sucesso.'
+                        : 'Cliente "${customer.name}" reativado.',
+                  ),
+                  backgroundColor: isCurrentlyActive
+                      ? Colors.orange.shade800
+                      : ThemeColors.success,
+                ),
+              );
             },
-            child: const Text('Excluir', style: TextStyle(color: Colors.white)),
+            child: Text(
+              isCurrentlyActive ? 'Inativar' : 'Reativar',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -378,13 +468,19 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
 
   void _showHistoryDialog(BuildContext context, Cliente customer) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final agendaState = ref.watch(agendaControllerProvider);
+    final allApts = agendaState.data ?? [];
+    final customerAppointments = allApts.where((a) {
+      return a.clientName.trim().toLowerCase() == customer.name.trim().toLowerCase();
+    }).toList()
+      ..sort((a, b) => b.dateTime.compareTo(a.dateTime));
 
     showDialog(
       context: context,
       builder: (ctx) => AppResponsiveDialog(
         title: customer.name,
-        subtitle: '${customer.email} • Plano: ${customer.plano}',
-        maxWidth: 520,
+        subtitle: '${customer.email.isNotEmpty ? customer.email : 'Sem e-mail'} • Plano: ${customer.plano}',
+        maxWidth: 540,
         actions: [
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -408,7 +504,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
           children: [
             Row(
               children: [
-                AppAvatar(url: customer.avatarUrl, size: 48),
+                AppAvatar(url: customer.avatarUrl, name: customer.name, size: 48),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -436,71 +532,107 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
               ],
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Histórico de Visitas Recentes',
-              style: TextStyle(
-                color: ThemeColors.primary,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Histórico de Visitas',
+                  style: TextStyle(
+                    color: ThemeColors.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  '${customerAppointments.length} agendamento(s)',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(
-                Icons.check_circle,
-                color: ThemeColors.success,
-              ),
-              title: Text(
-                'Corte + Barba (Arthur Santos)',
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black87,
-                  fontSize: 13,
+            if (customerAppointments.isEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.02)
+                      : Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.event_busy,
+                      size: 40,
+                      color: isDark ? Colors.white24 : Colors.black26,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Nenhum agendamento registrado para este cliente.',
+                      style: TextStyle(
+                        color: isDark ? Colors.white38 : Colors.grey.shade600,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 280),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: customerAppointments.length,
+                  separatorBuilder: (_, _) => Divider(
+                    height: 1,
+                    color: isDark ? Colors.white10 : Colors.grey.shade200,
+                  ),
+                  itemBuilder: (context, index) {
+                    final apt = customerAppointments[index];
+                    final isCompleted =
+                        apt.status == 'Concluído' || apt.status == 'completed';
+                    final isCanceled =
+                        apt.status == 'Cancelado' || apt.status == 'canceled';
+                    final statusColor = isCompleted
+                        ? ThemeColors.success
+                        : (isCanceled ? ThemeColors.danger : ThemeColors.primary);
+
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(
+                        isCompleted
+                            ? Icons.check_circle
+                            : (isCanceled ? Icons.cancel : Icons.schedule),
+                        color: statusColor,
+                      ),
+                      title: Text(
+                        '${apt.serviceName} (${apt.barberName})',
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Data: ${AppFormatters.formatDateTime(apt.dateTime)} • Status: ${apt.status}',
+                        style: const TextStyle(color: Colors.grey, fontSize: 11),
+                      ),
+                      trailing: Text(
+                        AppFormatters.formatCurrency(apt.price),
+                        style: TextStyle(
+                          color: statusColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
-              subtitle: Text(
-                'Data: ${customer.ultimaVisita} - R\$ 80.00',
-                style: const TextStyle(color: Colors.grey, fontSize: 11),
-              ),
-            ),
-            Divider(color: isDark ? Colors.white10 : Colors.grey.shade200),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(
-                Icons.check_circle,
-                color: ThemeColors.success,
-              ),
-              title: Text(
-                'Corte Degradê (Marcos Silva)',
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black87,
-                  fontSize: 13,
-                ),
-              ),
-              subtitle: const Text(
-                'Data: 10/05/2026 - R\$ 45.00',
-                style: TextStyle(color: Colors.grey, fontSize: 11),
-              ),
-            ),
-            Divider(color: isDark ? Colors.white10 : Colors.grey.shade200),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(
-                Icons.check_circle,
-                color: ThemeColors.success,
-              ),
-              title: Text(
-                'Design de Sobrancelha (Gabriel Neves)',
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black87,
-                  fontSize: 13,
-                ),
-              ),
-              subtitle: const Text(
-                'Data: 15/04/2026 - R\$ 20.00',
-                style: TextStyle(color: Colors.grey, fontSize: 11),
-              ),
-            ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
@@ -517,7 +649,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Total Consumido:',
+                    'Total Consumido Histórico:',
                     style: TextStyle(
                       color: isDark ? Colors.white70 : Colors.black87,
                       fontSize: 13,
@@ -525,7 +657,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                     ),
                   ),
                   Text(
-                    'R\$ ${customer.totalGasto.toStringAsFixed(2)}',
+                    AppFormatters.formatCurrency(customer.totalGasto),
                     style: const TextStyle(
                       color: ThemeColors.success,
                       fontWeight: FontWeight.bold,
@@ -632,9 +764,7 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
                 name: _nameController.text.trim(),
                 email: _emailController.text.trim(),
                 phone: _phoneController.text.trim(),
-                avatarUrl: _avatarUrlController.text.isNotEmpty
-                    ? _avatarUrlController.text.trim()
-                    : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&width=150',
+                avatarUrl: _avatarUrlController.text.trim(),
                 nascimento: _nascimentoController.text.trim(),
                 plano: _plano,
                 ultimaVisita: customer?.ultimaVisita ?? 'Nunca',
@@ -671,7 +801,7 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
               placeholder: 'Ex: João Carlos da Silva',
               controller: _nameController,
               validator: (val) =>
-                  val == null || val.isEmpty ? 'Nome obrigatório' : null,
+                  val == null || val.trim().isEmpty ? 'Nome obrigatório' : null,
             ),
             const SizedBox(height: 16),
             Row(
@@ -679,19 +809,53 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
                 Expanded(
                   child: AppInput(
                     label: 'Telefone',
-                    placeholder: 'Ex: (11) 99999-9999',
+                    placeholder: '(11) 99999-9999',
                     controller: _phoneController,
-                    validator: (val) => val == null || val.isEmpty
-                        ? 'Telefone obrigatório'
-                        : null,
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: [AppMasks.phone],
+                    validator: AppValidators.phone(required: true),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: AppInput(
-                    label: 'Nascimento',
-                    placeholder: 'Ex: 15/08/1990',
-                    controller: _nascimentoController,
+                  child: InkWell(
+                    onTap: () async {
+                      DateTime initial = DateTime.now().subtract(
+                        const Duration(days: 365 * 25),
+                      );
+                      if (_nascimentoController.text.isNotEmpty) {
+                        try {
+                          final parts = _nascimentoController.text.split('/');
+                          if (parts.length == 3) {
+                            initial = DateTime(
+                              int.parse(parts[2]),
+                              int.parse(parts[1]),
+                              int.parse(parts[0]),
+                            );
+                          }
+                        } catch (_) {}
+                      }
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: initial,
+                        firstDate: DateTime(1920),
+                        lastDate: DateTime.now(),
+                        locale: const Locale('pt', 'BR'),
+                      );
+                      if (picked != null) {
+                        _nascimentoController.text =
+                            AppFormatters.formatDate(picked);
+                      }
+                    },
+                    child: IgnorePointer(
+                      child: AppInput(
+                        label: 'Nascimento',
+                        placeholder: 'DD/MM/AAAA',
+                        controller: _nascimentoController,
+                        inputFormatters: [AppMasks.date],
+                        validator: AppValidators.date(),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -704,6 +868,8 @@ class _ClienteFormDialogState extends ConsumerState<_ClienteFormDialog> {
                     label: 'E-mail',
                     placeholder: 'Ex: joao@gmail.com',
                     controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    validator: AppValidators.email(),
                   ),
                 ),
                 const SizedBox(width: 16),
