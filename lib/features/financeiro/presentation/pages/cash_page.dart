@@ -10,6 +10,7 @@ import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_stat_card.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
+import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
 import 'package:barber_osbao/features/financeiro/domain/models/cash_shift.dart';
 import 'package:barber_osbao/features/financeiro/presentation/controllers/cash_controller.dart';
 
@@ -156,12 +157,12 @@ class _CashPageState extends ConsumerState<CashPage> {
               children: [
                 AppStatCard(
                   title: 'SALDO INICIAL',
-                  value: 'R\$ ${cash.initialBalance.toStringAsFixed(2)}',
+                  value: AppFormatters.formatCurrency(cash.initialBalance),
                   icon: const Icon(Icons.wallet, color: Colors.blue),
                 ),
                 AppStatCard(
                   title: 'MOVIMENTAÇÕES (LÍQ.)',
-                  value: 'R\$ ${(entries - exits).toStringAsFixed(2)}',
+                  value: AppFormatters.formatCurrency(entries - exits),
                   icon: const Icon(
                     Icons.swap_horiz,
                     color: ThemeColors.warning,
@@ -169,7 +170,7 @@ class _CashPageState extends ConsumerState<CashPage> {
                 ),
                 AppStatCard(
                   title: 'SALDO ATUAL EM CAIXA',
-                  value: 'R\$ ${currentBalance.toStringAsFixed(2)}',
+                  value: AppFormatters.formatCurrency(currentBalance),
                   icon: const Icon(
                     Icons.account_balance_wallet,
                     color: ThemeColors.success,
@@ -269,7 +270,7 @@ class _CashPageState extends ConsumerState<CashPage> {
             ),
             Text(mv.description),
             Text(
-              'R\$ ${mv.amount.toStringAsFixed(2)}',
+              '${isInput ? "+ " : "- "}${AppFormatters.formatCurrency(mv.amount)}',
               style: TextStyle(
                 color: isInput ? ThemeColors.success : ThemeColors.danger,
                 fontWeight: FontWeight.bold,
@@ -428,7 +429,7 @@ class _CashPageState extends ConsumerState<CashPage> {
                         ),
                       ),
                       Text(
-                        'R\$ ${cash.initialBalance.toStringAsFixed(2)}',
+                        AppFormatters.formatCurrency(cash.initialBalance),
                         style: TextStyle(
                           color: isDark ? Colors.white : Colors.black87,
                           fontSize: 13,
@@ -449,7 +450,7 @@ class _CashPageState extends ConsumerState<CashPage> {
                         ),
                       ),
                       Text(
-                        'R\$ ${moneyEntries.toStringAsFixed(2)}',
+                        AppFormatters.formatCurrency(moneyEntries),
                         style: TextStyle(
                           color: isDark ? Colors.white : Colors.black87,
                           fontSize: 13,
@@ -475,7 +476,7 @@ class _CashPageState extends ConsumerState<CashPage> {
                         ),
                       ),
                       Text(
-                        'R\$ ${totalExpected.toStringAsFixed(2)}',
+                        AppFormatters.formatCurrency(totalExpected),
                         style: const TextStyle(
                           color: ThemeColors.primary,
                           fontWeight: FontWeight.bold,

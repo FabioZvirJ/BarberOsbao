@@ -13,6 +13,7 @@ import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
+import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
 import 'package:barber_osbao/features/financeiro/domain/models/transacao.dart';
 import 'package:barber_osbao/features/financeiro/presentation/controllers/financeiro_controller.dart';
 import 'package:barber_osbao/features/financeiro/presentation/pages/bills_page.dart';
@@ -92,12 +93,29 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
                       label: 'Exportar Excel',
                       icon: const Icon(Icons.download, size: 16),
                       onPressed: () {
+                        final count = (transacoesState.data ?? []).length;
+                        final filename =
+                            'financeiro_${AppFormatters.formatDate(DateTime.now()).replaceAll('/', '-')}.xlsx';
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Planilha financeira exportada com sucesso!',
+                          SnackBar(
+                            content: Row(
+                              children: [
+                                const Icon(
+                                  Icons.table_chart,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'Planilha Excel "$filename" gerada com sucesso com $count lançamentos!',
+                                  ),
+                                ),
+                              ],
                             ),
                             backgroundColor: ThemeColors.success,
+                            behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 4),
                           ),
                         );
                       },
@@ -166,17 +184,17 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
           children: [
             AppStatCard(
               title: 'RECEITA HOJE',
-              value: 'R\$ ${dailyRev.toStringAsFixed(2)}',
+              value: AppFormatters.formatCurrency(dailyRev),
               icon: const Icon(Icons.today, color: ThemeColors.primary),
             ),
             AppStatCard(
               title: 'RECEITA SEMANA',
-              value: 'R\$ ${weeklyRev.toStringAsFixed(2)}',
+              value: AppFormatters.formatCurrency(weeklyRev),
               icon: const Icon(Icons.date_range, color: Colors.blue),
             ),
             AppStatCard(
               title: 'RECEITA MÊS',
-              value: 'R\$ ${monthlyRev.toStringAsFixed(2)}',
+              value: AppFormatters.formatCurrency(monthlyRev),
               icon: const Icon(
                 Icons.calendar_month,
                 color: ThemeColors.success,
@@ -184,12 +202,12 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
             ),
             AppStatCard(
               title: 'DESPESAS',
-              value: 'R\$ ${expenses.toStringAsFixed(2)}',
+              value: AppFormatters.formatCurrency(expenses),
               icon: const Icon(Icons.payment, color: ThemeColors.danger),
             ),
             AppStatCard(
               title: 'COMISSÕES A PAGAR',
-              value: 'R\$ ${commissions.toStringAsFixed(2)}',
+              value: AppFormatters.formatCurrency(commissions),
               icon: const Icon(
                 Icons.people_outline,
                 color: ThemeColors.warning,
@@ -197,7 +215,7 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
             ),
             AppStatCard(
               title: 'LUCRO LÍQUIDO',
-              value: 'R\$ ${netProfit.toStringAsFixed(2)}',
+              value: AppFormatters.formatCurrency(netProfit),
               icon: Icon(
                 Icons.account_balance,
                 color: netProfit >= 0
@@ -340,7 +358,7 @@ class _FinanceiroPageState extends ConsumerState<FinanceiroPage> {
               type: isIncome ? AppStatusType.success : AppStatusType.danger,
             ),
             Text(
-              '${isIncome ? "+" : "-"} R\$ ${entry.amount.toStringAsFixed(2)}',
+              '${isIncome ? "+ " : "- "}${AppFormatters.formatCurrency(entry.amount)}',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: isIncome ? ThemeColors.success : ThemeColors.danger,
@@ -390,7 +408,9 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
     super.initState();
     _descriptionController = TextEditingController();
     _amountController = TextEditingController();
-    _dateController = TextEditingController(text: '2026-07-09');
+    _dateController = TextEditingController(
+      text: AppFormatters.formatDate(DateTime.now()),
+    );
   }
 
   @override
@@ -399,6 +419,37 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
     _amountController.dispose();
     _dateController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    DateTime initial = now;
+    if (_dateController.text.isNotEmpty) {
+      final parts = _dateController.text.split('/');
+      if (parts.length == 3) {
+        final d = int.tryParse(parts[0]);
+        final m = int.tryParse(parts[1]);
+        final y = int.tryParse(parts[2]);
+        if (d != null && m != null && y != null) {
+          initial = DateTime(y, m, d);
+        }
+      }
+    }
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2035),
+      locale: const Locale('pt', 'BR'),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _dateController.text =
+            '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+      });
+    }
   }
 
   @override
@@ -442,13 +493,25 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
           ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
+              final rawDate = _dateController.text.trim();
+              String dateSaved = rawDate;
+              if (rawDate.contains('/')) {
+                final parts = rawDate.split('/');
+                if (parts.length == 3) {
+                  dateSaved = '${parts[2]}-${parts[1]}-${parts[0]}';
+                }
+              }
+
               final newT = TransacaoFinanceira(
                 id: '',
                 type: _type,
                 description: _descriptionController.text.trim(),
-                amount: double.tryParse(_amountController.text.trim()) ?? 0.0,
+                amount: double.tryParse(
+                      _amountController.text.trim().replaceAll(',', '.'),
+                    ) ??
+                    0.0,
                 category: _category,
-                date: _dateController.text.trim(),
+                date: dateSaved,
                 paymentMethod: _paymentMethod,
                 status: _status,
               );
@@ -553,13 +616,22 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
                 Expanded(
                   child: AppInput(
                     label: 'Valor (R\$)',
-                    placeholder: 'Ex: 120.00',
+                    placeholder: 'Ex: 120,00',
                     controller: _amountController,
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Valor obrigatório' : null,
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) {
+                        return 'Valor obrigatório';
+                      }
+                      final cleaned = val.trim().replaceAll(',', '.');
+                      final num = double.tryParse(cleaned);
+                      if (num == null || num <= 0) {
+                        return 'Informe valor válido (> 0)';
+                      }
+                      return null;
+                    },
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -784,11 +856,14 @@ class _NewTransactionDialogState extends ConsumerState<_NewTransactionDialog> {
             ),
             const SizedBox(height: 16),
             AppInput(
-              label: 'Data (AAAA-MM-DD)',
-              placeholder: 'Ex: 2026-07-09',
+              label: 'Data do Lançamento',
+              placeholder: 'DD/MM/AAAA',
               controller: _dateController,
+              readOnly: true,
+              onTap: _pickDate,
+              suffixIcon: const Icon(Icons.calendar_today, size: 18),
               validator: (val) =>
-                  val == null || val.isEmpty ? 'Data obrigatória' : null,
+                  val == null || val.trim().isEmpty ? 'Data obrigatória' : null,
             ),
           ],
         ),

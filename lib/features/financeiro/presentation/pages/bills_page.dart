@@ -8,6 +8,7 @@ import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
+import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
 import 'package:barber_osbao/features/financeiro/domain/models/bill.dart';
 import 'package:barber_osbao/features/financeiro/presentation/controllers/bill_controller.dart';
 import 'package:barber_osbao/features/servicos/presentation/controllers/servicos_controller.dart';
@@ -156,7 +157,7 @@ class _BillsPageState extends ConsumerState<BillsPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'R\$ ${bill.total.toStringAsFixed(2)}',
+                AppFormatters.formatCurrency(bill.total),
                 style: const TextStyle(
                   color: ThemeColors.primary,
                   fontWeight: FontWeight.bold,
@@ -357,7 +358,7 @@ class _CheckoutBillDialogState extends ConsumerState<_CheckoutBillDialog> {
               if ((totalPaid - total).abs() > 0.01) {
                 setState(
                   () => _errorMessage =
-                      'A soma das formas de pagamento (R\$ ${totalPaid.toStringAsFixed(2)}) não confere com o total (R\$ ${total.toStringAsFixed(2)}).',
+                      'A soma das formas de pagamento (${AppFormatters.formatCurrency(totalPaid)}) não confere com o total (${AppFormatters.formatCurrency(total)}).',
                 );
                 return;
               }
@@ -399,7 +400,7 @@ class _CheckoutBillDialogState extends ConsumerState<_CheckoutBillDialog> {
                           ),
                         ),
                         Text(
-                          'R\$ ${it.total.toStringAsFixed(2)}',
+                          AppFormatters.formatCurrency(it.total),
                           style: TextStyle(
                             color: isDark ? Colors.white70 : Colors.black87,
                             fontSize: 13,
@@ -422,7 +423,7 @@ class _CheckoutBillDialogState extends ConsumerState<_CheckoutBillDialog> {
                       style: TextStyle(color: Colors.grey, fontSize: 13),
                     ),
                     Text(
-                      'R\$ ${subtotal.toStringAsFixed(2)}',
+                      AppFormatters.formatCurrency(subtotal),
                       style: TextStyle(
                         color: isDark ? Colors.white : Colors.black87,
                         fontSize: 13,
@@ -443,7 +444,7 @@ class _CheckoutBillDialogState extends ConsumerState<_CheckoutBillDialog> {
                       ),
                     ),
                     Text(
-                      'R\$ ${total.toStringAsFixed(2)}',
+                      AppFormatters.formatCurrency(total),
                       style: const TextStyle(
                         color: ThemeColors.primary,
                         fontWeight: FontWeight.bold,
@@ -556,7 +557,7 @@ class _CheckoutBillDialogState extends ConsumerState<_CheckoutBillDialog> {
                   ),
                 ),
                 Text(
-                  'R\$ ${totalPaid.toStringAsFixed(2)} / R\$ ${total.toStringAsFixed(2)}',
+                  '${AppFormatters.formatCurrency(totalPaid)} / ${AppFormatters.formatCurrency(total)}',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -614,7 +615,7 @@ class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
         itemsToSelect.add(
           DropdownMenuItem(
             value: item.id,
-            child: Text('${item.name} - R\$ ${item.price.toStringAsFixed(2)}'),
+            child: Text('${item.name} - ${AppFormatters.formatCurrency(item.price)}'),
           ),
         );
       }
@@ -624,7 +625,7 @@ class _AddBillItemDialogState extends ConsumerState<_AddBillItemDialog> {
         itemsToSelect.add(
           DropdownMenuItem(
             value: item.id,
-            child: Text('${item.name} - R\$ ${item.price.toStringAsFixed(2)}'),
+            child: Text('${item.name} - ${AppFormatters.formatCurrency(item.price)}'),
           ),
         );
       }
