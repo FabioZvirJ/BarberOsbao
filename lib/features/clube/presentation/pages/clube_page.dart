@@ -11,6 +11,7 @@ import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_image_upload.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
+import 'package:barber_osbao/packages/core/utils/app_masks.dart';
 import 'package:barber_osbao/features/clube/domain/models/beneficio_clube.dart';
 import 'package:barber_osbao/features/clube/presentation/controllers/clube_controller.dart';
 
@@ -84,25 +85,72 @@ class ClubePage extends ConsumerWidget {
                     const SizedBox(width: 24),
                     Expanded(
                       child: AppCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'REGRAS DE RESGATE RÁPIDO',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            _buildRuleRow('100 pts: Chopp Artesanal Gelado'),
-                            _buildRuleRow('300 pts: Pomada Matte Finalizadora'),
-                            _buildRuleRow('500 pts: 50% de Desconto em Cortes'),
-                            _buildRuleRow(
-                              '800 pts: Combo Cabelo + Barba Completo',
-                            ),
-                          ],
+                        child: Builder(
+                          builder: (context) {
+                            final allRewards = state.data ?? [];
+                            final activeRewards = allRewards
+                                .where((b) => b.active)
+                                .toList()
+                              ..sort(
+                                (a, b) => a.pointsRequired
+                                    .compareTo(b.pointsRequired),
+                              );
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      'REGRAS DE RESGATE RÁPIDO',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${activeRewards.length} ativas',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: ThemeColors.primary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                const Text(
+                                  'Baseado nas recompensas ativas cadastradas:',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                if (activeRewards.isEmpty)
+                                  const Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 8.0),
+                                    child: Text(
+                                      'Nenhuma recompensa ativa no momento.',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  ...activeRewards.take(4).map(
+                                        (r) => _buildRuleRow(
+                                          '${r.pointsRequired} pts: ${r.name}',
+                                        ),
+                                      ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -244,7 +292,11 @@ class ClubePage extends ConsumerWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            Text(b.expirationDate.split('-').reversed.join('/')),
+            Text(
+              b.expirationDate.contains('-')
+                  ? b.expirationDate.split('-').reversed.join('/')
+                  : b.expirationDate,
+            ),
             AppStatusChip(
               label: b.active ? 'Ativo' : 'Inativo',
               type: b.active ? AppStatusType.success : AppStatusType.danger,
@@ -394,14 +446,21 @@ class _ClubeFormDialogState extends ConsumerState<_ClubeFormDialog> {
     _nameController = TextEditingController(text: b?.name ?? '');
     _descriptionController = TextEditingController(text: b?.description ?? '');
     _pointsController = TextEditingController(
-      text: b?.pointsRequired.toString() ?? '100',
+      text: b != null ? b.pointsRequired.toString() : '',
     );
     _benefitValueController = TextEditingController(
       text: b?.benefitValue ?? '',
     );
-    _expirationController = TextEditingController(
-      text: b?.expirationDate ?? '2026-12-31',
-    );
+
+    String expInitial = '';
+    if (b != null) {
+      if (b.expirationDate.contains('-')) {
+        expInitial = b.expirationDate.split('-').reversed.join('/');
+      } else {
+        expInitial = b.expirationDate;
+      }
+    }
+    _expirationController = TextEditingController(text: expInitial);
     _imageUrlController = TextEditingController(text: b?.imageUrl ?? '');
     _active = b?.active ?? true;
   }
@@ -415,6 +474,37 @@ class _ClubeFormDialogState extends ConsumerState<_ClubeFormDialog> {
     _expirationController.dispose();
     _imageUrlController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickExpirationDate() async {
+    final now = DateTime.now();
+    DateTime initial = now.add(const Duration(days: 90));
+    if (_expirationController.text.isNotEmpty) {
+      final parts = _expirationController.text.split('/');
+      if (parts.length == 3) {
+        final d = int.tryParse(parts[0]);
+        final m = int.tryParse(parts[1]);
+        final y = int.tryParse(parts[2]);
+        if (d != null && m != null && y != null) {
+          initial = DateTime(y, m, d);
+        }
+      }
+    }
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2035),
+      locale: const Locale('pt', 'BR'),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _expirationController.text =
+            '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+      });
+    }
   }
 
   @override
@@ -450,6 +540,15 @@ class _ClubeFormDialogState extends ConsumerState<_ClubeFormDialog> {
           ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
+              final expText = _expirationController.text.trim();
+              String expSaved = expText;
+              if (expText.contains('/')) {
+                final parts = expText.split('/');
+                if (parts.length == 3) {
+                  expSaved = '${parts[2]}-${parts[1]}-${parts[0]}';
+                }
+              }
+
               final newBenefit = BeneficioClube(
                 id: benefit?.id ?? '',
                 name: _nameController.text.trim(),
@@ -460,7 +559,7 @@ class _ClubeFormDialogState extends ConsumerState<_ClubeFormDialog> {
                 imageUrl: _imageUrlController.text.isNotEmpty
                     ? _imageUrlController.text.trim()
                     : 'https://images.unsplash.com/photo-1571613316887-6f8d5cbf7ef7?q=80&width=150',
-                expirationDate: _expirationController.text.trim(),
+                expirationDate: expSaved,
                 active: _active,
               );
 
@@ -492,7 +591,7 @@ class _ClubeFormDialogState extends ConsumerState<_ClubeFormDialog> {
               placeholder: 'Ex: Cerveja IPA Artesanal Gelada',
               controller: _nameController,
               validator: (val) =>
-                  val == null || val.isEmpty ? 'Nome obrigatório' : null,
+                  val == null || val.trim().isEmpty ? 'Nome obrigatório' : null,
             ),
             const SizedBox(height: 16),
             Row(
@@ -503,18 +602,20 @@ class _ClubeFormDialogState extends ConsumerState<_ClubeFormDialog> {
                     placeholder: 'Ex: 100',
                     controller: _pointsController,
                     keyboardType: TextInputType.number,
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                    inputFormatters: [AppMasks.digitsOnly],
+                    validator: AppValidators.integer(required: true, min: 1),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: AppInput(
-                    label: 'Validade (AAAA-MM-DD)',
-                    placeholder: 'Ex: 2026-12-31',
+                    label: 'Validade do Benefício',
+                    placeholder: 'DD/MM/AAAA',
                     controller: _expirationController,
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                    readOnly: true,
+                    onTap: _pickExpirationDate,
+                    suffixIcon: const Icon(Icons.calendar_today, size: 18),
+                    validator: AppValidators.date(required: true),
                   ),
                 ),
               ],

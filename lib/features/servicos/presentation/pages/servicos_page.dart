@@ -8,11 +8,12 @@ import 'package:barber_osbao/packages/design_system/organisms/app_table.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_filters.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_search_bar.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
-import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_image_upload.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
+import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
+import 'package:barber_osbao/packages/core/utils/app_masks.dart';
 import 'package:barber_osbao/features/servicos/domain/models/servico.dart';
 import 'package:barber_osbao/features/servicos/presentation/controllers/servicos_controller.dart';
 import 'package:barber_osbao/features/categorias/presentation/controllers/categorias_controller.dart';
@@ -196,7 +197,7 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
         AppTableColumn(label: 'DURAÇÃO', width: 90),
         AppTableColumn(label: 'PREÇO', width: 100),
         AppTableColumn(label: 'COR', width: 60),
-        AppTableColumn(label: 'STATUS', width: 85),
+        AppTableColumn(label: 'STATUS', width: 120),
         AppTableColumn(label: 'REORDENAR', width: 90),
         AppTableColumn(label: 'AÇÕES', width: 90),
       ],
@@ -222,19 +223,24 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
                   s.name,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                if (s.description.isNotEmpty)
+                if (s.description.isNotEmpty) ...[
+                  const SizedBox(height: 2),
                   Text(
                     s.description,
-                    style: const TextStyle(fontSize: 10, color: Colors.grey),
-                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.white60 : Colors.black54,
+                    ),
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
+                ],
               ],
             ),
             Text(s.category.toUpperCase()),
             Text('${s.durationMinutes} min'),
             Text(
-              'R\$ ${s.price.toStringAsFixed(2)}',
+              AppFormatters.formatCurrency(s.price),
               style: const TextStyle(
                 color: ThemeColors.primary,
                 fontWeight: FontWeight.bold,
@@ -248,9 +254,40 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
                 shape: BoxShape.circle,
               ),
             ),
-            AppStatusChip(
-              label: s.status ? 'Ativo' : 'Inativo',
-              type: s.status ? AppStatusType.success : AppStatusType.danger,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Switch(
+                  value: s.status,
+                  activeThumbColor: ThemeColors.primary,
+                  onChanged: (val) {
+                    ref
+                        .read(servicosControllerProvider.notifier)
+                        .editServico(s.copyWith(status: val));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          val
+                              ? 'Serviço "${s.name}" ativado para agendamentos.'
+                              : 'Serviço "${s.name}" inativado.',
+                        ),
+                        backgroundColor: val
+                            ? ThemeColors.success
+                            : Colors.orange.shade800,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                ),
+                Text(
+                  s.status ? 'Ativo' : 'Inativo',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: s.status ? ThemeColors.success : ThemeColors.danger,
+                  ),
+                ),
+              ],
             ),
             // Reorder actions
             Row(
@@ -293,13 +330,13 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
                   tooltip: 'Editar',
                 ),
                 IconButton(
-                  icon: const Icon(
-                    Icons.delete_outline,
+                  icon: Icon(
+                    s.status ? Icons.archive_outlined : Icons.unarchive_outlined,
                     size: 18,
-                    color: ThemeColors.danger,
+                    color: s.status ? ThemeColors.warning : ThemeColors.success,
                   ),
                   onPressed: () => _showDeleteDialog(context, s),
-                  tooltip: 'Excluir',
+                  tooltip: s.status ? 'Inativar Serviço' : 'Reativar Serviço',
                 ),
               ],
             ),
@@ -311,22 +348,40 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
 
   void _showDeleteDialog(BuildContext context, Servico service) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isCurrentlyActive = service.status;
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: Text(
-          'Excluir Serviço',
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black87,
-            fontWeight: FontWeight.bold,
-          ),
+        title: Row(
+          children: [
+            Icon(
+              isCurrentlyActive
+                  ? Icons.archive_outlined
+                  : Icons.unarchive_outlined,
+              color: isCurrentlyActive ? ThemeColors.warning : ThemeColors.success,
+              size: 22,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              isCurrentlyActive ? 'Inativar Serviço' : 'Reativar Serviço',
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black87,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
         content: Text(
-          'Tem certeza que deseja excluir o serviço "${service.name}"? Clientes não conseguirão mais agendá-lo.',
-          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+          isCurrentlyActive
+              ? 'Deseja inativar o serviço "${service.name}"? Ele deixará de aparecer para novos agendamentos, mas todo o histórico anterior continuará intacto.'
+              : 'Deseja reativar o serviço "${service.name}" para permitir novos agendamentos?',
+          style: TextStyle(
+            color: isDark ? Colors.white70 : Colors.black87,
+            fontSize: 13,
+          ),
         ),
         actions: [
           TextButton(
@@ -338,7 +393,9 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: ThemeColors.danger,
+              backgroundColor: isCurrentlyActive
+                  ? ThemeColors.warning
+                  : ThemeColors.success,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6),
               ),
@@ -346,10 +403,28 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
             onPressed: () {
               ref
                   .read(servicosControllerProvider.notifier)
-                  .removeServico(service.id);
+                  .editServico(service.copyWith(status: !isCurrentlyActive));
               Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    isCurrentlyActive
+                        ? 'Serviço "${service.name}" inativado com sucesso.'
+                        : 'Serviço "${service.name}" reativado.',
+                  ),
+                  backgroundColor: isCurrentlyActive
+                      ? Colors.orange.shade800
+                      : ThemeColors.success,
+                ),
+              );
             },
-            child: const Text('Excluir', style: TextStyle(color: Colors.white)),
+            child: Text(
+              isCurrentlyActive ? 'Inativar' : 'Reativar',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -404,9 +479,11 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
     final s = widget.service;
     _nameController = TextEditingController(text: s?.name ?? '');
     _descriptionController = TextEditingController(text: s?.description ?? '');
-    _priceController = TextEditingController(text: s?.price.toString() ?? '');
+    _priceController = TextEditingController(
+      text: s != null ? AppMasks.formatCurrencyValue(s.price) : '',
+    );
     _durationController = TextEditingController(
-      text: s?.durationMinutes.toString() ?? '30',
+      text: s?.durationMinutes.toString() ?? '',
     );
     _imageUrlController = TextEditingController(text: s?.imageUrl ?? '');
     _category =
@@ -464,12 +541,10 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
                 name: _nameController.text.trim(),
                 category: _category,
                 description: _descriptionController.text.trim(),
-                price: double.tryParse(_priceController.text.trim()) ?? 0.0,
+                price: AppMasks.parseCurrency(_priceController.text),
                 durationMinutes:
                     int.tryParse(_durationController.text.trim()) ?? 30,
-                imageUrl: _imageUrlController.text.isNotEmpty
-                    ? _imageUrlController.text.trim()
-                    : 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&width=150',
+                imageUrl: _imageUrlController.text.trim(),
                 colorHex: _colorHex,
                 status: _status,
               );
@@ -497,12 +572,50 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Active toggle on top as requested
+            Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.03)
+                    : Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
+                ),
+              ),
+              child: SwitchListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                title: Text(
+                  'Serviço Ativo para Agendamento',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  'Disponível para seleção em agendamentos e comandas',
+                  style: TextStyle(
+                    color: isDark ? Colors.white54 : Colors.black45,
+                    fontSize: 12,
+                  ),
+                ),
+                value: _status,
+                activeThumbColor: ThemeColors.primary,
+                onChanged: (val) => setState(() => _status = val),
+              ),
+            ),
+
             AppInput(
               label: 'Nome do Serviço',
               placeholder: 'Ex: Barboterapia Completa',
               controller: _nameController,
               validator: (val) =>
-                  val == null || val.isEmpty ? 'Nome obrigatório' : null,
+                  val == null || val.trim().isEmpty ? 'Nome obrigatório' : null,
             ),
             const SizedBox(height: 16),
             Row(
@@ -573,13 +686,11 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
                 Expanded(
                   child: AppInput(
                     label: 'Preço (R\$)',
-                    placeholder: 'Ex: 45.00',
+                    placeholder: '0,00',
                     controller: _priceController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Preço obrigatório' : null,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [AppMasks.currency],
+                    validator: AppValidators.currency(required: true, min: 0.01),
                   ),
                 ),
               ],
@@ -593,9 +704,8 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
                     placeholder: 'Ex: 30',
                     controller: _durationController,
                     keyboardType: TextInputType.number,
-                    validator: (val) => val == null || val.isEmpty
-                        ? 'Duração obrigatória'
-                        : null,
+                    inputFormatters: [AppMasks.digitsOnly],
+                    validator: AppValidators.integer(required: true, min: 1),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -693,46 +803,11 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
             ),
             const SizedBox(height: 16),
             AppInput(
-              label: 'Descrição do Serviço',
-              placeholder: 'Ex: Detalhes do que está incluso...',
+              label: 'Descrição Detalhada do Serviço',
+              placeholder:
+                  'Ex: Corte com lavagem especial, toalha quente e finalização com pomada modeladora matte...',
               controller: _descriptionController,
-              maxLines: 2,
-            ),
-            const SizedBox(height: 16),
-            Container(
-              decoration: BoxDecoration(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.03)
-                    : Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
-                ),
-              ),
-              child: SwitchListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
-                ),
-                title: Text(
-                  'Serviço Ativo',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                subtitle: Text(
-                  'Disponível para agendamentos e comandas',
-                  style: TextStyle(
-                    color: isDark ? Colors.white54 : Colors.black45,
-                    fontSize: 12,
-                  ),
-                ),
-                value: _status,
-                activeThumbColor: ThemeColors.primary,
-                onChanged: (val) => setState(() => _status = val),
-              ),
+              maxLines: 3,
             ),
           ],
         ),

@@ -13,6 +13,8 @@ import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_image_upload.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
+import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
+import 'package:barber_osbao/packages/core/utils/app_masks.dart';
 import 'package:barber_osbao/features/produtos/domain/models/produto.dart';
 import 'package:barber_osbao/features/produtos/presentation/controllers/produtos_controller.dart';
 import 'package:barber_osbao/features/categorias/presentation/controllers/categorias_controller.dart';
@@ -212,15 +214,22 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
         final isLowStock = p.stock <= p.minStock;
         return AppTableRow(
           cells: [
-            ClipRRect(
+            InkWell(
+              onTap: () => _showImageZoomDialog(context, p.imageUrl, p.name),
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                p.imageUrl,
-                width: 40,
-                height: 40,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.shopping_bag_outlined, size: 24),
+              child: Tooltip(
+                message: 'Clique para ampliar imagem',
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    p.imageUrl,
+                    width: 44,
+                    height: 44,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.shopping_bag_outlined, size: 24),
+                  ),
+                ),
               ),
             ),
             Column(
@@ -251,16 +260,20 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
                 ),
                 if (isLowStock) ...[
                   const SizedBox(width: 6),
-                  const Icon(
-                    Icons.warning,
-                    color: ThemeColors.danger,
-                    size: 14,
+                  Tooltip(
+                    message:
+                        'Estoque crítico: ${p.stock} un (Mínimo recomendado: ${p.minStock} un)',
+                    child: const Icon(
+                      Icons.warning_amber_rounded,
+                      color: ThemeColors.danger,
+                      size: 16,
+                    ),
                   ),
                 ],
               ],
             ),
             Text(
-              'R\$ ${p.price.toStringAsFixed(2)}',
+              AppFormatters.formatCurrency(p.price),
               style: const TextStyle(
                 color: ThemeColors.primary,
                 fontWeight: FontWeight.bold,
@@ -326,6 +339,72 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
     );
   }
 
+  void _showImageZoomDialog(BuildContext context, String imageUrl, String name) {
+    if (imageUrl.trim().isEmpty) return;
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(24),
+        child: Stack(
+          alignment: Alignment.topRight,
+          children: [
+            Container(
+              constraints: const BoxConstraints(maxWidth: 500, maxHeight: 500),
+              decoration: BoxDecoration(
+                color: Colors.black87,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  InteractiveViewer(
+                    maxScale: 4.0,
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, _, _) => Container(
+                        height: 250,
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          Icons.broken_image,
+                          size: 48,
+                          color: Colors.white54,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 16,
+                    ),
+                    color: Colors.black54,
+                    child: Text(
+                      name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, color: Colors.white, size: 26),
+              onPressed: () => Navigator.of(ctx).pop(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showFormDialog(
     BuildContext context,
     List<String> categories, [
@@ -377,6 +456,12 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
                   .read(produtosControllerProvider.notifier)
                   .removeProduto(product.id);
               Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Produto "${product.name}" excluído.'),
+                  backgroundColor: ThemeColors.danger,
+                ),
+              );
             },
             child: const Text('Excluir', style: TextStyle(color: Colors.white)),
           ),
@@ -391,9 +476,7 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
     String type,
   ) {
     final qtyController = TextEditingController(text: '1');
-    final reasonController = TextEditingController(
-      text: type == 'Entrada' ? 'Compra fornecedor' : 'Uso interno',
-    );
+    final reasonController = TextEditingController(text: '');
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showDialog(
@@ -429,14 +512,43 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
               ),
             ),
             onPressed: () {
-              final qty = int.tryParse(qtyController.text.trim()) ?? 1;
+              final qty = int.tryParse(qtyController.text.trim()) ?? 0;
+              if (qty <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Informe uma quantidade maior que zero.'),
+                    backgroundColor: ThemeColors.danger,
+                  ),
+                );
+                return;
+              }
               final reason = reasonController.text.trim();
               ref
                   .read(movimentacoesControllerProvider.notifier)
-                  .addMovimentacao(product.id, product.name, type, qty, reason);
+                  .addMovimentacao(
+                    product.id,
+                    product.name,
+                    type,
+                    qty,
+                    reason.isEmpty
+                        ? (type == 'Entrada'
+                            ? 'Entrada rápida'
+                            : 'Saída rápida')
+                        : reason,
+                  );
               qtyController.dispose();
               reasonController.dispose();
               Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    '$type de $qty un de "${product.name}" registrada com sucesso!',
+                  ),
+                  backgroundColor: type == 'Entrada'
+                      ? ThemeColors.success
+                      : Colors.orange.shade800,
+                ),
+              );
             },
             child: const Text(
               'Gravar Movimentação',
@@ -452,14 +564,17 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
           children: [
             AppInput(
               label: 'Quantidade',
-              placeholder: 'Quantidade de itens',
+              placeholder: 'Ex: 5',
               controller: qtyController,
               keyboardType: TextInputType.number,
+              inputFormatters: [AppMasks.digitsOnly],
+              validator: AppValidators.integer(required: true, min: 1),
             ),
             const SizedBox(height: 16),
             AppInput(
               label: 'Motivo / Justificativa',
-              placeholder: 'Ex: Reposição de estoque',
+              placeholder:
+                  'Ex: Compra de lote, reposição, avaria, consumo...',
               controller: reasonController,
             ),
           ],
@@ -504,9 +619,11 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
     _supplierController = TextEditingController(text: p?.supplier ?? '');
     _codeController = TextEditingController(text: p?.code ?? '');
     _costPriceController = TextEditingController(
-      text: p?.costPrice.toString() ?? '',
+      text: p != null ? AppMasks.formatCurrencyValue(p.costPrice) : '',
     );
-    _priceController = TextEditingController(text: p?.price.toString() ?? '');
+    _priceController = TextEditingController(
+      text: p != null ? AppMasks.formatCurrencyValue(p.price) : '',
+    );
     _stockController = TextEditingController(text: p?.stock.toString() ?? '');
     _minStockController = TextEditingController(
       text: p?.minStock.toString() ?? '',
@@ -574,16 +691,13 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
                 category: _category,
                 supplier: _supplierController.text.trim(),
                 code: _codeController.text.trim(),
-                costPrice:
-                    double.tryParse(_costPriceController.text.trim()) ?? 0.0,
-                price: double.tryParse(_priceController.text.trim()) ?? 0.0,
+                costPrice: AppMasks.parseCurrency(_costPriceController.text),
+                price: AppMasks.parseCurrency(_priceController.text),
                 stock: int.tryParse(_stockController.text.trim()) ?? 0,
                 minStock: int.tryParse(_minStockController.text.trim()) ?? 0,
                 description: _descriptionController.text.trim(),
                 status: _status,
-                imageUrl: _imageUrlController.text.isNotEmpty
-                    ? _imageUrlController.text.trim()
-                    : 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?q=80&width=150',
+                imageUrl: _imageUrlController.text.trim(),
               );
 
               if (product == null) {
@@ -614,7 +728,9 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
               placeholder: 'Ex: Pomada Modeladora Efeito Seco',
               controller: _nameController,
               validator: (val) =>
-                  val == null || val.isEmpty ? 'Nome obrigatório' : null,
+                  val == null || val.trim().isEmpty
+                      ? 'Nome obrigatório'
+                      : null,
             ),
             const SizedBox(height: 16),
             Row(
@@ -717,26 +833,22 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
                 Expanded(
                   child: AppInput(
                     label: 'Preço de Custo (R\$)',
-                    placeholder: 'Ex: 15.00',
+                    placeholder: '0,00',
                     controller: _costPriceController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [AppMasks.currency],
+                    validator: AppValidators.currency(required: true, min: 0.0),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: AppInput(
                     label: 'Preço de Venda (R\$)',
-                    placeholder: 'Ex: 45.00',
+                    placeholder: '0,00',
                     controller: _priceController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [AppMasks.currency],
+                    validator: AppValidators.currency(required: true, min: 0.01),
                   ),
                 ),
               ],
@@ -750,8 +862,8 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
                     placeholder: 'Ex: 24',
                     controller: _stockController,
                     keyboardType: TextInputType.number,
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                    inputFormatters: [AppMasks.digitsOnly],
+                    validator: AppValidators.integer(required: true, min: 0),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -761,8 +873,8 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
                     placeholder: 'Ex: 5',
                     controller: _minStockController,
                     keyboardType: TextInputType.number,
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                    inputFormatters: [AppMasks.digitsOnly],
+                    validator: AppValidators.integer(required: true, min: 0),
                   ),
                 ),
               ],
@@ -771,7 +883,7 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
             AppImageUpload(
               label: 'Foto do Produto',
               controller: _imageUrlController,
-              height: 140,
+              height: 180,
               helperText: 'Upload do arquivo ou informe o link',
             ),
             const SizedBox(height: 16),

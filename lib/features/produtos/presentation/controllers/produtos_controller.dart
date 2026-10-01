@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
+import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
 import 'package:barber_osbao/features/produtos/domain/models/produto.dart';
 import 'package:barber_osbao/features/produtos/domain/models/movimentacao.dart';
 import 'package:barber_osbao/features/produtos/domain/repositories/produtos_repository.dart';
@@ -125,7 +126,7 @@ class MovimentacoesController extends Notifier<AppState<List<MovimentacaoEstoque
         type: type,
         qty: qty,
         reason: reason,
-        date: '09/07/2026',
+        date: AppFormatters.formatDate(DateTime.now()),
         user: 'Fábio Zvir',
       );
       await _repository.recordMovement(newMovement);

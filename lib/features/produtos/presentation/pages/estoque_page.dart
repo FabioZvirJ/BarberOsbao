@@ -12,6 +12,7 @@ import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
+import 'package:barber_osbao/packages/core/utils/app_masks.dart';
 import 'package:barber_osbao/features/produtos/domain/models/produto.dart';
 import 'package:barber_osbao/features/produtos/domain/models/movimentacao.dart';
 import 'package:barber_osbao/features/produtos/presentation/controllers/produtos_controller.dart';
@@ -159,18 +160,9 @@ class _EstoquePageState extends ConsumerState<EstoquePage> {
                 ),
               ),
               AppButton(
-                label: 'Repor +10',
-                onPressed: () {
-                  ref
-                      .read(movimentacoesControllerProvider.notifier)
-                      .addMovimentacao(
-                        prod.id,
-                        prod.name,
-                        'Entrada',
-                        10,
-                        'Reposição rápida de estoque',
-                      );
-                },
+                label: 'Repor Estoque',
+                icon: const Icon(Icons.add_shopping_cart, size: 14),
+                onPressed: () => _showReplenishDialog(context, prod),
                 variant: AppButtonVariant.primary,
               ),
             ],
@@ -271,6 +263,108 @@ class _EstoquePageState extends ConsumerState<EstoquePage> {
       builder: (ctx) => _MovimentacaoDialog(products: products),
     );
   }
+
+  void _showReplenishDialog(BuildContext context, Produto prod) {
+    final defaultQty = (prod.minStock * 2 - prod.stock).clamp(5, 50);
+    final qtyController = TextEditingController(text: defaultQty.toString());
+    final reasonController = TextEditingController(text: '');
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AppResponsiveDialog(
+        title: 'Repor Estoque: ${prod.name}',
+        subtitle:
+            'Estoque atual: ${prod.stock} un | Mínimo recomendado: ${prod.minStock} un',
+        maxWidth: 480,
+        actions: [
+          TextButton(
+            onPressed: () {
+              qtyController.dispose();
+              reasonController.dispose();
+              Navigator.of(ctx).pop();
+            },
+            child: Text(
+              'Cancelar',
+              style: TextStyle(
+                color: isDark ? Colors.white70 : Colors.black54,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ThemeColors.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () {
+              final qty = int.tryParse(qtyController.text.trim()) ?? 0;
+              if (qty <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Informe uma quantidade válida (> 0).'),
+                    backgroundColor: ThemeColors.danger,
+                  ),
+                );
+                return;
+              }
+              final reason = reasonController.text.trim();
+              ref
+                  .read(movimentacoesControllerProvider.notifier)
+                  .addMovimentacao(
+                    prod.id,
+                    prod.name,
+                    'Entrada',
+                    qty,
+                    reason.isEmpty
+                        ? 'Reposição rápida de estoque baixo'
+                        : reason,
+                  );
+              qtyController.dispose();
+              reasonController.dispose();
+              Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Entrada de $qty un para "${prod.name}" confirmada!',
+                  ),
+                  backgroundColor: ThemeColors.success,
+                ),
+              );
+            },
+            child: const Text(
+              'Confirmar Reposição',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppInput(
+              label: 'Quantidade a Repor',
+              placeholder: 'Ex: 10',
+              controller: qtyController,
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 16),
+            AppInput(
+              label: 'Motivo / Nota Fiscal (Opcional)',
+              placeholder: 'Ex: Pedido reposição semanal, fornecedor XYZ...',
+              controller: reasonController,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _MovimentacaoDialog extends ConsumerStatefulWidget {
@@ -285,7 +379,7 @@ class _MovimentacaoDialog extends ConsumerStatefulWidget {
 
 class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
   final _formKey = GlobalKey<FormState>();
-  late String _selectedProductId;
+  String? _selectedProductId;
   late String _type;
   late final TextEditingController _qtyController;
   late final TextEditingController _reasonController;
@@ -293,10 +387,10 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedProductId = widget.products[0].id;
+    _selectedProductId = null; // Do NOT pre-select as requested
     _type = 'Entrada';
-    _qtyController = TextEditingController(text: '5');
-    _reasonController = TextEditingController(text: 'Compra de fornecedor');
+    _qtyController = TextEditingController(text: '');
+    _reasonController = TextEditingController(text: '');
   }
 
   @override
@@ -308,9 +402,6 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final currentProduct = widget.products.firstWhere(
-      (p) => p.id == _selectedProductId,
-    );
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AppResponsiveDialog(
@@ -339,18 +430,42 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
             ),
           ),
           onPressed: () {
+            if (_selectedProductId == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Por favor, selecione um produto.'),
+                  backgroundColor: ThemeColors.danger,
+                ),
+              );
+              return;
+            }
             if (_formKey.currentState?.validate() ?? false) {
+              final prod = widget.products.firstWhere(
+                (p) => p.id == _selectedProductId,
+              );
               final qty = int.tryParse(_qtyController.text.trim()) ?? 0;
+              final reason = _reasonController.text.trim();
+
               ref
                   .read(movimentacoesControllerProvider.notifier)
                   .addMovimentacao(
-                    _selectedProductId,
-                    currentProduct.name,
+                    _selectedProductId!,
+                    prod.name,
                     _type,
                     qty,
-                    _reasonController.text.trim(),
+                    reason,
                   );
               Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Movimentação de $_type ($qty un) para "${prod.name}" registrada!',
+                  ),
+                  backgroundColor: _type == 'Entrada'
+                      ? ThemeColors.success
+                      : Colors.orange.shade800,
+                ),
+              );
             }
           },
           child: const Text(
@@ -381,6 +496,7 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
                       ? ThemeColors.darkSurface
                       : Colors.white,
                   initialValue: _selectedProductId,
+                  hint: const Text('Selecione um produto...'),
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: isDark
@@ -413,11 +529,13 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
                     color: isDark ? Colors.white : Colors.black87,
                     fontSize: 14,
                   ),
+                  validator: (val) =>
+                      val == null ? 'Selecione um produto' : null,
                   items: widget.products
                       .map(
                         (p) => DropdownMenuItem(
                           value: p.id,
-                          child: Text('${p.name} (Qtd atual: ${p.stock})'),
+                          child: Text('${p.name} (Atual: ${p.stock} un)'),
                         ),
                       )
                       .toList(),
@@ -490,17 +608,7 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
                   ],
                   onChanged: (val) {
                     if (val != null) {
-                      setState(() {
-                        _type = val;
-                        if (val == 'Entrada') {
-                          _reasonController.text = 'Compra de fornecedor';
-                        } else if (val == 'Saída') {
-                          _reasonController.text = 'Consumo interno cabine';
-                        } else {
-                          _reasonController.text =
-                              'Ajuste de inventário periódico';
-                        }
-                      });
+                      setState(() => _type = val);
                     }
                   },
                 ),
@@ -509,19 +617,24 @@ class _MovimentacaoDialogState extends ConsumerState<_MovimentacaoDialog> {
             const SizedBox(height: 16),
             AppInput(
               label: _type == 'Inventário'
-                  ? 'Nova Quantidade Real'
+                  ? 'Nova Quantidade Real em Estoque'
                   : 'Quantidade de Itens',
               placeholder: 'Ex: 10',
               controller: _qtyController,
               keyboardType: TextInputType.number,
-              validator: (val) =>
-                  val == null || val.isEmpty ? 'Quantidade obrigatória' : null,
+              inputFormatters: [AppMasks.digitsOnly],
+              validator: AppValidators.integer(required: true, min: 1),
             ),
             const SizedBox(height: 16),
             AppInput(
-              label: 'Motivo',
-              placeholder: 'Justifique a alteração ou informe fornecedor',
+              label: 'Motivo / Justificativa',
+              placeholder:
+                  'Ex: Compra de lote, fornecedor XYZ, avaria, consumo...',
               controller: _reasonController,
+              validator: (val) =>
+                  val == null || val.trim().isEmpty
+                      ? 'Motivo obrigatório'
+                      : null,
             ),
           ],
         ),

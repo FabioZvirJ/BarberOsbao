@@ -11,6 +11,8 @@ import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_card.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
+import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
+import 'package:barber_osbao/packages/core/utils/app_masks.dart';
 import 'package:barber_osbao/features/planos/domain/models/plano.dart';
 import 'package:barber_osbao/features/planos/presentation/controllers/planos_controller.dart';
 
@@ -127,7 +129,7 @@ class PlanosPage extends ConsumerWidget {
                     ],
                   ),
                   Text(
-                    'R\$ ${plan.price.toStringAsFixed(2)}',
+                    AppFormatters.formatCurrency(plan.price),
                     style: const TextStyle(
                       color: ThemeColors.primary,
                       fontWeight: FontWeight.bold,
@@ -279,7 +281,7 @@ class PlanosPage extends ConsumerWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                'R\$ ${plan.price.toStringAsFixed(2)}',
+                AppFormatters.formatCurrency(plan.price),
                 style: const TextStyle(
                   color: ThemeColors.primary,
                   fontSize: 20,
@@ -449,6 +451,7 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
   late final TextEditingController _discountController;
   late final TextEditingController _benefitInputController;
 
+  late bool _isUnlimitedCuts;
   late String _period;
   late bool _recommended;
   late bool _status;
@@ -459,14 +462,15 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
     super.initState();
     final p = widget.plan;
     _nameController = TextEditingController(text: p?.name ?? '');
-    _priceController = TextEditingController(text: p?.price.toString() ?? '');
+    _priceController = TextEditingController(
+      text: p != null ? AppMasks.formatCurrencyValue(p.price) : '',
+    );
+    _isUnlimitedCuts = p != null && p.cutsCount >= 9999;
     _cutsController = TextEditingController(
-      text: p != null
-          ? (p.cutsCount == 9999 ? '9999' : p.cutsCount.toString())
-          : '4',
+      text: p != null ? (_isUnlimitedCuts ? '' : p.cutsCount.toString()) : '',
     );
     _discountController = TextEditingController(
-      text: p != null ? (p.productDiscount * 100).toStringAsFixed(0) : '10',
+      text: p != null ? (p.productDiscount * 100).toStringAsFixed(0) : '',
     );
     _benefitInputController = TextEditingController();
 
@@ -519,16 +523,23 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
           ),
           onPressed: () {
             if (_formKey.currentState?.validate() ?? false) {
+              final priceParsed = AppMasks.parseCurrency(_priceController.text);
+              final cutsParsed = _isUnlimitedCuts
+                  ? 9999
+                  : (int.tryParse(_cutsController.text.trim()) ?? 1);
+              final discountNum = double.tryParse(
+                    _discountController.text.trim().replaceAll(',', '.'),
+                  ) ??
+                  0.0;
+
               final newPlan = Plano(
                 id: plan?.id ?? '',
                 name: _nameController.text.trim(),
-                price: double.tryParse(_priceController.text.trim()) ?? 0.0,
+                price: priceParsed,
                 period: _period,
                 benefits: _benefits,
-                cutsCount: int.tryParse(_cutsController.text.trim()) ?? 4,
-                productDiscount:
-                    (double.tryParse(_discountController.text.trim()) ?? 10.0) /
-                    100.0,
+                cutsCount: cutsParsed,
+                productDiscount: discountNum / 100.0,
                 status: _status,
                 recommended: _recommended,
               );
@@ -565,13 +576,11 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
                 Expanded(
                   child: AppInput(
                     label: 'Valor Recorrente (R\$)',
-                    placeholder: 'Ex: 139.90',
+                    placeholder: '0,00',
                     controller: _priceController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Valor obrigatório' : null,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [AppMasks.currency],
+                    validator: AppValidators.currency(required: true, min: 0.01),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -654,16 +663,74 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
             ),
             const SizedBox(height: 16),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: AppInput(
-                    label: 'Qtd de Cortes (9999 = Ilimitado)',
-                    placeholder: 'Ex: 4',
-                    controller: _cutsController,
-                    keyboardType: TextInputType.number,
-                    validator: (val) => val == null || val.isEmpty
-                        ? 'Qtd de cortes obrigatória'
-                        : null,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AppInput(
+                        label: 'Qtd de Cortes por Mês',
+                        placeholder: _isUnlimitedCuts ? 'Ilimitado' : 'Ex: 4',
+                        controller: _cutsController,
+                        readOnly: _isUnlimitedCuts,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [AppMasks.digitsOnly],
+                        validator: _isUnlimitedCuts
+                            ? null
+                            : AppValidators.integer(required: true, min: 1),
+                      ),
+                      const SizedBox(height: 4),
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            _isUnlimitedCuts = !_isUnlimitedCuts;
+                            if (_isUnlimitedCuts) {
+                              _cutsController.clear();
+                            }
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(4),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: Checkbox(
+                                  value: _isUnlimitedCuts,
+                                  activeColor: ThemeColors.primary,
+                                  checkColor: Colors.black,
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      _isUnlimitedCuts = val ?? false;
+                                      if (_isUnlimitedCuts) {
+                                        _cutsController.clear();
+                                      }
+                                    });
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Cortes Ilimitados',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark
+                                      ? Colors.white70
+                                      : Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -672,12 +739,9 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
                     label: 'Desconto em Produtos (%)',
                     placeholder: 'Ex: 10',
                     controller: _discountController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    validator: (val) => val == null || val.isEmpty
-                        ? 'Desconto obrigatório'
-                        : null,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [AppMasks.percentage],
+                    validator: AppValidators.percentage(required: true),
                   ),
                 ),
               ],
@@ -763,6 +827,7 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
             ),
             const SizedBox(height: 8),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
                   child: AppInput(
@@ -771,22 +836,25 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
                     controller: _benefitInputController,
                   ),
                 ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(
-                    Icons.add_circle,
-                    color: ThemeColors.primary,
-                    size: 36,
+                const SizedBox(width: 12),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 2.0),
+                  child: SizedBox(
+                    height: 46,
+                    child: AppButton(
+                      label: 'Adicionar',
+                      icon: const Icon(Icons.add, size: 16),
+                      onPressed: () {
+                        final text = _benefitInputController.text.trim();
+                        if (text.isNotEmpty) {
+                          setState(() {
+                            _benefits.add(text);
+                            _benefitInputController.clear();
+                          });
+                        }
+                      },
+                    ),
                   ),
-                  onPressed: () {
-                    final text = _benefitInputController.text.trim();
-                    if (text.isNotEmpty) {
-                      setState(() {
-                        _benefits.add(text);
-                        _benefitInputController.clear();
-                      });
-                    }
-                  },
                 ),
               ],
             ),
