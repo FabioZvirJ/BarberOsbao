@@ -8,6 +8,7 @@ import 'package:barber_osbao/packages/design_system/molecules/app_card.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_image_upload.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
+import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/auth/application/auth_controller.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/configuracoes/presentation/controllers/configuracoes_controller.dart';
@@ -233,23 +234,30 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                       // Working hours
                       AppSection(
                         title: 'Horário de Funcionamento',
-                        subtitle: 'Defina os horários de atendimento da loja',
+                        subtitle:
+                            'Defina os horários de atendimento da barbearia (clique para alterar)',
                         child: AppCard(
                           child: Column(
                             children: [
                               _buildHourRow(
+                                context,
+                                settings,
                                 'Segunda a Sexta',
                                 settings.workingHours['Segunda a Sexta'] ??
                                     '09:00 - 20:00',
                               ),
                               const Divider(height: 24),
                               _buildHourRow(
+                                context,
+                                settings,
                                 'Sábado',
                                 settings.workingHours['Sábado'] ??
                                     '09:00 - 18:00',
                               ),
                               const Divider(height: 24),
                               _buildHourRow(
+                                context,
+                                settings,
                                 'Domingo',
                                 settings.workingHours['Domingo'] ?? 'Fechado',
                                 isOpen: false,
@@ -259,10 +267,11 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      // Intervals and theme preference
+                      // Intervals and schedule conflict settings
                       AppSection(
                         title: 'Configurações de Agendamento',
-                        subtitle: 'Defina intervalos e opções visuais',
+                        subtitle:
+                            'Intervalos de encaixe e validação de conflitos na agenda',
                         child: AppCard(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,7 +282,8 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                                     : Colors.white,
                                 initialValue: settings.slotInterval,
                                 decoration: InputDecoration(
-                                  labelText: 'Tempo entre Atendimentos',
+                                  labelText:
+                                      'Tempo entre Atendimentos (Intervalo de Encaixe)',
                                   labelStyle: TextStyle(
                                     color: isDark
                                         ? Colors.white70
@@ -312,7 +322,7 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                                   ),
                                   DropdownMenuItem(
                                     value: '30',
-                                    child: Text('30 Minutos'),
+                                    child: Text('30 Minutos (Padrão)'),
                                   ),
                                   DropdownMenuItem(
                                     value: '45',
@@ -336,32 +346,29 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                                   }
                                 },
                               ),
-                              const SizedBox(height: 24),
-                              SwitchListTile(
-                                contentPadding: EdgeInsets.zero,
-                                title: const Text(
-                                  'Tema Escuro (Dark Mode)',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
+                              const SizedBox(height: 12),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Icon(
+                                    Icons.info_outline,
+                                    size: 16,
+                                    color: ThemeColors.primary,
                                   ),
-                                ),
-                                subtitle: const Text(
-                                  'Alterna a identidade visual da dashboard admin',
-                                ),
-                                value: user?.theme == 'dark',
-                                activeThumbColor: ThemeColors.primary,
-                                onChanged: (val) {
-                                  if (user != null) {
-                                    ref
-                                        .read(authControllerProvider.notifier)
-                                        .updateUser(
-                                          user.copyWith(
-                                            theme: val ? 'dark' : 'light',
-                                          ),
-                                        );
-                                  }
-                                },
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'Utilizado para validar conflitos de horários na agenda do barbeiro. Ex: com 30m, se houver um atendimento às 08:40, um novo agendamento às 09:00 é bloqueado por sobreposição.',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: isDark
+                                            ? Colors.white54
+                                            : Colors.black54,
+                                        height: 1.3,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -376,23 +383,30 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                       Expanded(
                         child: AppSection(
                           title: 'Horário de Funcionamento',
-                          subtitle: 'Defina os horários de atendimento da loja',
+                          subtitle:
+                              'Defina os horários de atendimento da barbearia (clique para alterar)',
                           child: AppCard(
                             child: Column(
                               children: [
                                 _buildHourRow(
+                                  context,
+                                  settings,
                                   'Segunda a Sexta',
                                   settings.workingHours['Segunda a Sexta'] ??
                                       '09:00 - 20:00',
                                 ),
                                 const Divider(height: 24),
                                 _buildHourRow(
+                                  context,
+                                  settings,
                                   'Sábado',
                                   settings.workingHours['Sábado'] ??
                                       '09:00 - 18:00',
                                 ),
                                 const Divider(height: 24),
                                 _buildHourRow(
+                                  context,
+                                  settings,
                                   'Domingo',
                                   settings.workingHours['Domingo'] ?? 'Fechado',
                                   isOpen: false,
@@ -403,11 +417,12 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                         ),
                       ),
                       const SizedBox(width: 24),
-                      // Intervals and theme preference
+                      // Intervals and schedule conflict settings
                       Expanded(
                         child: AppSection(
                           title: 'Configurações de Agendamento',
-                          subtitle: 'Defina intervalos e opções visuais',
+                          subtitle:
+                              'Intervalos de encaixe e validação de conflitos na agenda',
                           child: AppCard(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -418,7 +433,8 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                                       : Colors.white,
                                   initialValue: settings.slotInterval,
                                   decoration: InputDecoration(
-                                    labelText: 'Tempo entre Atendimentos',
+                                    labelText:
+                                        'Tempo entre Atendimentos (Intervalo de Encaixe)',
                                     labelStyle: TextStyle(
                                       color: isDark
                                           ? Colors.white70
@@ -459,7 +475,7 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                                     ),
                                     DropdownMenuItem(
                                       value: '30',
-                                      child: Text('30 Minutos'),
+                                      child: Text('30 Minutos (Padrão)'),
                                     ),
                                     DropdownMenuItem(
                                       value: '45',
@@ -485,32 +501,29 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                                     }
                                   },
                                 ),
-                                const SizedBox(height: 24),
-                                SwitchListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  title: const Text(
-                                    'Tema Escuro (Dark Mode)',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
+                                const SizedBox(height: 12),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Icon(
+                                      Icons.info_outline,
+                                      size: 16,
+                                      color: ThemeColors.primary,
                                     ),
-                                  ),
-                                  subtitle: const Text(
-                                    'Alterna a identidade visual da dashboard admin',
-                                  ),
-                                  value: user?.theme == 'dark',
-                                  activeThumbColor: ThemeColors.primary,
-                                  onChanged: (val) {
-                                    if (user != null) {
-                                      ref
-                                          .read(authControllerProvider.notifier)
-                                          .updateUser(
-                                            user.copyWith(
-                                              theme: val ? 'dark' : 'light',
-                                            ),
-                                          );
-                                    }
-                                  },
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Utilizado para validar conflitos de horários na agenda do barbeiro. Ex: com 30m, se houver um atendimento às 08:40, um novo agendamento às 09:00 é bloqueado por sobreposição.',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: isDark
+                                              ? Colors.white54
+                                              : Colors.black54,
+                                          height: 1.3,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -520,6 +533,53 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
                     ],
                   ),
             const SizedBox(height: 32),
+
+            // 3. Theme & Appearance (Separated dedicated section)
+            AppSection(
+              title: 'Aparência e Identidade Visual',
+              subtitle: 'Personalize as preferências de tema e exibição do ERP',
+              child: AppCard(
+                child: SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  secondary: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: ThemeColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      user?.theme == 'dark'
+                          ? Icons.dark_mode_outlined
+                          : Icons.light_mode_outlined,
+                      color: ThemeColors.primary,
+                    ),
+                  ),
+                  title: const Text(
+                    'Tema Escuro (Dark Mode)',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'Alterna a identidade visual entre claro e escuro para todo o painel',
+                  ),
+                  value: user?.theme == 'dark',
+                  activeThumbColor: ThemeColors.primary,
+                  onChanged: (val) {
+                    if (user != null) {
+                      ref
+                          .read(authControllerProvider.notifier)
+                          .updateUser(
+                            user.copyWith(
+                              theme: val ? 'dark' : 'light',
+                            ),
+                          );
+                    }
+                  },
+                ),
+              ),
+            ),
 
             // 3. Notification switches & WhatsApp Integration
             AppSection(
@@ -629,29 +689,253 @@ class _ConfiguracoesPageState extends ConsumerState<ConfiguracoesPage> {
     );
   }
 
-  Widget _buildHourRow(String day, String hours, {bool isOpen = true}) {
+  Widget _buildHourRow(
+    BuildContext context,
+    dynamic settings,
+    String day,
+    String hours, {
+    bool isOpen = true,
+  }) {
+    final isActuallyOpen = isOpen && hours.toLowerCase() != 'fechado';
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(day, style: const TextStyle(fontWeight: FontWeight.bold)),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: isOpen
-                ? ThemeColors.primary.withValues(alpha: 0.1)
-                : Colors.red.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            hours,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: isOpen ? ThemeColors.primary : Colors.red,
+        Row(
+          children: [
+            Icon(
+              isActuallyOpen ? Icons.access_time_filled : Icons.access_time,
+              size: 16,
+              color: isActuallyOpen ? ThemeColors.primary : Colors.grey,
             ),
-          ),
+            const SizedBox(width: 8),
+            Text(day, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: isActuallyOpen
+                    ? ThemeColors.primary.withValues(alpha: 0.1)
+                    : Colors.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                hours,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: isActuallyOpen ? ThemeColors.primary : Colors.red,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.edit_outlined, size: 18),
+              tooltip: 'Alterar Horário',
+              onPressed: () => _showEditHoursDialog(
+                context,
+                settings,
+                day,
+                hours,
+                isActuallyOpen,
+              ),
+            ),
+          ],
         ),
       ],
+    );
+  }
+
+  void _showEditHoursDialog(
+    BuildContext context,
+    dynamic settings,
+    String day,
+    String currentHours,
+    bool isOpenInitial,
+  ) {
+    bool isOpen = isOpenInitial && currentHours.toLowerCase() != 'fechado';
+    String startTime = '09:00';
+    String endTime = '20:00';
+
+    if (currentHours.contains('-')) {
+      final parts = currentHours.split('-');
+      if (parts.length == 2) {
+        startTime = parts[0].trim();
+        endTime = parts[1].trim();
+      }
+    }
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (dialogCtx, setDialogState) {
+            return AppResponsiveDialog(
+              title: 'Horário de Funcionamento - $day',
+              subtitle: 'Defina os horários de abertura e encerramento da loja',
+              maxWidth: 480,
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogCtx).pop(),
+                  child: Text(
+                    'Cancelar',
+                    style: TextStyle(
+                      color: isDark ? Colors.white70 : Colors.black54,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                AppButton(
+                  label: 'Salvar Horário',
+                  onPressed: () {
+                    final newHours =
+                        Map<String, String>.from(settings.workingHours as Map);
+                    newHours[day] =
+                        isOpen ? '$startTime - $endTime' : 'Fechado';
+                    ref
+                        .read(businessSettingsControllerProvider.notifier)
+                        .updateSettings(
+                          settings.copyWith(workingHours: newHours),
+                        );
+                    Navigator.of(dialogCtx).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Horário de $day atualizado para ${newHours[day]}!',
+                        ),
+                        backgroundColor: ThemeColors.success,
+                      ),
+                    );
+                  },
+                ),
+              ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      'Loja Aberta neste dia',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    subtitle: Text(
+                      isOpen
+                          ? 'A barbearia realiza atendimentos'
+                          : 'Loja fechada (sem agendamentos)',
+                    ),
+                    value: isOpen,
+                    activeThumbColor: ThemeColors.primary,
+                    onChanged: (val) => setDialogState(() => isOpen = val),
+                  ),
+                  if (isOpen) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () async {
+                              final parts = startTime.split(':');
+                              final initial = TimeOfDay(
+                                hour: int.tryParse(parts[0]) ?? 9,
+                                minute: int.tryParse(parts[1]) ?? 0,
+                              );
+                              final picked = await showTimePicker(
+                                context: dialogCtx,
+                                initialTime: initial,
+                              );
+                              if (picked != null) {
+                                setDialogState(() {
+                                  startTime =
+                                      '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+                                });
+                              }
+                            },
+                            child: InputDecorator(
+                              decoration: InputDecoration(
+                                labelText: 'Abertura',
+                                filled: true,
+                                fillColor: isDark
+                                    ? ThemeColors.darkSurface
+                                    : Colors.grey.shade50,
+                                suffixIcon: const Icon(
+                                  Icons.access_time,
+                                  size: 18,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                startTime,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () async {
+                              final parts = endTime.split(':');
+                              final initial = TimeOfDay(
+                                hour: int.tryParse(parts[0]) ?? 20,
+                                minute: int.tryParse(parts[1]) ?? 0,
+                              );
+                              final picked = await showTimePicker(
+                                context: dialogCtx,
+                                initialTime: initial,
+                              );
+                              if (picked != null) {
+                                setDialogState(() {
+                                  endTime =
+                                      '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+                                });
+                              }
+                            },
+                            child: InputDecorator(
+                              decoration: InputDecoration(
+                                labelText: 'Fechamento',
+                                filled: true,
+                                fillColor: isDark
+                                    ? ThemeColors.darkSurface
+                                    : Colors.grey.shade50,
+                                suffixIcon: const Icon(
+                                  Icons.access_time,
+                                  size: 18,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                endTime,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

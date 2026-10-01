@@ -75,16 +75,20 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: Scaffold(
-          backgroundColor: isDark ? ThemeColors.darkBg : Colors.grey.shade50,
-          body: Column(
-            children: [
-              // 1. Header Bar
-              _buildHeader(context, title, desc, color, isDark),
-              Divider(
-                height: 1,
-                color: isDark ? const Color(0xFF2A2A2A) : Colors.grey.shade200,
-              ),
+        child: ScaffoldMessenger(
+          child: Scaffold(
+            backgroundColor: isDark ? ThemeColors.darkBg : Colors.grey.shade50,
+            body: Builder(
+              builder: (modalContext) => Column(
+                children: [
+                  // 1. Header Bar
+                  _buildHeader(modalContext, title, desc, color, isDark),
+                  Divider(
+                    height: 1,
+                    color: isDark
+                        ? const Color(0xFF2A2A2A)
+                        : Colors.grey.shade200,
+                  ),
 
               // 2. Scrollable Dashboard Body
               Expanded(
@@ -126,8 +130,10 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  ),
+);
+}
 
   Widget _buildHeader(
     BuildContext context,
@@ -379,11 +385,14 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
           itemCount: kpis.length,
           itemBuilder: (context, idx) {
             final k = kpis[idx];
+            final title = k['title'] as String;
+            final tooltip = k['tooltip'] as String? ?? _getKpiTooltip(title);
             return AppStatCard(
-              title: k['title'] as String,
+              title: title,
               value: k['value'] as String,
               trendText: k['trend'] as String?,
               positiveTrend: (k['positive'] as bool?) ?? true,
+              tooltip: tooltip,
               icon: Icon(
                 k['icon'] as IconData? ?? Icons.analytics,
                 size: 18,
@@ -394,6 +403,41 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
         );
       },
     );
+  }
+
+  String _getKpiTooltip(String title) {
+    final lower = title.toLowerCase();
+    if (lower.contains('churn')) {
+      return 'Taxa de Churn: Percentual de clientes que cancelaram planos ou deixaram de frequentar no período.';
+    }
+    if (lower.contains('ltv')) {
+      return 'LTV (Lifetime Value): Receita média total gerada por cliente ao longo do seu ciclo de relacionamento.';
+    }
+    if (lower.contains('mrr')) {
+      return 'MRR (Monthly Recurring Revenue): Receita mensal previsível gerada pelas assinaturas recorrentes ativas.';
+    }
+    if (lower.contains('assinantes')) {
+      return 'Assinantes Ativos: Quantidade de clientes com planos de assinatura vigentes.';
+    }
+    if (lower.contains('receita') || lower.contains('faturamento')) {
+      return 'Receita total gerada pelas operações comerciais no período selecionado.';
+    }
+    if (lower.contains('ticket')) {
+      return 'Ticket Médio: Valor médio gasto por cliente a cada atendimento.';
+    }
+    if (lower.contains('ocupação') || lower.contains('ocupacao')) {
+      return 'Taxa de Ocupação: Proporção de horários disponíveis na agenda que foram preenchidos.';
+    }
+    if (lower.contains('pontos')) {
+      return 'Total de pontos acumulados ou resgatados no Clube de Fidelidade.';
+    }
+    if (lower.contains('clientes')) {
+      return 'Número de clientes cadastrados contabilizados no período.';
+    }
+    if (lower.contains('itens') || lower.contains('produtos')) {
+      return 'Volume de produtos comercializados no período.';
+    }
+    return 'Indicador gerencial ($title) monitorado no período selecionado.';
   }
 
   Widget _buildChartAndBreakdownRow(
@@ -643,15 +687,35 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) {
-        Future.delayed(const Duration(milliseconds: 1200), () {
+        Future.delayed(const Duration(milliseconds: 1000), () {
           if (ctx.mounted) Navigator.of(ctx).pop();
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
+            final messenger = ScaffoldMessenger.of(context);
+            messenger.hideCurrentSnackBar();
+            messenger.showSnackBar(
               SnackBar(
-                content: Text(
-                  'Relatório "$title" exportado com sucesso em $format!',
+                content: Row(
+                  children: [
+                    const Icon(
+                      Icons.check_circle_outline,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Relatório "$title" exportado com sucesso em $format!',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 backgroundColor: ThemeColors.success,
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 4),
               ),
             );
           }
@@ -668,10 +732,11 @@ class _ReportDashboardModalState extends State<ReportDashboardModal> {
               const CircularProgressIndicator(color: ThemeColors.primary),
               const SizedBox(height: 16),
               Text(
-                'Gerando arquivo executivo $format...',
+                'Compilando relatório em $format...',
                 style: TextStyle(
                   color: isDark ? Colors.white : Colors.black87,
                   fontSize: 13,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],

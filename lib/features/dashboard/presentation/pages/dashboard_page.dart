@@ -15,6 +15,7 @@ import 'package:barber_osbao/features/agenda/presentation/controllers/agenda_con
 import 'package:barber_osbao/features/produtos/presentation/controllers/produtos_controller.dart';
 import 'package:barber_osbao/features/financeiro/presentation/controllers/financeiro_controller.dart';
 import 'package:barber_osbao/features/produtos/domain/models/produto.dart';
+import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -128,7 +129,7 @@ class DashboardPage extends ConsumerWidget {
               onTap: () => context.go('/financeiro'),
               child: AppStatCard(
                 title: 'FATURAMENTO HOJE',
-                value: 'R\$ ${dailyRevenue.toStringAsFixed(2)}',
+                value: AppFormatters.formatCurrency(dailyRevenue),
                 icon: const Icon(
                   Icons.monetization_on_outlined,
                   color: ThemeColors.success,
@@ -300,8 +301,8 @@ class DashboardPage extends ConsumerWidget {
 
   Widget _buildQuickAccessSection(BuildContext context) {
     return AppSection(
-      title: 'Acessos rápidos',
-      subtitle: 'Ações administrativas rápidas',
+      title: 'Ações e Operações Rápidas',
+      subtitle: 'Atalhos operacionais diretos do dia a dia da barbearia',
       child: LayoutBuilder(
         builder: (context, constraints) {
           final crossCount = constraints.maxWidth > 960
@@ -318,29 +319,29 @@ class DashboardPage extends ConsumerWidget {
             ),
             children: [
               AppActionButton(
-                label: 'Novo serviço',
-                icon: Icons.add_circle_outline,
-                onPressed: () => context.go('/servicos'),
+                label: 'Novo agendamento',
+                icon: Icons.calendar_today_outlined,
+                onPressed: () => context.go('/agenda'),
               ),
               AppActionButton(
-                label: 'Novo produto',
-                icon: Icons.add_shopping_cart,
-                onPressed: () => context.go('/produtos'),
+                label: 'Movimentar estoque',
+                icon: Icons.swap_horiz_outlined,
+                onPressed: () => context.go('/estoque'),
               ),
               AppActionButton(
-                label: 'Novo funcionário',
-                icon: Icons.person_add,
-                onPressed: () => context.go('/funcionarios'),
+                label: 'Cadastrar cliente',
+                icon: Icons.person_add_outlined,
+                onPressed: () => context.go('/clientes'),
               ),
               AppActionButton(
-                label: 'Novo plano',
-                icon: Icons.card_membership,
-                onPressed: () => context.go('/planos'),
+                label: 'Nova transação',
+                icon: Icons.add_card_outlined,
+                onPressed: () => context.go('/financeiro'),
               ),
               AppActionButton(
-                label: 'Relatório financeiro',
-                icon: Icons.bar_chart,
-                onPressed: () => context.go('/relatorios'),
+                label: 'Comandas & PDV',
+                icon: Icons.receipt_long_outlined,
+                onPressed: () => context.go('/financeiro'),
               ),
             ],
           );

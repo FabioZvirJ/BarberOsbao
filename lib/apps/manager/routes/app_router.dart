@@ -68,6 +68,7 @@ final GoRouter managerRouter = GoRouter(
                 AppSidebarItem(id: 'funcionarios', title: 'Funcionários', icon: Icons.badge_outlined),
                 AppSidebarItem(id: 'servicos', title: 'Serviços', icon: Icons.content_cut_outlined),
                 AppSidebarItem(id: 'produtos', title: 'Produtos', icon: Icons.shopping_bag_outlined),
+                AppSidebarItem(id: 'categorias', title: 'Categorias', icon: Icons.category_outlined),
                 AppSidebarItem(id: 'estoque', title: 'Estoque', icon: Icons.inventory_2_outlined),
                 AppSidebarItem(id: 'planos', title: 'Planos', icon: Icons.card_membership_outlined),
                 AppSidebarItem(id: 'clube', title: 'Clube', icon: Icons.stars_outlined),
@@ -94,6 +95,9 @@ final GoRouter managerRouter = GoRouter(
                     break;
                   case 'produtos':
                     context.go('/produtos');
+                    break;
+                  case 'categorias':
+                    context.go('/categorias');
                     break;
                   case 'estoque':
                     context.go('/estoque');
