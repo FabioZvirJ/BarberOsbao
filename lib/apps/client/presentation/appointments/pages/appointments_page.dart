@@ -9,6 +9,8 @@ import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/packages/core/shared/appointments/application/appointment_controller.dart';
 import 'package:barber_osbao/apps/client/presentation/appointments/widgets/booking_wizard.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_modal.dart';
+import 'package:barber_osbao/packages/core/models/appointment.dart';
+import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
 
 class AppointmentsPage extends ConsumerStatefulWidget {
   const AppointmentsPage({super.key});
@@ -181,10 +183,31 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
 
                     return AppTableRow(
                       cells: [
-                        Text(apt.barberName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(apt.barberName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 2),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
+                                const SizedBox(width: 3),
+                                Text(
+                                  apt.locationName,
+                                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                         Text(apt.services.map((s) => s.name).join(', '), maxLines: 1, overflow: TextOverflow.ellipsis),
                         Text('${apt.date.split('-').reversed.join('/')} às ${apt.time}'),
-                        Text('R\$ ${apt.totalValue.toStringAsFixed(2)}'),
+                        Text(
+                          AppFormatters.formatCurrency(apt.totalValue),
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
                         AppBadge(label: statusLabel, variant: badgeVar),
                         if (apt.status == 'confirmed')
                           TextButton(

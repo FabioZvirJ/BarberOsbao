@@ -10,6 +10,10 @@ import 'package:barber_osbao/packages/design_system/atoms/app_avatar.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_badge.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
+import 'package:barber_osbao/packages/core/models/barber.dart';
+import 'package:barber_osbao/packages/core/models/appointment.dart';
+import 'package:barber_osbao/packages/core/models/service_model.dart';
+import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
 import 'package:barber_osbao/packages/core/auth/application/auth_controller.dart';
 import 'package:barber_osbao/packages/core/shared/appointments/application/appointment_controller.dart';
 import 'package:barber_osbao/apps/client/presentation/appointments/widgets/booking_wizard.dart';
@@ -18,14 +22,21 @@ import 'package:barber_osbao/packages/core/shared/plans/application/plans_contro
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
 
-  void _openBookingWizard(BuildContext context, {dynamic preselectedService}) {
+  void _openBookingWizard(
+    BuildContext context, {
+    ServiceModel? preselectedService,
+    Barber? preselectedBarber,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => AppModal(
         title: 'Agendar Horário',
-        child: BookingWizard(preselectedService: preselectedService),
+        child: BookingWizard(
+          preselectedService: preselectedService,
+          preselectedBarber: preselectedBarber,
+        ),
       ),
     );
   }
@@ -122,7 +133,7 @@ class DashboardPage extends ConsumerWidget {
                               crossAxisCount: crossCount,
                               crossAxisSpacing: 20,
                               mainAxisSpacing: 20,
-                              mainAxisExtent: 180,
+                              mainAxisExtent: 195,
                             ),
                             children: [
                               // 1. Next Appointment Card
@@ -156,15 +167,36 @@ class DashboardPage extends ConsumerWidget {
                                             AppBadge(label: 'Confirmado', variant: AppBadgeVariant.success),
                                           ],
                                         ),
-                                        const SizedBox(height: 12),
+                                        const SizedBox(height: 10),
                                         Text(
                                           '${upcoming.date.split('-').reversed.join('/')} às ${upcoming.time}',
-                                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
                                         ),
                                         const SizedBox(height: 4),
-                                        Text(
-                                          'Barbeiro: ${upcoming.barberName}',
-                                          style: const TextStyle(fontSize: 13, color: Colors.grey),
+                                        Row(
+                                          children: [
+                                            const Icon(Icons.person_outline, size: 14, color: ThemeColors.primary),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              upcoming.barberName,
+                                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 3),
+                                        Row(
+                                          children: [
+                                            const Icon(Icons.location_on_outlined, size: 13, color: ThemeColors.primary),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                '${upcoming.locationName} • ${upcoming.locationAddress}',
+                                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                         const Spacer(),
                                         Row(
@@ -264,7 +296,8 @@ class DashboardPage extends ConsumerWidget {
                       // Quick Services Section
                       AppSection(
                         title: 'Nossos Serviços',
-                        subtitle: 'Selecione um serviço rápido para abrir o agendamento',
+                        subtitle:
+                            'Catálogo completo de serviços disponíveis na rede Barber Osbão',
                         child: servicesState.when(
                           loading: () => const Center(child: CircularProgressIndicator()),
                           error: (e, s) => const Center(child: Text('Erro ao carregar serviços.')),
@@ -303,7 +336,7 @@ class DashboardPage extends ConsumerWidget {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          'R\$ ${s.price.toStringAsFixed(2)}',
+                                          AppFormatters.formatCurrency(s.price),
                                           style: const TextStyle(color: ThemeColors.primary, fontSize: 12, fontWeight: FontWeight.bold),
                                         ),
                                       ],
@@ -320,7 +353,8 @@ class DashboardPage extends ConsumerWidget {
                       // Barbers list section
                       AppSection(
                         title: 'Barbeiros Disponíveis',
-                        subtitle: 'Conheça nossos profissionais especialistas',
+                        subtitle:
+                            'Conheça nossos profissionais especialistas, confira unidades e agende seu horário',
                         child: barbersState.when(
                           loading: () => const Center(child: CircularProgressIndicator()),
                           error: (e, s) => const Center(child: Text('Erro ao carregar profissionais.')),
@@ -334,23 +368,28 @@ class DashboardPage extends ConsumerWidget {
                                   crossAxisCount: crossCount,
                                   crossAxisSpacing: 16,
                                   mainAxisSpacing: 16,
-                                  mainAxisExtent: 220,
+                                  mainAxisExtent: 260,
                                 ),
                                 itemCount: barbers.length,
                                 itemBuilder: (context, index) {
                                   final b = barbers[index];
                                   return AppCard(
                                     child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
-                                            AppAvatar(url: b.avatarUrl, size: 50),
-                                            const SizedBox(width: 16),
+                                            AppAvatar(url: b.avatarUrl, name: b.name, size: 48),
+                                            const SizedBox(width: 14),
                                             Expanded(
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  Text(b.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                                  Text(
+                                                    b.name,
+                                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                                  ),
+                                                  const SizedBox(height: 2),
                                                   Row(
                                                     children: [
                                                       const Icon(Icons.star, color: ThemeColors.primary, size: 14),
@@ -366,17 +405,53 @@ class DashboardPage extends ConsumerWidget {
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(height: 12),
-                                        Text(
-                                          b.bio,
-                                          style: const TextStyle(fontSize: 12, color: Colors.grey, height: 1.3),
-                                          maxLines: 3,
-                                          overflow: TextOverflow.ellipsis,
+                                        const SizedBox(height: 10),
+                                        Row(
+                                          children: [
+                                            const Icon(Icons.store, size: 13, color: ThemeColors.primary),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                b.shopName,
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: isDark ? Colors.white70 : Colors.black87,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        const Spacer(),
+                                        const SizedBox(height: 2),
+                                        Row(
+                                          children: [
+                                            const Icon(Icons.location_on_outlined, size: 13, color: Colors.grey),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                b.address,
+                                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
                                         Wrap(
                                           spacing: 6,
-                                          children: b.specialties.map((s) => AppBadge(label: s)).toList(),
+                                          children: b.specialties.take(3).map((s) => AppBadge(label: s)).toList(),
+                                        ),
+                                        const Spacer(),
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: AppButton(
+                                            label: 'Agendar com ${b.name.split(' ').first}',
+                                            icon: const Icon(Icons.calendar_today, size: 13),
+                                            onPressed: () => _openBookingWizard(context, preselectedBarber: b),
+                                          ),
                                         ),
                                       ],
                                     ),

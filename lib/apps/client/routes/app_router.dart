@@ -26,8 +26,8 @@ final GoRouter appRouter = GoRouter(
         String activeId = 'dashboard';
         if (location.startsWith('/appointments')) {
           activeId = 'appointments';
-        } else if (location.startsWith('/customers')) {
-          activeId = 'customers';
+        } else if (location.startsWith('/barbers') || location.startsWith('/customers')) {
+          activeId = 'barbers';
         } else if (location.startsWith('/profile')) {
           activeId = 'profile';
         } else if (location.startsWith('/plans')) {
@@ -43,7 +43,7 @@ final GoRouter appRouter = GoRouter(
               sidebarItems: [
                 AppSidebarItem(id: 'dashboard', title: 'Início', icon: Icons.dashboard_outlined),
                 AppSidebarItem(id: 'appointments', title: 'Agendamentos', icon: Icons.calendar_today_outlined),
-                AppSidebarItem(id: 'customers', title: 'Clientes', icon: Icons.people_outline),
+                AppSidebarItem(id: 'barbers', title: 'Barbeiros & Unidades', icon: Icons.storefront_outlined),
                 AppSidebarItem(id: 'plans', title: 'Planos & Clube', icon: Icons.star_outline),
                 AppSidebarItem(id: 'profile', title: 'Meu Perfil', icon: Icons.person_outlined),
                 AppSidebarItem(id: 'settings', title: 'Configurações', icon: Icons.settings_outlined),
@@ -56,8 +56,9 @@ final GoRouter appRouter = GoRouter(
                   case 'appointments':
                     context.go('/appointments');
                     break;
+                  case 'barbers':
                   case 'customers':
-                    context.go('/customers');
+                    context.go('/barbers');
                     break;
                   case 'plans':
                     context.go('/plans');
@@ -86,6 +87,10 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: '/appointments',
           builder: (context, state) => const AppointmentsPage(),
+        ),
+        GoRoute(
+          path: '/barbers',
+          builder: (context, state) => const CustomersPage(),
         ),
         GoRoute(
           path: '/customers',
