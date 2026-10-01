@@ -10,6 +10,10 @@ import 'package:barber_osbao/packages/core/shared/appointments/application/appoi
 import 'package:barber_osbao/apps/client/presentation/appointments/widgets/booking_wizard.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_modal.dart';
 import 'package:barber_osbao/packages/core/models/appointment.dart';
+import 'package:barber_osbao/packages/core/models/barber.dart';
+import 'package:barber_osbao/packages/core/models/service_model.dart';
+import 'package:barber_osbao/packages/core/shared/repositories/barber_repository.dart';
+import 'package:barber_osbao/packages/core/utils/mock_data.dart';
 import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
 
 class AppointmentsPage extends ConsumerStatefulWidget {
@@ -23,15 +27,36 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
   String _filterStatus = 'todos'; // 'todos', 'confirmed', 'completed', 'cancelled'
   String _searchQuery = '';
 
-  void _openBookingWizard() {
+  void _openBookingWizard({Barber? barber, List<ServiceModel>? services}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const AppModal(
+      builder: (context) => AppModal(
         title: 'Agendar Horário',
-        child: BookingWizard(),
+        child: BookingWizard(
+          preselectedBarber: barber,
+          preselectedServices: services,
+        ),
       ),
+    );
+  }
+
+  void _rebookAppointment(Appointment apt) {
+    final barbersAsync = ref.read(barbersListProvider);
+    final barbers = barbersAsync.value ?? MockData.barbers;
+    Barber? barber;
+    try {
+      barber = barbers.firstWhere(
+        (b) => b.id == apt.barberId || b.name == apt.barberName,
+      );
+    } catch (_) {
+      barber = null;
+    }
+
+    _openBookingWizard(
+      barber: barber,
+      services: apt.services,
     );
   }
 
@@ -158,7 +183,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
                     AppTableColumn(label: 'DATA & HORA'),
                     AppTableColumn(label: 'VALOR'),
                     AppTableColumn(label: 'STATUS'),
-                    AppTableColumn(label: 'AÇÕES', width: 120),
+                    AppTableColumn(label: 'AÇÕES', width: 140),
                   ],
                   rows: filtered.map((apt) {
                     AppBadgeVariant badgeVar;
@@ -212,10 +237,36 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
                         if (apt.status == 'confirmed')
                           TextButton(
                             onPressed: () => _confirmCancel(apt.id),
-                            child: const Text('Cancelar', style: TextStyle(color: Colors.red, fontSize: 13)),
+                            child: const Text(
+                              'Cancelar',
+                              style: TextStyle(color: Colors.red, fontSize: 13),
+                            ),
                           )
                         else
-                          const Text('-', style: TextStyle(color: Colors.grey)),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  ThemeColors.primary.withValues(alpha: 0.15),
+                              foregroundColor: ThemeColors.primary,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            icon: const Icon(Icons.repeat, size: 14),
+                            label: const Text(
+                              'Reagendar',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            onPressed: () => _rebookAppointment(apt),
+                          ),
                       ],
                     );
                   }).toList(),

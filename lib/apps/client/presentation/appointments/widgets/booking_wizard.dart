@@ -17,11 +17,13 @@ import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
 
 class BookingWizard extends ConsumerStatefulWidget {
   final ServiceModel? preselectedService;
+  final List<ServiceModel>? preselectedServices;
   final Barber? preselectedBarber;
 
   const BookingWizard({
     super.key,
     this.preselectedService,
+    this.preselectedServices,
     this.preselectedBarber,
   });
 
@@ -42,16 +44,21 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
   @override
   void initState() {
     super.initState();
+    if (widget.preselectedServices != null &&
+        widget.preselectedServices!.isNotEmpty) {
+      _selectedServices.addAll(widget.preselectedServices!);
+    } else if (widget.preselectedService != null) {
+      _selectedServices.add(widget.preselectedService!);
+    }
+
     if (widget.preselectedBarber != null) {
       _selectedBarber = widget.preselectedBarber;
-      if (widget.preselectedService != null) {
-        _selectedServices.add(widget.preselectedService!);
+      if (_selectedServices.isNotEmpty) {
         _currentStep = 2; // Go straight to date & time
       } else {
         _currentStep = 1; // Go to services selection for this barber
       }
-    } else if (widget.preselectedService != null) {
-      _selectedServices.add(widget.preselectedService!);
+    } else if (_selectedServices.isNotEmpty) {
       _currentStep = 0; // Pick professional first
     }
   }
@@ -294,6 +301,103 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
           ),
         ),
         const SizedBox(height: 16),
+
+        if (barbers.isNotEmpty &&
+            _searchBarberController.text.isEmpty &&
+            _selectedUnitFilter == 'Todas') ...[
+          InkWell(
+            onTap: () {
+              setState(() {
+                _selectedBarber = barbers.first;
+              });
+            },
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: _selectedBarber?.id == barbers.first.id
+                    ? ThemeColors.primary.withValues(alpha: 0.12)
+                    : (isDark ? ThemeColors.darkSurface : Colors.grey.shade50),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: _selectedBarber?.id == barbers.first.id
+                      ? ThemeColors.primary
+                      : (isDark ? ThemeColors.darkBorder : Colors.grey.shade300),
+                  width: _selectedBarber?.id == barbers.first.id ? 2 : 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: ThemeColors.primary.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.bolt,
+                      color: ThemeColors.primary,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Text(
+                              'Qualquer Profissional',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: ThemeColors.primary,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'Mais Rápido',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Encontraremos o profissional com o horário mais próximo para você.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white60 : Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (_selectedBarber?.id == barbers.first.id)
+                    const Icon(
+                      Icons.check_circle,
+                      color: ThemeColors.primary,
+                      size: 20,
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
 
         if (filtered.isEmpty)
           Container(
