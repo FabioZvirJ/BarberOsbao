@@ -5,6 +5,7 @@ import 'package:barber_osbao/packages/design_system/layouts/app_section.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_card.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_badge.dart';
+import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/packages/core/shared/plans/application/plans_controller.dart';
 
@@ -90,7 +91,28 @@ class PlansPage extends ConsumerWidget {
                             variant: AppButtonVariant.outline,
                             height: 40,
                             onPressed: () {
-                              ref.read(membershipControllerProvider.notifier).cancel();
+                              showDialog(
+                                context: context,
+                                builder: (ctx) => AppDialog(
+                                  title: 'Cancelar Assinatura',
+                                  content:
+                                      'Tem certeza que deseja cancelar sua assinatura do clube? Você continuará com acesso aos benefícios até o fim do período atual.',
+                                  confirmLabel: 'Sim, Cancelar',
+                                  onConfirm: () {
+                                    ref
+                                        .read(membershipControllerProvider.notifier)
+                                        .cancel();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Assinatura cancelada com sucesso.',
+                                        ),
+                                        backgroundColor: ThemeColors.warning,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
                             },
                           ),
                         ],

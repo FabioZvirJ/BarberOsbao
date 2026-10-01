@@ -4,6 +4,7 @@ import 'package:barber_osbao/packages/design_system/layouts/app_container.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_card.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_select.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:barber_osbao/packages/core/auth/application/auth_controller.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -149,9 +150,18 @@ class SettingsPage extends ConsumerWidget {
                             style: TextStyle(color: Colors.grey, fontSize: 13),
                           ),
                           const SizedBox(height: 16),
-                          TextButton(
-                            onPressed: () {},
-                            child: const Text('Falar com o Suporte (suporte@barberosbao.com.br)', style: TextStyle(color: ThemeColors.primary)),
+                          TextButton.icon(
+                            icon: const Icon(Icons.mail_outline, size: 16, color: ThemeColors.primary),
+                            onPressed: () async {
+                              final uri = Uri.parse('mailto:suporte@barberosbao.com.br?subject=Suporte%20Barber%20Osbao');
+                              if (await canLaunchUrl(uri)) {
+                                await launchUrl(uri);
+                              }
+                            },
+                            label: const Text(
+                              'Falar com o Suporte (suporte@barberosbao.com.br)',
+                              style: TextStyle(color: ThemeColors.primary),
+                            ),
                           ),
                         ],
                       ),

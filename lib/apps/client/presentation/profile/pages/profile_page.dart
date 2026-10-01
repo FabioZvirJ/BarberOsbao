@@ -7,6 +7,7 @@ import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_avatar.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/packages/core/auth/application/auth_controller.dart';
+import 'package:barber_osbao/packages/core/utils/app_masks.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -106,7 +107,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         // Avatar Row
                         Row(
                           children: [
-                            AppAvatar(url: _avatarUrlController.text.isNotEmpty ? _avatarUrlController.text : user.avatarUrl, size: 70),
+                            AppAvatar(
+                              url: _avatarUrlController.text.isNotEmpty ? _avatarUrlController.text : user.avatarUrl,
+                              name: user.name,
+                              size: 70,
+                            ),
                             const SizedBox(width: 24),
                             Expanded(
                               child: AppInput(
@@ -133,15 +138,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                         child: AppInput(
                                           label: 'Nome Completo',
                                           controller: _nameController,
-                                          validator: (val) => val == null || val.isEmpty ? 'Campo obrigatório' : null,
+                                          validator: AppValidators.required('Nome'),
                                         ),
                                       ),
                                       const SizedBox(width: 20),
                                       Expanded(
                                         child: AppInput(
                                           label: 'Celular / WhatsApp',
+                                          placeholder: '(11) 99999-9999',
                                           controller: _phoneController,
-                                          validator: (val) => val == null || val.isEmpty ? 'Campo obrigatório' : null,
+                                          keyboardType: TextInputType.phone,
+                                          inputFormatters: [AppMasks.phone],
+                                          validator: AppValidators.phone(required: true),
                                         ),
                                       ),
                                     ],
@@ -150,21 +158,25 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                   AppInput(
                                     label: 'Nome Completo',
                                     controller: _nameController,
-                                    validator: (val) => val == null || val.isEmpty ? 'Campo obrigatório' : null,
+                                    validator: AppValidators.required('Nome'),
                                   ),
                                   const SizedBox(height: 20),
                                   AppInput(
                                     label: 'Celular / WhatsApp',
+                                    placeholder: '(11) 99999-9999',
                                     controller: _phoneController,
-                                    validator: (val) => val == null || val.isEmpty ? 'Campo obrigatório' : null,
+                                    keyboardType: TextInputType.phone,
+                                    inputFormatters: [AppMasks.phone],
+                                    validator: AppValidators.phone(required: true),
                                   ),
                                 ],
                                 const SizedBox(height: 20),
                                 AppInput(
                                   label: 'E-mail',
+                                  placeholder: 'exemplo@email.com',
                                   controller: _emailController,
                                   keyboardType: TextInputType.emailAddress,
-                                  validator: (val) => val == null || val.isEmpty ? 'Campo obrigatório' : null,
+                                  validator: AppValidators.email(required: true),
                                 ),
                               ],
                             );
