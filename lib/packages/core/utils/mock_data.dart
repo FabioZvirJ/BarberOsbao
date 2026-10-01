@@ -54,6 +54,36 @@ class MockData {
       availableDays: ['2026-07-08', '2026-07-09', '2026-07-10', '2026-07-11', '2026-07-13', '2026-07-14'],
       availableHours: ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'],
     ),
+    const Barber(
+      id: 'barb_4',
+      name: 'Lucas Ferreira',
+      avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&width=150',
+      rating: 4.9,
+      specialties: ['Degradê Navalhado', 'Freestyle', 'Barba Terapia'],
+      bio: 'Expert em degradê ultra-definido, riscos artísticos e hidratação de barba.',
+      availableDays: ['2026-07-08', '2026-07-09', '2026-07-10', '2026-07-11', '2026-07-13', '2026-07-14'],
+      availableHours: ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'],
+    ),
+    const Barber(
+      id: 'barb_5',
+      name: 'Bruno Albuquerque',
+      avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&width=150',
+      rating: 4.95,
+      specialties: ['Visagismo Masculino', 'Tratamento Capilar', 'Barba Completa'],
+      bio: 'Consultor de imagem e visagismo, transformando cortes em assinaturas de estilo.',
+      availableDays: ['2026-07-08', '2026-07-09', '2026-07-10', '2026-07-11', '2026-07-13', '2026-07-14'],
+      availableHours: ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'],
+    ),
+    const Barber(
+      id: 'barb_6',
+      name: 'Matheus Lima',
+      avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&width=150',
+      rating: 4.85,
+      specialties: ['Fade Americano', 'Pigmentação de Barba', 'Corte Infantil'],
+      bio: 'Mais de 6 anos de experiência com paciência para público infantil e acabamentos impecáveis.',
+      availableDays: ['2026-07-08', '2026-07-09', '2026-07-10', '2026-07-11', '2026-07-13', '2026-07-14'],
+      availableHours: ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'],
+    ),
   ];
 
   static final List<ServiceModel> services = [

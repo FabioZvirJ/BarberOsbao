@@ -22,3 +22,43 @@ abstract class Appointment with _$Appointment {
 
   factory Appointment.fromJson(Map<String, dynamic> json) => _$AppointmentFromJson(json);
 }
+
+extension AppointmentLocationExtension on Appointment {
+  String get locationName {
+    switch (barberId) {
+      case 'barb_1':
+        return 'Barber Osbão - Unidade Jardins';
+      case 'barb_2':
+        return 'Barber Osbão - Unidade Pinheiros';
+      case 'barb_3':
+        return 'Barber Osbão - Unidade Centro Histórico';
+      case 'barb_4':
+        return 'Barber Osbão - Unidade Moema';
+      case 'barb_5':
+        return 'Barber Osbão - Unidade Paulista';
+      case 'barb_6':
+        return 'Barber Osbão - Unidade Vila Madalena';
+      default:
+        return 'Barber Osbão - Unidade Jardins';
+    }
+  }
+
+  String get locationAddress {
+    switch (barberId) {
+      case 'barb_1':
+        return 'Rua Oscar Freire, 1020 - Jardins, SP';
+      case 'barb_2':
+        return 'Rua dos Pinheiros, 450 - Pinheiros, SP';
+      case 'barb_3':
+        return 'Rua Direita, 88 - Centro Histórico, SP';
+      case 'barb_4':
+        return 'Av. Moema, 312 - Moema, SP';
+      case 'barb_5':
+        return 'Av. Paulista, 1578 - Bela Vista, SP';
+      case 'barb_6':
+        return 'Rua Aspicuelta, 260 - Vila Madalena, SP';
+      default:
+        return 'Rua Oscar Freire, 1020 - Jardins, SP';
+    }
+  }
+}

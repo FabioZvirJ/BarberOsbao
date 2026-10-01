@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,6 +12,7 @@ import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Intl.defaultLocale = 'pt_BR';
   
   // Initialize SharedPreferences
   final prefs = await SharedPreferences.getInstance();
@@ -34,6 +37,13 @@ class MyApp extends ConsumerWidget {
     return userState.when(
       loading: () => const MaterialApp(
         debugShowCheckedModeBanner: false,
+        locale: Locale('pt', 'BR'),
+        supportedLocales: [Locale('pt', 'BR'), Locale('en', 'US')],
+        localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         home: Scaffold(
           backgroundColor: ThemeColors.darkBg,
           body: Center(
@@ -43,6 +53,13 @@ class MyApp extends ConsumerWidget {
       ),
       error: (e, s) => MaterialApp(
         debugShowCheckedModeBanner: false,
+        locale: const Locale('pt', 'BR'),
+        supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         home: Scaffold(
           backgroundColor: ThemeColors.darkBg,
           body: Center(
@@ -55,6 +72,13 @@ class MyApp extends ConsumerWidget {
           return MaterialApp(
             title: 'BarberOsbao - Login',
             debugShowCheckedModeBanner: false,
+            locale: const Locale('pt', 'BR'),
+            supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US')],
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
             themeMode: ThemeMode.dark,
             darkTheme: ThemeColors.getDarkTheme(),
             home: const LoginPage(),
@@ -67,6 +91,13 @@ class MyApp extends ConsumerWidget {
         return MaterialApp.router(
           title: isClient ? 'BarberOsbao' : 'BarberOsbao Manager',
           debugShowCheckedModeBanner: false,
+          locale: const Locale('pt', 'BR'),
+          supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US')],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
           themeMode: themeMode,
           theme: ThemeColors.getLightTheme(),
           darkTheme: ThemeColors.getDarkTheme(),
