@@ -15,6 +15,10 @@ import 'package:barber_osbao/features/agenda/presentation/controllers/agenda_con
 import 'package:barber_osbao/features/produtos/presentation/controllers/produtos_controller.dart';
 import 'package:barber_osbao/features/financeiro/presentation/controllers/financeiro_controller.dart';
 import 'package:barber_osbao/features/produtos/domain/models/produto.dart';
+import 'package:barber_osbao/features/agenda/presentation/pages/agenda_page.dart';
+import 'package:barber_osbao/features/clientes/presentation/pages/clientes_page.dart';
+import 'package:barber_osbao/features/produtos/presentation/pages/estoque_page.dart';
+import 'package:barber_osbao/features/financeiro/presentation/pages/financeiro_page.dart';
 import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
 
 class DashboardPage extends ConsumerWidget {
@@ -321,22 +325,34 @@ class DashboardPage extends ConsumerWidget {
               AppActionButton(
                 label: 'Novo agendamento',
                 icon: Icons.calendar_today_outlined,
-                onPressed: () => context.go('/agenda'),
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (_) => const AppointmentFormDialog(),
+                ),
               ),
               AppActionButton(
                 label: 'Movimentar estoque',
                 icon: Icons.swap_horiz_outlined,
-                onPressed: () => context.go('/estoque'),
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (_) => const EstoqueMovimentacaoDialog(),
+                ),
               ),
               AppActionButton(
                 label: 'Cadastrar cliente',
                 icon: Icons.person_add_outlined,
-                onPressed: () => context.go('/clientes'),
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (_) => const ClienteFormDialog(),
+                ),
               ),
               AppActionButton(
                 label: 'Nova transação',
                 icon: Icons.add_card_outlined,
-                onPressed: () => context.go('/financeiro'),
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (_) => const NewTransactionDialog(),
+                ),
               ),
               AppActionButton(
                 label: 'Comandas & PDV',
