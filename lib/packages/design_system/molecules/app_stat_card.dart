@@ -8,6 +8,7 @@ class AppStatCard extends StatelessWidget {
   final Widget? icon;
   final String? trendText;
   final bool positiveTrend;
+  final String? tooltip;
 
   const AppStatCard({
     super.key,
@@ -16,13 +17,14 @@ class AppStatCard extends StatelessWidget {
     this.icon,
     this.trendText,
     this.positiveTrend = true,
+    this.tooltip,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AppCard(
+    Widget cardWidget = AppCard(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,12 +33,41 @@ class AppStatCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: isDark ? Colors.white60 : Colors.black54,
+              Expanded(
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? Colors.white60 : Colors.black54,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (tooltip != null) ...[
+                      const SizedBox(width: 4),
+                      Tooltip(
+                        message: tooltip!,
+                        padding: const EdgeInsets.all(8),
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: isDark ? ThemeColors.darkSurface : Colors.black87,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Colors.white24),
+                        ),
+                        textStyle: const TextStyle(color: Colors.white, fontSize: 11),
+                        child: Icon(
+                          Icons.info_outline,
+                          size: 13,
+                          color: isDark ? Colors.white38 : Colors.black38,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
               ?icon,
@@ -46,7 +77,7 @@ class AppStatCard extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(
-              fontSize: 24,
+              fontSize: 22,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.5,
             ),
@@ -89,5 +120,23 @@ class AppStatCard extends StatelessWidget {
         ],
       ),
     );
+
+    if (tooltip != null) {
+      return Tooltip(
+        message: tooltip!,
+        waitDuration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.all(8),
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: isDark ? ThemeColors.darkSurface : Colors.black87,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: Colors.white24),
+        ),
+        textStyle: const TextStyle(color: Colors.white, fontSize: 11),
+        child: cardWidget,
+      );
+    }
+
+    return cardWidget;
   }
 }

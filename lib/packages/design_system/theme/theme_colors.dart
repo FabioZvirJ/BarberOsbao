@@ -44,6 +44,12 @@ class ThemeColors {
       primaryColor: primary,
       scaffoldBackgroundColor: background,
       cardColor: surface,
+      dividerColor: const Color(0xFFE5E7EB),
+      dividerTheme: const DividerThemeData(
+        color: Color(0xFFE5E7EB),
+        space: 1,
+        thickness: 1,
+      ),
       colorScheme: const ColorScheme.light(
         primary: primary,
         secondary: secondary,
@@ -63,6 +69,12 @@ class ThemeColors {
       primaryColor: primary,
       scaffoldBackgroundColor: darkBackground,
       cardColor: darkSurface,
+      dividerColor: const Color(0xFF2C2C2C),
+      dividerTheme: const DividerThemeData(
+        color: Color(0xFF2C2C2C),
+        space: 1,
+        thickness: 1,
+      ),
       colorScheme: const ColorScheme.dark(
         primary: primary,
         secondary: Colors.white,
