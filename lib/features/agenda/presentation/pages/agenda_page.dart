@@ -17,6 +17,9 @@ import 'package:barber_osbao/features/agenda/presentation/controllers/agenda_con
 import 'package:barber_osbao/features/clientes/presentation/controllers/clientes_controller.dart';
 import 'package:barber_osbao/features/funcionarios/presentation/controllers/funcionarios_controller.dart';
 import 'package:barber_osbao/features/servicos/presentation/controllers/servicos_controller.dart';
+import 'package:barber_osbao/features/configuracoes/presentation/controllers/configuracoes_controller.dart';
+import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
+import 'package:barber_osbao/packages/core/utils/app_masks.dart';
 
 class AgendaPage extends ConsumerStatefulWidget {
   const AgendaPage({super.key});
@@ -394,14 +397,14 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
         return AppTableRow(
           cells: [
             Text(
-              '${apt.date.split('-').reversed.join('/')} às ${apt.time}',
+              '${AppFormatters.formatDate(apt.date)} às ${apt.time}',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(apt.clientName),
             Text(apt.barberName),
             Text(apt.services),
             Text(
-              'R\$ ${apt.price.toStringAsFixed(2)}',
+              AppFormatters.formatCurrency(apt.price),
               style: const TextStyle(
                 color: ThemeColors.primary,
                 fontWeight: FontWeight.bold,
@@ -438,9 +441,7 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                       size: 18,
                       color: Colors.blue,
                     ),
-                    onPressed: () => ref
-                        .read(agendaControllerProvider.notifier)
-                        .updateStatus(apt.id, 'completed'),
+                    onPressed: () => _confirmFinish(context, apt),
                     tooltip: 'Finalizar',
                   ),
                 ],
@@ -451,9 +452,7 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                       size: 18,
                       color: ThemeColors.danger,
                     ),
-                    onPressed: () => ref
-                        .read(agendaControllerProvider.notifier)
-                        .updateStatus(apt.id, 'cancelled'),
+                    onPressed: () => _confirmCancel(context, apt),
                     tooltip: 'Cancelar',
                   ),
                   IconButton(
@@ -478,21 +477,126 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
     );
   }
 
+  void _confirmFinish(BuildContext context, Agendamento apt) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        title: const Text(
+          'Finalizar Atendimento',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Deseja marcar o atendimento de "${apt.clientName}" às ${apt.time} como finalizado? Esta ação não permite desfazer.',
+          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(
+              'Voltar',
+              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ThemeColors.success,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+            onPressed: () {
+              ref
+                  .read(agendaControllerProvider.notifier)
+                  .updateStatus(apt.id, 'completed');
+              Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Atendimento marcado como finalizado!'),
+                  backgroundColor: ThemeColors.success,
+                ),
+              );
+            },
+            child: const Text('Sim, Finalizar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmCancel(BuildContext context, Agendamento apt) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        title: const Text(
+          'Cancelar Agendamento',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Tem certeza que deseja cancelar o agendamento de "${apt.clientName}" às ${apt.time}? O horário do profissional será liberado.',
+          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(
+              'Voltar',
+              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ThemeColors.danger,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+            onPressed: () {
+              ref
+                  .read(agendaControllerProvider.notifier)
+                  .updateStatus(apt.id, 'cancelled');
+              Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Agendamento cancelado com sucesso.'),
+                  backgroundColor: ThemeColors.danger,
+                ),
+              );
+            },
+            child: const Text('Sim, Cancelar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showCalendarPicker(BuildContext context) async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime(2026, 7, 9),
-      firstDate: DateTime(2026, 1, 1),
+      locale: const Locale('pt', 'BR'),
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2025, 1, 1),
       lastDate: DateTime(2027, 12, 31),
       builder: (context, child) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: ThemeColors.primary,
-              onPrimary: Colors.black,
-              surface: ThemeColors.darkSurface,
-              onSurface: Colors.white,
-            ),
+            colorScheme: isDark
+                ? const ColorScheme.dark(
+                    primary: ThemeColors.primary,
+                    onPrimary: Colors.black,
+                    surface: ThemeColors.darkSurface,
+                    onSurface: Colors.white,
+                  )
+                : const ColorScheme.light(
+                    primary: ThemeColors.primary,
+                    onPrimary: Colors.white,
+                  ),
           ),
           child: child!,
         );
@@ -648,9 +752,9 @@ class _AppointmentFormDialogState
   late final TextEditingController _timeController;
   late final TextEditingController _priceController;
 
-  late String _selectedClient;
-  late String _selectedBarber;
-  late String _selectedService;
+  String? _selectedClient;
+  String? _selectedBarber;
+  String? _selectedService;
   late String _status;
   String? _conflictError;
 
@@ -663,10 +767,10 @@ class _AppointmentFormDialogState
     super.initState();
     final apt = widget.appointment;
     _notesController = TextEditingController(text: apt?.notes ?? '');
-    _dateController = TextEditingController(text: apt?.date ?? '2026-07-09');
-    _timeController = TextEditingController(text: apt?.time ?? '09:00');
+    _dateController = TextEditingController(text: apt?.date ?? '');
+    _timeController = TextEditingController(text: apt?.time ?? '');
     _priceController = TextEditingController(
-      text: apt?.price.toString() ?? '50.00',
+      text: apt != null ? AppMasks.formatCurrencyValue(apt.price) : '',
     );
 
     // Extract dynamic dropdown items
@@ -677,7 +781,7 @@ class _AppointmentFormDialogState
       );
     }
     if (_clients.isEmpty) {
-      _clients.add('João Silva');
+      _clients.addAll(['João Silva', 'Lucas Ferreira', 'Rafael Costa', 'Bruno Albuquerque', 'Matheus Lima']);
     }
 
     if (widget.employeesState is AppSuccess<dynamic> &&
@@ -704,13 +808,35 @@ class _AppointmentFormDialogState
         'Corte de Cabelo',
         'Barba Completa',
         'Combo Cabelo + Barba',
+        'Corte Infantil',
+        'Corte Degradê Navalhado',
+        'Design de Sobrancelha',
       ]);
     }
 
-    _selectedClient = apt?.clientName ?? _clients[0];
-    _selectedBarber = apt?.barberName ?? _barbers[0];
-    _selectedService = apt?.services.split(',')[0] ?? _services[0];
-    _status = apt?.status ?? 'pending';
+    if (apt != null) {
+      if (apt.clientName.isNotEmpty && !_clients.contains(apt.clientName)) {
+        _clients.insert(0, apt.clientName);
+      }
+      _selectedClient = apt.clientName;
+
+      if (apt.barberName.isNotEmpty && !_barbers.contains(apt.barberName)) {
+        _barbers.insert(0, apt.barberName);
+      }
+      _selectedBarber = apt.barberName;
+
+      final sName = apt.services.trim();
+      if (sName.isNotEmpty && !_services.contains(sName)) {
+        _services.insert(0, sName);
+      }
+      _selectedService = sName;
+      _status = apt.status;
+    } else {
+      _selectedClient = null;
+      _selectedBarber = null;
+      _selectedService = null;
+      _status = 'pending';
+    }
   }
 
   @override
@@ -720,6 +846,114 @@ class _AppointmentFormDialogState
     _timeController.dispose();
     _priceController.dispose();
     super.dispose();
+  }
+
+  int _getServiceDurationMinutes(String? serviceName) {
+    if (serviceName != null &&
+        widget.servicesState is AppSuccess<dynamic> &&
+        widget.servicesState.data != null) {
+      final list = widget.servicesState.data!;
+      for (final s in list) {
+        if (s.name == serviceName) {
+          return s.durationMinutes as int;
+        }
+      }
+    }
+    final settings = ref.read(businessSettingsControllerProvider).data;
+    return int.tryParse(settings?.slotInterval ?? '30') ?? 30;
+  }
+
+  void _onServiceChanged(String val) {
+    setState(() {
+      _selectedService = val;
+      _conflictError = null;
+
+      // Auto-fill service price if empty or changing
+      if (widget.servicesState is AppSuccess<dynamic> &&
+          widget.servicesState.data != null) {
+        final list = widget.servicesState.data!;
+        for (final s in list) {
+          if (s.name == val) {
+            _priceController.text = AppMasks.formatCurrencyValue(s.price as double);
+            return;
+          }
+        }
+      }
+
+      if (val.contains('Combo')) {
+        _priceController.text = '70,00';
+      } else if (val.contains('Barba')) {
+        _priceController.text = '35,00';
+      } else if (val.contains('Sobrancelha')) {
+        _priceController.text = '25,00';
+      } else {
+        _priceController.text = '50,00';
+      }
+    });
+  }
+
+  Future<void> _selectDate() async {
+    DateTime initDate = DateTime.now();
+    if (_dateController.text.isNotEmpty) {
+      final parts = _dateController.text.split('-');
+      if (parts.length == 3) {
+        initDate = DateTime(
+          int.tryParse(parts[0]) ?? initDate.year,
+          int.tryParse(parts[1]) ?? initDate.month,
+          int.tryParse(parts[2]) ?? initDate.day,
+        );
+      }
+    }
+
+    final picked = await showDatePicker(
+      context: context,
+      locale: const Locale('pt', 'BR'),
+      initialDate: initDate,
+      firstDate: DateTime(2025, 1, 1),
+      lastDate: DateTime(2027, 12, 31),
+    );
+
+    if (picked != null) {
+      final formattedStr =
+          '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+      setState(() {
+        _dateController.text = formattedStr;
+        _conflictError = null;
+      });
+    }
+  }
+
+  Future<void> _selectTime() async {
+    TimeOfDay initTime = const TimeOfDay(hour: 9, minute: 0);
+    if (_timeController.text.isNotEmpty) {
+      final parts = _timeController.text.split(':');
+      if (parts.length == 2) {
+        initTime = TimeOfDay(
+          hour: int.tryParse(parts[0]) ?? 9,
+          minute: int.tryParse(parts[1]) ?? 0,
+        );
+      }
+    }
+
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initTime,
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      final timeStr =
+          '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+      setState(() {
+        _timeController.text = timeStr;
+        _conflictError = null;
+      });
+    }
   }
 
   @override
@@ -758,36 +992,66 @@ class _AppointmentFormDialogState
               final targetDate = _dateController.text.trim();
               final targetTime = _timeController.text.trim();
 
-              // Double-check conflict prevention (only if not cancelled)
+              if (_selectedClient == null || _selectedClient!.isEmpty) {
+                setState(() => _conflictError = 'Selecione o cliente.');
+                return;
+              }
+              if (_selectedBarber == null || _selectedBarber!.isEmpty) {
+                setState(() => _conflictError = 'Selecione o barbeiro.');
+                return;
+              }
+              if (_selectedService == null || _selectedService!.isEmpty) {
+                setState(() => _conflictError = 'Selecione o serviço.');
+                return;
+              }
+
+              // Overlap conflict prevention using service duration / slot interval
               if (_status != 'cancelled') {
                 final agendaState = ref.read(agendaControllerProvider);
                 final existingList = agendaState.data ?? [];
-                final hasConflict = existingList.any(
-                  (a) =>
-                      a.id != appointment?.id &&
-                      a.barberName == _selectedBarber &&
-                      a.date == targetDate &&
-                      a.time == targetTime &&
-                      a.status != 'cancelled',
-                );
 
-                if (hasConflict) {
-                  setState(() {
-                    _conflictError =
-                        'O barbeiro $_selectedBarber já possui agendamento em $targetDate às $targetTime.';
-                  });
-                  return;
+                final targetParts = targetTime.split(':');
+                final targetStartMin = (int.tryParse(targetParts[0]) ?? 0) * 60 +
+                    (int.tryParse(targetParts[1]) ?? 0);
+                final targetDuration = _getServiceDurationMinutes(_selectedService);
+                final targetEndMin = targetStartMin + targetDuration;
+
+                for (final existing in existingList) {
+                  if (existing.id == appointment?.id) continue;
+                  if (existing.status == 'cancelled') continue;
+                  if (existing.barberName != _selectedBarber) continue;
+                  if (existing.date != targetDate) continue;
+
+                  final exParts = existing.time.split(':');
+                  if (exParts.length != 2) continue;
+                  final exStartMin = (int.tryParse(exParts[0]) ?? 0) * 60 +
+                      (int.tryParse(exParts[1]) ?? 0);
+                  final exDuration = _getServiceDurationMinutes(existing.services);
+                  final exEndMin = exStartMin + exDuration;
+
+                  // Overlap condition
+                  if (targetStartMin < exEndMin && targetEndMin > exStartMin) {
+                    final exEndH = (exEndMin ~/ 60).toString().padLeft(2, '0');
+                    final exEndM = (exEndMin % 60).toString().padLeft(2, '0');
+                    setState(() {
+                      _conflictError =
+                          'O barbeiro $_selectedBarber já possui agendamento das ${existing.time} às $exEndH:$exEndM ($exDuration min). Horário livre após às $exEndH:$exEndM.';
+                    });
+                    return;
+                  }
                 }
               }
 
+              final cleanPrice = AppMasks.parseCurrency(_priceController.text);
+
               final newApt = Agendamento(
                 id: appointment?.id ?? '',
-                clientName: _selectedClient,
-                barberName: _selectedBarber,
-                services: _selectedService,
+                clientName: _selectedClient!,
+                barberName: _selectedBarber!,
+                services: _selectedService!,
                 date: targetDate,
                 time: targetTime,
-                price: double.tryParse(_priceController.text.trim()) ?? 0.0,
+                price: cleanPrice,
                 status: _status,
                 notes: _notesController.text.trim(),
               );
@@ -861,10 +1125,16 @@ class _AppointmentFormDialogState
                 ),
                 const SizedBox(height: 6),
                 DropdownButtonFormField<String>(
-                  dropdownColor: isDark
-                      ? ThemeColors.darkSurface
-                      : Colors.white,
+                  dropdownColor:
+                      isDark ? ThemeColors.darkSurface : Colors.white,
                   initialValue: _selectedClient,
+                  hint: Text(
+                    'Selecione o cliente',
+                    style: TextStyle(
+                      color: isDark ? Colors.white38 : Colors.grey.shade400,
+                      fontSize: 14,
+                    ),
+                  ),
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: isDark
@@ -897,11 +1167,18 @@ class _AppointmentFormDialogState
                     color: isDark ? Colors.white : Colors.black87,
                     fontSize: 14,
                   ),
+                  validator: (val) =>
+                      val == null || val.isEmpty ? 'Selecione o cliente' : null,
                   items: _clients
                       .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                       .toList(),
                   onChanged: (val) {
-                    if (val != null) setState(() => _selectedClient = val);
+                    if (val != null) {
+                      setState(() {
+                        _selectedClient = val;
+                        _conflictError = null;
+                      });
+                    }
                   },
                 ),
               ],
@@ -923,10 +1200,18 @@ class _AppointmentFormDialogState
                       ),
                       const SizedBox(height: 6),
                       DropdownButtonFormField<String>(
-                        dropdownColor: isDark
-                            ? ThemeColors.darkSurface
-                            : Colors.white,
+                        dropdownColor:
+                            isDark ? ThemeColors.darkSurface : Colors.white,
                         initialValue: _selectedBarber,
+                        hint: Text(
+                          'Selecione o barbeiro',
+                          style: TextStyle(
+                            color: isDark
+                                ? Colors.white38
+                                : Colors.grey.shade400,
+                            fontSize: 14,
+                          ),
+                        ),
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: isDark
@@ -959,9 +1244,13 @@ class _AppointmentFormDialogState
                           color: isDark ? Colors.white : Colors.black87,
                           fontSize: 14,
                         ),
+                        validator: (val) => val == null || val.isEmpty
+                            ? 'Selecione o barbeiro'
+                            : null,
                         items: _barbers
                             .map(
-                              (b) => DropdownMenuItem(value: b, child: Text(b)),
+                              (b) =>
+                                  DropdownMenuItem(value: b, child: Text(b)),
                             )
                             .toList(),
                         onChanged: (val) {
@@ -991,10 +1280,18 @@ class _AppointmentFormDialogState
                       ),
                       const SizedBox(height: 6),
                       DropdownButtonFormField<String>(
-                        dropdownColor: isDark
-                            ? ThemeColors.darkSurface
-                            : Colors.white,
+                        dropdownColor:
+                            isDark ? ThemeColors.darkSurface : Colors.white,
                         initialValue: _selectedService,
+                        hint: Text(
+                          'Selecione o serviço',
+                          style: TextStyle(
+                            color: isDark
+                                ? Colors.white38
+                                : Colors.grey.shade400,
+                            fontSize: 14,
+                          ),
+                        ),
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: isDark
@@ -1027,24 +1324,17 @@ class _AppointmentFormDialogState
                           color: isDark ? Colors.white : Colors.black87,
                           fontSize: 14,
                         ),
+                        validator: (val) => val == null || val.isEmpty
+                            ? 'Selecione o serviço'
+                            : null,
                         items: _services
                             .map(
-                              (s) => DropdownMenuItem(value: s, child: Text(s)),
+                              (s) =>
+                                  DropdownMenuItem(value: s, child: Text(s)),
                             )
                             .toList(),
                         onChanged: (val) {
-                          if (val != null) {
-                            setState(() {
-                              _selectedService = val;
-                              if (val.contains('Combo')) {
-                                _priceController.text = '70.00';
-                              } else if (val.contains('Barba')) {
-                                _priceController.text = '35.00';
-                              } else {
-                                _priceController.text = '45.00';
-                              }
-                            });
-                          }
+                          if (val != null) _onServiceChanged(val);
                         },
                       ),
                     ],
@@ -1056,25 +1346,50 @@ class _AppointmentFormDialogState
             Row(
               children: [
                 Expanded(
-                  child: AppInput(
-                    label: 'Data (AAAA-MM-DD)',
-                    placeholder: 'Ex: 2026-07-09',
-                    controller: _dateController,
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Data obrigatória' : null,
-                    onChanged: (_) => setState(() => _conflictError = null),
+                  child: InkWell(
+                    onTap: _selectDate,
+                    borderRadius: BorderRadius.circular(8),
+                    child: IgnorePointer(
+                      child: AppInput(
+                        label: 'Data do Atendimento',
+                        placeholder: 'Toque para selecionar',
+                        controller: TextEditingController(
+                          text: _dateController.text.isNotEmpty
+                              ? AppFormatters.formatDate(_dateController.text)
+                              : '',
+                        ),
+                        suffixIcon: const Icon(
+                          Icons.calendar_today,
+                          size: 18,
+                          color: ThemeColors.primary,
+                        ),
+                        validator: (_) => _dateController.text.isEmpty
+                            ? 'Data obrigatória'
+                            : null,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: AppInput(
-                    label: 'Horário (HH:MM)',
-                    placeholder: 'Ex: 14:30',
-                    controller: _timeController,
-                    validator: (val) => val == null || val.isEmpty
-                        ? 'Horário obrigatório'
-                        : null,
-                    onChanged: (_) => setState(() => _conflictError = null),
+                  child: InkWell(
+                    onTap: _selectTime,
+                    borderRadius: BorderRadius.circular(8),
+                    child: IgnorePointer(
+                      child: AppInput(
+                        label: 'Horário do Atendimento',
+                        placeholder: 'Toque para selecionar',
+                        controller: _timeController,
+                        suffixIcon: const Icon(
+                          Icons.access_time,
+                          size: 18,
+                          color: ThemeColors.primary,
+                        ),
+                        validator: (_) => _timeController.text.isEmpty
+                            ? 'Horário obrigatório'
+                            : null,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -1085,13 +1400,11 @@ class _AppointmentFormDialogState
                 Expanded(
                   child: AppInput(
                     label: 'Valor Cobrado (R\$)',
-                    placeholder: 'Ex: 80.00',
+                    placeholder: '0,00',
                     controller: _priceController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    validator: (val) =>
-                        val == null || val.isEmpty ? 'Obrigatório' : null,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [AppMasks.currency],
+                    validator: AppValidators.currency(required: true, min: 0.01),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -1109,9 +1422,8 @@ class _AppointmentFormDialogState
                       ),
                       const SizedBox(height: 6),
                       DropdownButtonFormField<String>(
-                        dropdownColor: isDark
-                            ? ThemeColors.darkSurface
-                            : Colors.white,
+                        dropdownColor:
+                            isDark ? ThemeColors.darkSurface : Colors.white,
                         initialValue: _status,
                         decoration: InputDecoration(
                           filled: true,

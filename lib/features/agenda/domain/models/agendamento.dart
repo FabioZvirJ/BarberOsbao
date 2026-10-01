@@ -68,4 +68,23 @@ class Agendamento {
         status: json['status'] ?? 'pending',
         notes: json['notes'] ?? '',
       );
+
+  DateTime get dateTime {
+    try {
+      final pDate = date.split('-');
+      final pTime = time.split(':');
+      if (pDate.length == 3 && pTime.length >= 2) {
+        return DateTime(
+          int.parse(pDate[0]),
+          int.parse(pDate[1]),
+          int.parse(pDate[2]),
+          int.parse(pTime[0]),
+          int.parse(pTime[1]),
+        );
+      }
+    } catch (_) {}
+    return DateTime.tryParse('$date $time') ?? DateTime.fromMillisecondsSinceEpoch(0);
+  }
+
+  String get serviceName => services;
 }
