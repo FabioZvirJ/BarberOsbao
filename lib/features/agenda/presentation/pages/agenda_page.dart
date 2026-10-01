@@ -18,6 +18,8 @@ import 'package:barber_osbao/features/clientes/presentation/controllers/clientes
 import 'package:barber_osbao/features/funcionarios/presentation/controllers/funcionarios_controller.dart';
 import 'package:barber_osbao/features/servicos/presentation/controllers/servicos_controller.dart';
 import 'package:barber_osbao/features/configuracoes/presentation/controllers/configuracoes_controller.dart';
+import 'package:barber_osbao/features/financeiro/domain/models/transacao.dart';
+import 'package:barber_osbao/features/financeiro/presentation/controllers/financeiro_controller.dart';
 import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
 import 'package:barber_osbao/packages/core/utils/app_masks.dart';
 
@@ -130,7 +132,7 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   AppFilters(
-                    options: const ['Hoje', 'Semana', 'Mês', 'Todos'],
+                    options: const ['Hoje', 'Amanhã', 'Esta Semana', 'Todos'],
                     selectedOption: _selectedDateRange,
                     onSelected: (val) => setState(() {
                       _selectedDateRange = val;
@@ -334,16 +336,23 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
       if (_calendarSelectedDate.isNotEmpty) {
         matchesDate = apt.date == _calendarSelectedDate;
       } else {
-        final today = '2026-07-09';
+        final now = DateTime.now();
+        final todayStr =
+            '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+        final tomorrow = now.add(const Duration(days: 1));
+        final tomorrowStr =
+            '${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}';
+
         if (_selectedDateRange == 'Hoje') {
-          matchesDate = apt.date == today;
-        } else if (_selectedDateRange == 'Semana') {
-          // simple check: dates matching 2026-07-08 to 14
-          matchesDate =
-              apt.date.startsWith('2026-07-0') ||
-              apt.date.startsWith('2026-07-1');
-        } else if (_selectedDateRange == 'Mês') {
-          matchesDate = apt.date.startsWith('2026-07');
+          matchesDate = apt.date == todayStr || apt.date == '2026-07-09';
+        } else if (_selectedDateRange == 'Amanhã') {
+          matchesDate = apt.date == tomorrowStr || apt.date == '2026-07-10';
+        } else if (_selectedDateRange == 'Esta Semana') {
+          matchesDate = apt.date.startsWith('2026-07-0') ||
+              apt.date.startsWith('2026-07-1') ||
+              apt.date.startsWith(todayStr.substring(0, 7));
+        } else if (_selectedDateRange == 'Todos') {
+          matchesDate = true;
         }
       }
 
@@ -479,49 +488,233 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
 
   void _confirmFinish(BuildContext context, Agendamento apt) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    String selectedPaymentMethod = 'PIX';
+    bool launchInCashRegister = true;
+
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: const Text(
-          'Finalizar Atendimento',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          'Deseja marcar o atendimento de "${apt.clientName}" às ${apt.time} como finalizado? Esta ação não permite desfazer.',
-          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(
-              'Voltar',
-              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: ThemeColors.success.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check_circle_outline,
+                  color: ThemeColors.success,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Finalizar Atendimento',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.04)
+                        : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Cliente:',
+                            style: TextStyle(color: Colors.grey, fontSize: 13),
+                          ),
+                          Text(
+                            apt.clientName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Serviço:',
+                            style: TextStyle(color: Colors.grey, fontSize: 13),
+                          ),
+                          Flexible(
+                            child: Text(
+                              apt.services,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Total a Receber:',
+                            style: TextStyle(color: Colors.grey, fontSize: 13),
+                          ),
+                          Text(
+                            AppFormatters.formatCurrency(apt.price),
+                            style: const TextStyle(
+                              color: ThemeColors.success,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Forma de Pagamento:',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    'PIX',
+                    'Dinheiro',
+                    'Cartão Crédito',
+                    'Cartão Débito',
+                  ].map((method) {
+                    final isSel = selectedPaymentMethod == method;
+                    return ChoiceChip(
+                      label: Text(method),
+                      selected: isSel,
+                      selectedColor: ThemeColors.primary,
+                      labelStyle: TextStyle(
+                        color: isSel
+                            ? Colors.black
+                            : (isDark ? Colors.white70 : Colors.black87),
+                        fontWeight:
+                            isSel ? FontWeight.bold : FontWeight.normal,
+                        fontSize: 12,
+                      ),
+                      onSelected: (selected) {
+                        if (selected) {
+                          setDialogState(() => selectedPaymentMethod = method);
+                        }
+                      },
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 14),
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  value: launchInCashRegister,
+                  activeColor: ThemeColors.primary,
+                  title: const Text(
+                    'Lançar no Caixa / Financeiro',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: const Text(
+                    'Gera receita de serviço automaticamente',
+                    style: TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
+                  onChanged: (val) {
+                    setDialogState(() => launchInCashRegister = val ?? true);
+                  },
+                ),
+              ],
             ),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ThemeColors.success,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(
+                'Voltar',
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : Colors.black54,
+                ),
               ),
             ),
-            onPressed: () {
-              ref
-                  .read(agendaControllerProvider.notifier)
-                  .updateStatus(apt.id, 'completed');
-              Navigator.of(ctx).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Atendimento marcado como finalizado!'),
-                  backgroundColor: ThemeColors.success,
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ThemeColors.success,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 10,
                 ),
-              );
-            },
-            child: const Text('Sim, Finalizar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          ),
-        ],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                ref
+                    .read(agendaControllerProvider.notifier)
+                    .updateStatus(apt.id, 'completed');
+
+                if (launchInCashRegister) {
+                  final now = DateTime.now();
+                  final dateStr =
+                      '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+                  ref.read(transacoesControllerProvider.notifier).addTransacao(
+                        TransacaoFinanceira(
+                          id: '',
+                          type: 'income',
+                          description: '${apt.services} - ${apt.clientName}',
+                          amount: apt.price,
+                          category: 'Serviço',
+                          date: dateStr,
+                          paymentMethod: selectedPaymentMethod,
+                          status: 'paid',
+                        ),
+                      );
+                }
+
+                Navigator.of(ctx).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      launchInCashRegister
+                          ? 'Atendimento finalizado e ${AppFormatters.formatCurrency(apt.price)} ($selectedPaymentMethod) lançado no Caixa!'
+                          : 'Atendimento marcado como finalizado!',
+                    ),
+                    backgroundColor: ThemeColors.success,
+                  ),
+                );
+              },
+              child: const Text(
+                'Finalizar & Concluir',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -716,7 +909,7 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
   ]) {
     showDialog(
       context: context,
-      builder: (ctx) => _AppointmentFormDialog(
+      builder: (ctx) => AppointmentFormDialog(
         clientsState: clientsState,
         employeesState: employeesState,
         servicesState: servicesState,
@@ -726,26 +919,27 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
   }
 }
 
-class _AppointmentFormDialog extends ConsumerStatefulWidget {
-  final AppState<List<dynamic>> clientsState;
-  final AppState<List<dynamic>> employeesState;
-  final AppState<List<dynamic>> servicesState;
+class AppointmentFormDialog extends ConsumerStatefulWidget {
+  final AppState<List<dynamic>>? clientsState;
+  final AppState<List<dynamic>>? employeesState;
+  final AppState<List<dynamic>>? servicesState;
   final Agendamento? appointment;
 
-  const _AppointmentFormDialog({
-    required this.clientsState,
-    required this.employeesState,
-    required this.servicesState,
+  const AppointmentFormDialog({
+    super.key,
+    this.clientsState,
+    this.employeesState,
+    this.servicesState,
     this.appointment,
   });
 
   @override
-  ConsumerState<_AppointmentFormDialog> createState() =>
+  ConsumerState<AppointmentFormDialog> createState() =>
       _AppointmentFormDialogState();
 }
 
 class _AppointmentFormDialogState
-    extends ConsumerState<_AppointmentFormDialog> {
+    extends ConsumerState<AppointmentFormDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _notesController;
   late final TextEditingController _dateController;
@@ -774,21 +968,29 @@ class _AppointmentFormDialogState
     );
 
     // Extract dynamic dropdown items
-    if (widget.clientsState is AppSuccess<dynamic> &&
-        widget.clientsState.data != null) {
+    final List<dynamic>? cData =
+        widget.clientsState?.data ?? ref.read(clientesControllerProvider).data;
+    if (cData != null) {
       _clients.addAll(
-        widget.clientsState.data!.map((c) => c.name as String).cast<String>(),
+        cData.map((c) => c.name as String).cast<String>(),
       );
     }
     if (_clients.isEmpty) {
-      _clients.addAll(['João Silva', 'Lucas Ferreira', 'Rafael Costa', 'Bruno Albuquerque', 'Matheus Lima']);
+      _clients.addAll([
+        'João Silva',
+        'Lucas Ferreira',
+        'Rafael Costa',
+        'Bruno Albuquerque',
+        'Matheus Lima',
+      ]);
     }
 
-    if (widget.employeesState is AppSuccess<dynamic> &&
-        widget.employeesState.data != null) {
+    final List<dynamic>? eData = widget.employeesState?.data ??
+        ref.read(funcionariosControllerProvider).data;
+    if (eData != null) {
       _barbers.addAll(
-        widget.employeesState.data!
-            .where((f) => f.cargo.toLowerCase().contains('barbeiro'))
+        eData
+            .where((f) => f.cargo.toString().toLowerCase().contains('barbeiro'))
             .map((f) => f.name as String)
             .cast<String>(),
       );
@@ -797,10 +999,11 @@ class _AppointmentFormDialogState
       _barbers.addAll(['Marcos Silva', 'Arthur Santos', 'Gabriel Neves']);
     }
 
-    if (widget.servicesState is AppSuccess<dynamic> &&
-        widget.servicesState.data != null) {
+    final List<dynamic>? sData = widget.servicesState?.data ??
+        ref.read(servicosControllerProvider).data;
+    if (sData != null) {
       _services.addAll(
-        widget.servicesState.data!.map((s) => s.name as String).cast<String>(),
+        sData.map((s) => s.name as String).cast<String>(),
       );
     }
     if (_services.isEmpty) {
@@ -849,11 +1052,10 @@ class _AppointmentFormDialogState
   }
 
   int _getServiceDurationMinutes(String? serviceName) {
-    if (serviceName != null &&
-        widget.servicesState is AppSuccess<dynamic> &&
-        widget.servicesState.data != null) {
-      final list = widget.servicesState.data!;
-      for (final s in list) {
+    final List<dynamic>? sData = widget.servicesState?.data ??
+        ref.read(servicosControllerProvider).data;
+    if (serviceName != null && sData != null) {
+      for (final s in sData) {
         if (s.name == serviceName) {
           return s.durationMinutes as int;
         }
@@ -869,12 +1071,13 @@ class _AppointmentFormDialogState
       _conflictError = null;
 
       // Auto-fill service price if empty or changing
-      if (widget.servicesState is AppSuccess<dynamic> &&
-          widget.servicesState.data != null) {
-        final list = widget.servicesState.data!;
-        for (final s in list) {
+      final List<dynamic>? sData = widget.servicesState?.data ??
+          ref.read(servicosControllerProvider).data;
+      if (sData != null) {
+        for (final s in sData) {
           if (s.name == val) {
-            _priceController.text = AppMasks.formatCurrencyValue(s.price as double);
+            _priceController.text =
+                AppMasks.formatCurrencyValue(s.price as double);
             return;
           }
         }
