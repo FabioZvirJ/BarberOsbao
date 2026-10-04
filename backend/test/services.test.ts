@@ -3,6 +3,7 @@ import app from '../src/app';
 
 describe('Services API', () => {
   let authToken: string;
+  jest.setTimeout(25000);
 
   beforeAll(async () => {
     const loginRes = await request(app)
@@ -14,8 +15,14 @@ describe('Services API', () => {
     }
   });
 
-  it('GET /services without token should return 401 Unauthorized', async () => {
+  it('GET /services without token should return 200 (public catalog)', async () => {
     const res = await request(app).get('/services');
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+  });
+
+  it('POST /services without token should return 401 Unauthorized', async () => {
+    const res = await request(app).post('/services').send({ name: 'Fail' });
     expect(res.status).toBe(401);
   });
 

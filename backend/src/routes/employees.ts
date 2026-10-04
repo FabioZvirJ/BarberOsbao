@@ -8,14 +8,16 @@ import {
   deleteEmployee,
 } from '../controllers/employeesController';
 import { validateRequest } from '../middleware/validate';
-import { requireAuth, requireRole } from '../middleware/auth';
+import { optionalAuth, requireAuth, requireRole } from '../middleware/auth';
 
 const router = Router();
 
-router.use(requireAuth);
+// Rotas públicas (Clientes podem ver a lista de barbeiros/funcionários da unidade)
+router.get('/', optionalAuth, listEmployees);
+router.get('/:id', [param('id').notEmpty()], validateRequest, optionalAuth, getEmployee);
 
-router.get('/', listEmployees);
-router.get('/:id', [param('id').notEmpty()], validateRequest, getEmployee);
+// Rotas administrativas (Apenas administradores podem cadastrar ou editar funcionários)
+router.use(requireAuth);
 router.post(
   '/',
   [

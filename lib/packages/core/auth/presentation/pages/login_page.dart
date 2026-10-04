@@ -6,6 +6,7 @@ import 'package:barber_osbao/packages/core/utils/app_masks.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
+import 'package:barber_osbao/features/filiais/application/branches_controller.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -397,10 +398,49 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               letterSpacing: 3.5,
                             ),
                           ),
+                          // Exibe a filial ativa se o usuário veio de um link de agendamento
+                          Builder(
+                            builder: (context) {
+                              final branch = ref.watch(selectedBranchProvider);
+                              if (branch == null) return const SizedBox.shrink();
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 14),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: ThemeColors.primary.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: ThemeColors.primary.withValues(alpha: 0.35),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.storefront, color: ThemeColors.primary, size: 16),
+                                      const SizedBox(width: 8),
+                                      Flexible(
+                                        child: Text(
+                                          '${branch.name} • ${branch.city}/${branch.state}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 28),
 
                     // Erro se houver
                     if (_errorMessage != null) ...[
@@ -576,7 +616,65 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 14),
+
+                    // Botão Acesso Rápido / Convidado
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.white.withValues(alpha: 0.03),
+                        side: const BorderSide(color: Colors.white12),
+                        foregroundColor: Colors.white70,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: _loading
+                          ? null
+                          : () async {
+                              setState(() {
+                                _loading = true;
+                                _errorMessage = null;
+                              });
+                              try {
+                                await ref
+                                    .read(authControllerProvider.notifier)
+                                    .loginAsGuest();
+                              } catch (e) {
+                                if (mounted) {
+                                  setState(() {
+                                    _errorMessage = e
+                                        .toString()
+                                        .replaceAll('Exception:', '')
+                                        .trim();
+                                  });
+                                }
+                              } finally {
+                                if (mounted) {
+                                  setState(() {
+                                    _loading = false;
+                                  });
+                                }
+                              }
+                            },
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.person_outline,
+                              color: ThemeColors.primary, size: 18),
+                          SizedBox(width: 8),
+                          Text(
+                            'Continuar sem conta (Visitante)',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
 
                     // Rodapé: Criar Conta
                     Row(

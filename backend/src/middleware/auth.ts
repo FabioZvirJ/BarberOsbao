@@ -61,3 +61,21 @@ export function requireRole(allowedRoles: string[]) {
     next();
   };
 }
+
+export function optionalAuth(req: Request, _res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return next();
+
+  const parts = authHeader.split(' ');
+  if (parts.length === 2 && parts[0] === 'Bearer') {
+    try {
+      const payload = jwt.verify(parts[1], getJwtSecret(), {
+        algorithms: ['HS256'],
+      }) as AuthPayload;
+      req.user = payload;
+    } catch {
+      // Ignora erro se for opcional
+    }
+  }
+  next();
+}

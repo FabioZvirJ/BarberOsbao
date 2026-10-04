@@ -175,4 +175,30 @@ class AuthRepositoryImpl implements AuthRepository {
       throw Exception(errorMsg);
     }
   }
+
+  @override
+  Future<User> loginAsGuest({String? name}) async {
+    try {
+      final response = await _dioClient.dio.post(
+        '/auth/guest',
+        data: {
+          'name': name?.trim() ?? 'Cliente Visitante',
+        },
+      );
+
+      final token = response.data['token'] as String;
+      final userData = response.data['user'] as Map<String, dynamic>;
+      return await _saveSession(token, userData);
+    } catch (_) {
+      // Fallback offline se o backend estiver inacessível
+      final guest = _parseUserFromBackend({
+        'id': 'guest_${DateTime.now().millisecondsSinceEpoch}',
+        'email': 'guest@barberosbao.com.br',
+        'name': name?.trim().isNotEmpty == true ? name!.trim() : 'Cliente Visitante',
+        'role': 'client',
+      });
+      await _prefHelper.setUserJson(jsonEncode(guest.toJson()));
+      return guest;
+    }
+  }
 }

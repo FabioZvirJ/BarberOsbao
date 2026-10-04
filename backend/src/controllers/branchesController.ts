@@ -165,3 +165,4 @@ export async function deleteBranch(req: Request, res: Response) {
     res.status(500).json({ error: error.message || 'Erro ao desativar filial' });
   }
 }
+

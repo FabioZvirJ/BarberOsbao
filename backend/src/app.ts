@@ -122,6 +122,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // 9. Healthcheck
 app.get('/', (_req, res) => res.json({ status: 'healthy', timestamp: new Date().toISOString() }));
+app.get('/health', (_req, res) => res.json({ status: 'healthy', timestamp: new Date().toISOString() }));
 
 // 10. Tratador Global de Erros (Evita vazamento de stacktrace e SQL)
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

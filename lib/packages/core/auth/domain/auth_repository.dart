@@ -21,4 +21,5 @@ abstract class AuthRepository {
     required String phone,
     String? name,
   });
+  Future<User> loginAsGuest({String? name});
 }

@@ -1,24 +1,30 @@
 import { Request, Response } from 'express';
 import { prisma } from '../app';
 
-function serializeEmployee(emp: any) {
-  return {
+function serializeEmployee(emp: any, isAdmin: boolean = false) {
+  const data: any = {
     ...emp,
     specialties: typeof emp.specialties === 'string' ? JSON.parse(emp.specialties || '[]') : emp.specialties,
     diasDisponiveis: typeof emp.diasDisponiveis === 'string' ? JSON.parse(emp.diasDisponiveis || '[]') : emp.diasDisponiveis,
     folgas: typeof emp.folgas === 'string' ? JSON.parse(emp.folgas || '[]') : emp.folgas,
   };
+  if (!isAdmin) {
+    delete data.cpf;
+    delete data.commissionRate;
+  }
+  return data;
 }
 
 export async function listEmployees(req: Request, res: Response) {
   try {
     const { branchId } = req.query;
+    const isAdmin = (req as any).user?.role === 'admin';
     const employees = await prisma.employee.findMany({
       where: branchId ? { branchId: String(branchId) } : undefined,
       include: { branch: true },
       orderBy: { createdAt: 'desc' },
     });
-    res.json(employees.map(serializeEmployee));
+    res.json(employees.map(emp => serializeEmployee(emp, isAdmin)));
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -26,9 +32,10 @@ export async function listEmployees(req: Request, res: Response) {
 
 export async function getEmployee(req: Request, res: Response) {
   try {
+    const isAdmin = (req as any).user?.role === 'admin';
     const employee = await prisma.employee.findUnique({ where: { id: req.params.id } });
     if (!employee) return res.status(404).json({ error: 'Funcionário não encontrado' });
-    res.json(serializeEmployee(employee));
+    res.json(serializeEmployee(employee, isAdmin));
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

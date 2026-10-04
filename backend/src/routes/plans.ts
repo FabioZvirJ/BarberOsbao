@@ -12,10 +12,12 @@ import { requireAuth, requireRole } from '../middleware/auth';
 
 const router = Router();
 
-router.use(requireAuth);
-
+// Rotas públicas (Clientes podem ver planos e assinaturas da barbearia)
 router.get('/', listPlans);
 router.get('/:id', [param('id').notEmpty()], validateRequest, getPlan);
+
+// Rotas administrativas (Apenas administradores podem cadastrar ou editar planos)
+router.use(requireAuth);
 router.post(
   '/',
   [

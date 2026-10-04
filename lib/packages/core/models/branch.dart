@@ -65,3 +65,4 @@ class Branch {
     return parts.join(', ');
   }
 }
+

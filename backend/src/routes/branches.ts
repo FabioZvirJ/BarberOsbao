@@ -12,10 +12,12 @@ import { requireAuth, requireRole } from '../middleware/auth';
 
 const router = Router();
 
-router.use(requireAuth);
-
+// Rotas públicas (Leitura para clientes e links de agendamento)
 router.get('/', listBranches);
 router.get('/:idOrSlug', [param('idOrSlug').notEmpty()], validateRequest, getBranch);
+
+// Rotas administrativas (Apenas administradores podem criar, editar ou excluir filiais)
+router.use(requireAuth);
 router.post(
   '/',
   [

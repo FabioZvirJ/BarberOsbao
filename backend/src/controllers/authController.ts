@@ -209,7 +209,34 @@ export async function phoneLogin(req: Request, res: Response) {
   }
 }
 
-// 5. Perfil autenticado (/auth/me)
+// 5. Acesso Rápido / Convidado
+export async function guestLogin(req: Request, res: Response) {
+  try {
+    const guestId = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
+    const guestEmail = `guest_${guestId}@guest.barberosbao.com.br`;
+    const randomPassword = await bcrypt.hash(`guest_${guestId}`, 10);
+    const clientName = (req.body?.name || '').trim().slice(0, 100) || 'Cliente Convidado';
+
+    const user = await prisma.user.create({
+      data: {
+        email: guestEmail,
+        password: randomPassword,
+        name: clientName,
+        role: 'client',
+      },
+    });
+
+    const token = generateToken(user);
+    res.json({
+      token,
+      user: sanitizeUser(user),
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Erro ao gerar acesso de convidado' });
+  }
+}
+
+// 6. Perfil autenticado (/auth/me)
 export async function me(req: Request, res: Response) {
   try {
     const userId = req.user?.userId;

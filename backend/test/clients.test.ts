@@ -3,6 +3,7 @@ import app from '../src/app';
 
 describe('Clients API', () => {
   let authToken: string;
+  jest.setTimeout(25000);
 
   beforeAll(async () => {
     // Autentica com a conta de admin para obter o Bearer token

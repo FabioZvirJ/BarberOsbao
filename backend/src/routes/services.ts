@@ -13,11 +13,13 @@ import { requireAuth, requireRole } from '../middleware/auth';
 
 const router = Router();
 
-router.use(requireAuth);
-
+// Rotas públicas (Clientes podem ver a lista e detalhes de serviços)
 router.get('/', listServices);
-router.put('/reorder', requireRole(['admin']), updateServicesOrder);
 router.get('/:id', [param('id').notEmpty()], validateRequest, getService);
+
+// Rotas administrativas (Apenas administradores podem cadastrar, reordenar ou editar serviços)
+router.use(requireAuth);
+router.put('/reorder', requireRole(['admin']), updateServicesOrder);
 router.post(
   '/',
   [
