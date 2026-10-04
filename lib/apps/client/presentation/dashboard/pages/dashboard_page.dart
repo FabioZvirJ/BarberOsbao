@@ -155,6 +155,62 @@ class DashboardPage extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
+                      ] else if (branches.isNotEmpty) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: isDark ? ThemeColors.darkSurface : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: ThemeColors.primary.withValues(alpha: 0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: ThemeColors.primary.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(Icons.storefront, color: ThemeColors.primary, size: 20),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Escolha sua unidade / filial', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                    const SizedBox(height: 2),
+                                    Text('Selecione uma barbearia para ver a equipe e serviços', style: TextStyle(fontSize: 12, color: isDark ? Colors.white60 : Colors.black54)),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuButton<String>(
+                                tooltip: 'Escolher Filial',
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: ThemeColors.primary,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text('Selecionar', style: TextStyle(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold)),
+                                      Icon(Icons.arrow_drop_down, color: Colors.black, size: 16),
+                                    ],
+                                  ),
+                                ),
+                                onSelected: (slug) {
+                                  ref.read(currentBranchSlugProvider.notifier).setSlug(slug);
+                                },
+                                itemBuilder: (context) => branches
+                                    .map((b) => PopupMenuItem(value: b.slug, child: Text('${b.name} (${b.city})')))
+                                    .toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
                       ],
 
                       // Banner

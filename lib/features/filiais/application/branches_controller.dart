@@ -50,7 +50,7 @@ final selectedBranchProvider = Provider<Branch?>((ref) {
       );
     } catch (_) {}
   }
-  return branches.first;
+  return null;
 });
 
 class BranchesController extends AsyncNotifier<List<Branch>> {
