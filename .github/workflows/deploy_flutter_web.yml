@@ -35,7 +35,11 @@ jobs:
 
       - name: Build web for GitHub Pages
         run: |
-          flutter build web --release --base-href /BarberOsbao/ --verbose 2>&1 | tee flutter_build.log
+          API_URL_VAL="${{ secrets.API_URL }}"
+          if [ -z "$API_URL_VAL" ]; then
+            API_URL_VAL="https://barberosbao-api.onrender.com"
+          fi
+          flutter build web --release --base-href /BarberOsbao/ --dart-define=API_URL=$API_URL_VAL --verbose 2>&1 | tee flutter_build.log
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
