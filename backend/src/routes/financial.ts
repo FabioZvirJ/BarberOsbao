@@ -28,7 +28,7 @@ router.post(
   '/transactions',
   [
     body('description').trim().notEmpty().withMessage('Descrição é obrigatória'),
-    body('amount').isNumeric().withMessage('Valor deve ser numérico'),
+    body('amount').isFloat({ min: 0.01 }).withMessage('Valor deve ser numérico e maior que zero'),
   ],
   validateRequest,
   createTransaction,

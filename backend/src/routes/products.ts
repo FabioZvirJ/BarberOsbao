@@ -15,7 +15,15 @@ const router = Router();
 
 router.get('/', listProducts);
 router.get('/movements', listStockMovements);
-router.post('/movements', createStockMovement);
+router.post(
+  '/movements',
+  [
+    body('productId').trim().notEmpty().withMessage('ID do produto é obrigatório'),
+    body('quantity').isInt({ min: 1 }).withMessage('Quantidade deve ser um número inteiro positivo maior que zero'),
+  ],
+  validateRequest,
+  createStockMovement,
+);
 router.get('/:id', [param('id').notEmpty()], validateRequest, getProduct);
 router.post(
   '/',
