@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:barber_osbao/packages/core/storage/pref_helper.dart';
+import 'package:barber_osbao/packages/core/network/dio_client.dart';
 import 'package:barber_osbao/packages/core/models/user.dart';
 import 'package:barber_osbao/packages/core/auth/domain/auth_repository.dart';
 import 'package:barber_osbao/packages/core/auth/infrastructure/auth_repository_impl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // Provider for SharedPreferences
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
@@ -19,7 +20,8 @@ final prefHelperProvider = Provider<PrefHelper>((ref) {
 // Provider for AuthRepository
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final helper = ref.watch(prefHelperProvider);
-  return AuthRepositoryImpl(helper);
+  final client = ref.watch(dioClientProvider);
+  return AuthRepositoryImpl(helper, client);
 });
 
 // Controller to manage logged-in User
@@ -34,12 +36,74 @@ class AuthController extends AsyncNotifier<User?> {
     }
   }
 
-  Future<void> updateUser(User updatedUser) async {
+  Future<void> login(String email, String password) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(authRepositoryProvider);
-      return await repo.updateUser(updatedUser);
+      return await repo.login(email, password);
     });
+    if (state.hasError) {
+      throw state.error!;
+    }
+  }
+
+  Future<void> register({
+    required String name,
+    required String email,
+    required String password,
+    String? phone,
+    String? role,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(authRepositoryProvider);
+      return await repo.register(
+        name: name,
+        email: email,
+        password: password,
+        phone: phone,
+        role: role,
+      );
+    });
+    if (state.hasError) {
+      throw state.error!;
+    }
+  }
+
+  Future<void> loginWithGoogle({
+    required String email,
+    required String name,
+    String? avatarUrl,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(authRepositoryProvider);
+      return await repo.loginWithGoogle(
+        email: email,
+        name: name,
+        avatarUrl: avatarUrl,
+      );
+    });
+    if (state.hasError) {
+      throw state.error!;
+    }
+  }
+
+  Future<void> loginWithPhone({
+    required String phone,
+    String? name,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(authRepositoryProvider);
+      return await repo.loginWithPhone(
+        phone: phone,
+        name: name,
+      );
+    });
+    if (state.hasError) {
+      throw state.error!;
+    }
   }
 
   Future<void> logout() async {
@@ -51,11 +115,11 @@ class AuthController extends AsyncNotifier<User?> {
     });
   }
 
-  Future<void> login(String email, String password) async {
+  Future<void> updateUser(User updatedUser) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(authRepositoryProvider);
-      return await repo.login(email, password);
+      return await repo.updateUser(updatedUser);
     });
   }
 
