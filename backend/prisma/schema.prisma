@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -16,39 +17,174 @@ model User {
 }
 
 model Client {
-  id        String   @id @default(cuid())
-  name      String
-  phone     String?
-  email     String?
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  name         String
+  phone        String?
+  email        String?
+  avatarUrl    String?
+  nascimento   String?
+  plano        String?  @default("Nenhum")
+  ultimaVisita String?
+  totalGasto   Float    @default(0.0)
+  observacoes  String?
+  status       String   @default("active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Employee {
+  id              String   @id @default(cuid())
+  name            String
+  avatarUrl       String?
+  cargo           String
+  phone           String?
+  email           String?
+  cpf             String?
+  specialties     String   @default("[]")
+  commissionRate  Float    @default(0.3)
+  horarioTrabalho String?
+  diasDisponiveis String   @default("[]")
+  folgas          String   @default("[]")
+  status          Boolean  @default(true)
+  rating          Float    @default(5.0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model Service {
+  id              String   @id @default(cuid())
+  name            String
+  category        String
+  description     String?
+  price           Float
+  durationMinutes Int      @default(30)
+  imageUrl        String?
+  colorHex        String   @default("C89B3C")
+  status          Boolean  @default(true)
+  orderIndex      Int      @default(0)
+  createdAt       DateTime @default(now())
+}
+
+model Category {
+  id         String   @id @default(cuid())
+  name       String   @unique
+  iconName   String?
+  colorHex   String   @default("C89B3C")
+  active     Boolean  @default(true)
+  orderIndex Int      @default(0)
+  createdAt  DateTime @default(now())
+}
+
+model Product {
   id          String   @id @default(cuid())
-  title       String
-  price       Float
-  durationMin Int
+  name        String
+  brand       String?
+  category    String
+  supplier    String?
+  code        String?
+  costPrice   Float    @default(0.0)
+  price       Float    @default(0.0)
+  stock       Int      @default(0)
+  minStock    Int      @default(0)
+  description String?
+  status      Boolean  @default(true)
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model StockMovement {
+  id          String   @id @default(cuid())
+  productId   String
+  productName String
+  type        String
+  quantity    Int
+  reason      String?
+  date        String
+  responsible String?
+  createdAt   DateTime @default(now())
+}
+
+model Plan {
+  id              String   @id @default(cuid())
+  name            String
+  price           Float
+  period          String   @default("mensal")
+  benefits        String   @default("[]")
+  cutsCount       Int      @default(4)
+  productDiscount Float    @default(0.0)
+  status          Boolean  @default(true)
+  recommended     Boolean  @default(false)
+  createdAt       DateTime @default(now())
 }
 
 model Appointment {
-  id         String   @id @default(cuid())
-  clientId   String
-  serviceId  String
-  startAt    DateTime
-  endAt      DateTime
-  status     String   @default("scheduled")
-  createdAt  DateTime @default(now())
-
-  client Client @relation(fields: [clientId], references: [id])
-  service Service @relation(fields: [serviceId], references: [id])
+  id           String   @id @default(cuid())
+  clientName   String
+  clientPhone  String?
+  clientAvatar String?
+  barberName   String
+  barberAvatar String?
+  serviceName  String
+  dateTime     DateTime
+  price        Float
+  status       String   @default("Pendente")
+  notes        String?
+  createdAt    DateTime @default(now())
 }
 
-model Payment {
+model FinancialTransaction {
   id            String   @id @default(cuid())
-  appointmentId String
+  description   String
   amount        Float
-  method        String
+  type          String
+  category      String
+  date          DateTime @default(now())
+  paymentMethod String   @default("Pix")
+  status        String   @default("Confirmado")
   createdAt     DateTime @default(now())
+}
 
-  appointment Appointment @relation(fields: [appointmentId], references: [id])
+model Bill {
+  id          String   @id @default(cuid())
+  description String
+  amount      Float
+  dueDate     DateTime
+  category    String
+  status      String   @default("Pendente")
+  recipient   String?
+  createdAt   DateTime @default(now())
+}
+
+model CashShift {
+  id            String    @id @default(cuid())
+  openedAt      DateTime  @default(now())
+  closedAt      DateTime?
+  initialAmount Float     @default(0.0)
+  finalAmount   Float?
+  totalSales    Float     @default(0.0)
+  difference    Float     @default(0.0)
+  status        String    @default("Aberto")
+  createdAt     DateTime  @default(now())
+}
+
+model ClubBenefit {
+  id              String   @id @default(cuid())
+  title           String
+  description     String
+  discountPercent Float    @default(0.0)
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+}
+
+model ClubMember {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  tier      String   @default("Silver")
+  points    Int      @default(0)
+  since     String
+  status    String   @default("active")
+  createdAt DateTime @default(now())
 }

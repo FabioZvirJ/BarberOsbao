@@ -1,4 +1,4 @@
-const swaggerSpec = {
+const swaggerSpec: any = {
   openapi: '3.0.3',
   info: {
     title: 'BarberOsbao API',
