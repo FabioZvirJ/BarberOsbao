@@ -8,19 +8,24 @@ import {
   deleteCategory,
 } from '../controllers/categoriesController';
 import { validateRequest } from '../middleware/validate';
+import { requireAuth, requireRole } from '../middleware/auth';
 
 const router = Router();
 
+router.use(requireAuth);
+
 router.get('/', listCategories);
-router.put('/reorder', updateCategoriesOrder);
+router.put('/reorder', requireRole(['admin']), updateCategoriesOrder);
 router.post(
   '/',
-  [body('name').trim().notEmpty().withMessage('Nome é obrigatório')],
+  [
+    requireRole(['admin']),
+    body('name').trim().notEmpty().withMessage('Nome é obrigatório'),
+  ],
   validateRequest,
   createCategory,
 );
-router.put('/:id', [param('id').notEmpty()], validateRequest, updateCategory);
-router.delete('/:id', [param('id').notEmpty()], validateRequest, deleteCategory);
+router.put('/:id', [param('id').notEmpty(), requireRole(['admin'])], validateRequest, updateCategory);
+router.delete('/:id', [param('id').notEmpty(), requireRole(['admin'])], validateRequest, deleteCategory);
 
 export default router;
-

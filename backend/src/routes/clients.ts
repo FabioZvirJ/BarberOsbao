@@ -8,8 +8,12 @@ import {
   deleteClient,
 } from '../controllers/clientsController';
 import { validateRequest } from '../middleware/validate';
+import { requireAuth, requireRole } from '../middleware/auth';
 
 const router = Router();
+
+// Todas as rotas de clientes exigem autenticação
+router.use(requireAuth);
 
 router.get('/', listClients);
 router.get('/:id', [param('id').notEmpty()], validateRequest, getClient);
@@ -20,6 +24,6 @@ router.post(
   createClient,
 );
 router.put('/:id', [param('id').notEmpty()], validateRequest, updateClient);
-router.delete('/:id', [param('id').notEmpty()], validateRequest, deleteClient);
+router.delete('/:id', [param('id').notEmpty()], validateRequest, requireRole(['admin']), deleteClient);
 
 export default router;

@@ -25,8 +25,9 @@ export const prisma = new PrismaClient();
 
 const app = express();
 
-// 1. Desabilitar identificação do servidor
+// 1. Desabilitar identificação do servidor e habilitar proxy reverso confiável (Render/Cloudflare)
 app.disable('x-powered-by');
+app.set('trust proxy', 1);
 
 // 2. Proteção de Headers HTTP (Helmet)
 app.use(
@@ -36,32 +37,40 @@ app.use(
 );
 
 // 3. Limitação de Tamanho de Payload (Anti-DoS)
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '2mb' }));
 
-// 4. Configuração Segura de CORS
+// 4. Configuração Estrita de CORS (Sem bypasses de *.github.io ou includes(localhost))
 const allowedOrigins = [
   'https://fabiozvirj.github.io',
   'http://localhost:3000',
   'http://localhost:8080',
+  'http://localhost:5000',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:8080',
 ];
 if (process.env.CORS_ORIGIN) {
-  allowedOrigins.push(process.env.CORS_ORIGIN);
+  allowedOrigins.push(process.env.CORS_ORIGIN.trim());
 }
 
 app.use(
   cors({
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-      // Permite requisições mobile (sem origin), ferramentas internas ou mesmas origens
+      // Permite requisições mobile e CLI/scripts autorizados (sem cabeçalho Origin)
       if (!origin) return callback(null, true);
+
+      // Verificação exata da lista autorizada
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Em ambiente de desenvolvimento local, permite portas de loopback
       if (
-        allowedOrigins.some((o) => origin.startsWith(o)) ||
-        origin.endsWith('.github.io') ||
-        origin.includes('localhost')
+        process.env.NODE_ENV !== 'production' &&
+        /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
       ) {
         return callback(null, true);
       }
+
       return callback(new Error('Bloqueado pela política de CORS'));
     },
     credentials: true,

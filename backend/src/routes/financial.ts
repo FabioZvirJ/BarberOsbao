@@ -16,8 +16,13 @@ import {
   getCashMovements,
 } from '../controllers/financialController';
 import { validateRequest } from '../middleware/validate';
+import { requireAuth, requireRole } from '../middleware/auth';
 
 const router = Router();
+
+// Módulo financeiro e controle de caixa restrito exclusivamente a administradores
+router.use(requireAuth);
+router.use(requireRole(['admin']));
 
 // Summary
 router.get('/summary', getSummary);
@@ -53,4 +58,3 @@ router.post('/cash-shifts/movements', addCashMovement);
 router.get('/cash-shifts/:id/movements', getCashMovements);
 
 export default router;
-

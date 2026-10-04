@@ -7,3 +7,4 @@ export function handleSafeError(res: Response, error: any, defaultMessage: strin
   }
   return res.status(500).json({ error: defaultMessage });
 }
+

@@ -8,8 +8,11 @@ import {
   deleteAppointment,
 } from '../controllers/appointmentsController';
 import { validateRequest } from '../middleware/validate';
+import { requireAuth } from '../middleware/auth';
 
 const router = Router();
+
+router.use(requireAuth);
 
 router.get('/', listAppointments);
 router.get('/:id', [param('id').notEmpty()], validateRequest, getAppointment);
