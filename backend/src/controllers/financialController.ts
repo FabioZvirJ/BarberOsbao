@@ -32,7 +32,7 @@ export async function createTransaction(req: Request, res: Response) {
       return res.status(400).json({ error: 'Descrição é obrigatória' });
     }
     const amt = Number(amount);
-    if (isNaN(amt)) return res.status(400).json({ error: 'Valor inválido' });
+    if (isNaN(amt) || amt <= 0) return res.status(400).json({ error: 'O valor da transação deve ser positivo' });
 
     const transaction = await prisma.financialTransaction.create({
       data: {
@@ -251,8 +251,6 @@ export async function deleteBill(req: Request, res: Response) {
 }
 
 // Cash Shifts
-let inMemoryMovements: any[] = [];
-
 function formatShift(shift: any) {
   const openDate = new Date(shift.openedAt);
   const closeDate = shift.closedAt ? new Date(shift.closedAt) : null;
@@ -344,17 +342,31 @@ export async function closeCashShift(req: Request, res: Response) {
 export async function addCashMovement(req: Request, res: Response) {
   try {
     const { cashShiftId, type, amount, description, time, user } = req.body;
-    const movement = {
-      id: `mv_${Date.now()}`,
-      cashShiftId: cashShiftId || '',
-      type: type || 'input',
-      amount: Number(amount) || 0.0,
-      description: description || '',
-      time: time || formatTime(new Date()),
-      user: user || 'Administrador',
-    };
-    inMemoryMovements.push(movement);
-    res.status(201).json(movement);
+    const numAmount = Number(amount);
+    if (isNaN(numAmount) || numAmount <= 0) {
+      return res.status(400).json({ error: 'O valor da movimentação deve ser maior que zero' });
+    }
+
+    const movement = await prisma.cashMovement.create({
+      data: {
+        cashShiftId: cashShiftId ? String(cashShiftId) : null,
+        type: type === 'output' ? 'output' : 'input',
+        amount: numAmount,
+        description: description ? String(description).trim().slice(0, 255) : '',
+        responsible: user ? String(user).trim().slice(0, 100) : 'Administrador',
+        time: time || formatTime(new Date()),
+      },
+    });
+
+    res.status(201).json({
+      id: movement.id,
+      cashShiftId: movement.cashShiftId,
+      type: movement.type,
+      amount: movement.amount,
+      description: movement.description,
+      time: movement.time,
+      user: movement.responsible,
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -363,10 +375,25 @@ export async function addCashMovement(req: Request, res: Response) {
 export async function getCashMovements(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const list = inMemoryMovements.filter((m) => m.cashShiftId === id);
-    res.json(list);
+    const movements = await prisma.cashMovement.findMany({
+      where: { cashShiftId: id },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    res.json(
+      movements.map((m) => ({
+        id: m.id,
+        cashShiftId: m.cashShiftId,
+        type: m.type,
+        amount: m.amount,
+        description: m.description,
+        time: m.time,
+        user: m.responsible,
+      })),
+    );
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 }
+
 

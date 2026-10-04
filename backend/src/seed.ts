@@ -43,6 +43,38 @@ async function main() {
     }
   }
 
+  // Seed default admin and client users
+  const bcrypt = await import('bcryptjs');
+  const adminExists = await prisma.user.findUnique({ where: { email: 'admin@barberosbao.com.br' } });
+  if (!adminExists) {
+    const adminHash = await bcrypt.default.hash('123456', 10);
+    await prisma.user.create({
+      data: {
+        email: 'admin@barberosbao.com.br',
+        password: adminHash,
+        name: 'Administrador BarberOsbao',
+        phone: '(11) 98888-8888',
+        role: 'admin',
+      },
+    });
+    console.log('Seeded admin user (admin@barberosbao.com.br)');
+  }
+
+  const clientExists = await prisma.user.findUnique({ where: { email: 'cliente@barberosbao.com.br' } });
+  if (!clientExists) {
+    const clientHash = await bcrypt.default.hash('123456', 10);
+    await prisma.user.create({
+      data: {
+        email: 'cliente@barberosbao.com.br',
+        password: clientHash,
+        name: 'Cliente BarberOsbao',
+        phone: '(11) 97777-7777',
+        role: 'client',
+      },
+    });
+    console.log('Seeded demo client user (cliente@barberosbao.com.br)');
+  }
+
   console.log('Seeding finished');
 }
 

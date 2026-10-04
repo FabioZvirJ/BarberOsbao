@@ -13,6 +13,9 @@ model User {
   email     String   @unique
   password  String
   name      String?
+  phone     String?
+  role      String   @default("client") // "client" | "admin" | "barber"
+  avatarUrl String?
   createdAt DateTime @default(now())
 }
 
@@ -188,3 +191,16 @@ model ClubMember {
   status    String   @default("active")
   createdAt DateTime @default(now())
 }
+
+model CashMovement {
+  id          String   @id @default(cuid())
+  cashShiftId String?
+  type        String   @default("input")
+  amount      Float
+  description String?
+  responsible String?
+  time        String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
