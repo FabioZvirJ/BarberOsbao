@@ -223,16 +223,14 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
     }
 
     return AppTable(
-      minWidth: 1050,
+      minWidth: 850,
       columns: [
         AppTableColumn(label: 'FOTO', width: 50),
         AppTableColumn(label: 'NOME', flex: 3),
-        AppTableColumn(label: 'TELEFONE', width: 165),
-        AppTableColumn(label: 'EMAIL', flex: 2),
-        AppTableColumn(label: 'NASCIMENTO', width: 105),
-        AppTableColumn(label: 'PLANO', width: 100),
+        AppTableColumn(label: 'TELEFONE', width: 170),
+        AppTableColumn(label: 'PLANO', width: 110),
         AppTableColumn(label: 'ÚLT. VISITA', width: 105),
-        AppTableColumn(label: 'TOTAL GASTO', width: 110),
+        AppTableColumn(label: 'TOTAL GASTO', width: 115),
         AppTableColumn(label: 'STATUS', width: 85),
         AppTableColumn(label: 'AÇÕES', width: 130),
       ],
@@ -259,50 +257,43 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                   ),
               ],
             ),
-            InkWell(
-              onTap: () async {
-                final clean = c.phone.replaceAll(RegExp(r'\D'), '');
-                if (clean.isNotEmpty) {
-                  final ddi = clean.startsWith('55') ? clean : '55$clean';
-                  final uri = Uri.parse('https://wa.me/$ddi');
-                  if (await canLaunchUrl(uri)) {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+            Tooltip(
+              message: 'Enviar mensagem no WhatsApp',
+              child: InkWell(
+                onTap: () async {
+                  final clean = c.phone.replaceAll(RegExp(r'\D'), '');
+                  if (clean.isNotEmpty) {
+                    final ddi = clean.startsWith('55') ? clean : '55$clean';
+                    final uri = Uri.parse('https://wa.me/$ddi');
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    }
                   }
-                }
-              },
-              borderRadius: BorderRadius.circular(4),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        c.phone,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          decoration: TextDecoration.underline,
-                          decorationColor: ThemeColors.success,
+                },
+                borderRadius: BorderRadius.circular(4),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          c.phone,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            decoration: TextDecoration.underline,
+                            decorationColor: ThemeColors.success,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.chat, size: 13, color: ThemeColors.success),
-                  ],
+                      const SizedBox(width: 4),
+                      const Icon(Icons.chat, size: 14, color: ThemeColors.success),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Text(
-              c.email,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Text(
-              c.nascimento,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
             Text(
               c.plano,
@@ -381,88 +372,45 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
   }
 
   void _showDeleteDialog(BuildContext context, Cliente customer) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isCurrentlyActive = customer.status == 'active';
 
-    showDialog(
+    AppConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: Row(
-          children: [
-            Icon(
+      title: isCurrentlyActive ? 'Inativar Cliente' : 'Reativar Cliente',
+      message: isCurrentlyActive
+          ? 'Tem certeza que deseja inativar o cliente "${customer.name}"? O cliente será ocultado de novas seleções de agendamento, mas todo o seu histórico financeiro e de visitas será preservado com segurança.'
+          : 'Deseja reativar o cadastro do cliente "${customer.name}" para permitir novos agendamentos?',
+      confirmLabel: isCurrentlyActive ? 'Sim, Inativar' : 'Sim, Reativar',
+      confirmColor: isCurrentlyActive ? ThemeColors.warning : ThemeColors.success,
+      confirmTextColor: isCurrentlyActive ? Colors.black : Colors.white,
+      icon: isCurrentlyActive
+          ? Icons.person_off_outlined
+          : Icons.person_add_alt_1_outlined,
+      iconColor: isCurrentlyActive ? ThemeColors.warning : ThemeColors.success,
+      details: [
+        MapEntry('Cliente', customer.name),
+        MapEntry('Plano', customer.plano),
+        MapEntry('Telefone', customer.phone.isNotEmpty ? customer.phone : 'Não informado'),
+        MapEntry('Total Histórico', AppFormatters.formatCurrency(customer.totalGasto)),
+      ],
+      onConfirm: () {
+        final newStatus = isCurrentlyActive ? 'inactive' : 'active';
+        ref
+            .read(clientesControllerProvider.notifier)
+            .editCliente(customer.copyWith(status: newStatus));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
               isCurrentlyActive
-                  ? Icons.person_off_outlined
-                  : Icons.person_add_alt_1_outlined,
-              color: isCurrentlyActive ? ThemeColors.warning : ThemeColors.success,
-              size: 22,
+                  ? 'Cliente "${customer.name}" inativado com sucesso.'
+                  : 'Cliente "${customer.name}" reativado.',
             ),
-            const SizedBox(width: 8),
-            Text(
-              isCurrentlyActive ? 'Inativar Cliente' : 'Reativar Cliente',
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black87,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          isCurrentlyActive
-              ? 'Deseja inativar o cliente "${customer.name}"? O cliente não aparecerá em novos agendamentos, mas todo o seu histórico de consumo de ${AppFormatters.formatCurrency(customer.totalGasto)} permanecerá seguro na base de dados.'
-              : 'Deseja reativar o cadastro do cliente "${customer.name}" para permitir novos agendamentos?',
-          style: TextStyle(
-            color: isDark ? Colors.white70 : Colors.black87,
-            fontSize: 13,
+            backgroundColor: isCurrentlyActive
+                ? Colors.orange.shade800
+                : ThemeColors.success,
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(
-              'Cancelar',
-              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isCurrentlyActive
-                  ? ThemeColors.warning
-                  : ThemeColors.success,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ),
-            onPressed: () {
-              final newStatus = isCurrentlyActive ? 'inactive' : 'active';
-              ref
-                  .read(clientesControllerProvider.notifier)
-                  .editCliente(customer.copyWith(status: newStatus));
-              Navigator.of(ctx).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    isCurrentlyActive
-                        ? 'Cliente "${customer.name}" inativado com sucesso.'
-                        : 'Cliente "${customer.name}" reativado.',
-                  ),
-                  backgroundColor: isCurrentlyActive
-                      ? Colors.orange.shade800
-                      : ThemeColors.success,
-                ),
-              );
-            },
-            child: Text(
-              isCurrentlyActive ? 'Inativar' : 'Reativar',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -593,20 +541,33 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                   ),
                   itemBuilder: (context, index) {
                     final apt = customerAppointments[index];
-                    final isCompleted =
-                        apt.status == 'Concluído' || apt.status == 'completed';
-                    final isCanceled =
-                        apt.status == 'Cancelado' || apt.status == 'canceled';
-                    final statusColor = isCompleted
-                        ? ThemeColors.success
-                        : (isCanceled ? ThemeColors.danger : ThemeColors.primary);
+                    final rawStatus = apt.status.toLowerCase();
+                    String statusLabel;
+                    Color statusColor;
+                    IconData statusIcon;
+
+                    if (rawStatus == 'completed' || rawStatus == 'concluído' || rawStatus == 'finalizado') {
+                      statusLabel = 'Finalizado';
+                      statusColor = ThemeColors.success;
+                      statusIcon = Icons.check_circle;
+                    } else if (rawStatus == 'cancelled' || rawStatus == 'canceled' || rawStatus == 'cancelado') {
+                      statusLabel = 'Cancelado';
+                      statusColor = ThemeColors.danger;
+                      statusIcon = Icons.cancel;
+                    } else if (rawStatus == 'pending' || rawStatus == 'pendente') {
+                      statusLabel = 'Pendente';
+                      statusColor = ThemeColors.warning;
+                      statusIcon = Icons.hourglass_top;
+                    } else {
+                      statusLabel = 'Confirmado';
+                      statusColor = ThemeColors.primary;
+                      statusIcon = Icons.event_available;
+                    }
 
                     return ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Icon(
-                        isCompleted
-                            ? Icons.check_circle
-                            : (isCanceled ? Icons.cancel : Icons.schedule),
+                        statusIcon,
                         color: statusColor,
                       ),
                       title: Text(
@@ -618,7 +579,7 @@ class _ClientesPageState extends ConsumerState<ClientesPage> {
                         ),
                       ),
                       subtitle: Text(
-                        'Data: ${AppFormatters.formatDateTime(apt.dateTime)} • Status: ${apt.status}',
+                        'Data: ${AppFormatters.formatDateTime(apt.dateTime)} • Status: $statusLabel',
                         style: const TextStyle(color: Colors.grey, fontSize: 11),
                       ),
                       trailing: Text(

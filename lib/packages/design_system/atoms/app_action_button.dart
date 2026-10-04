@@ -6,6 +6,7 @@ class AppActionButton extends StatefulWidget {
   final IconData icon;
   final VoidCallback onPressed;
   final Color color;
+  final String? subtitle;
 
   const AppActionButton({
     super.key,
@@ -13,6 +14,7 @@ class AppActionButton extends StatefulWidget {
     required this.icon,
     required this.onPressed,
     this.color = ThemeColors.primary,
+    this.subtitle,
   });
 
   @override
@@ -83,11 +85,13 @@ class _AppActionButtonState extends State<AppActionButton> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Acesso Rápido',
+                widget.subtitle ?? 'Acesso Rápido',
                 style: TextStyle(
                   fontSize: 11,
                   color: isDark ? Colors.white30 : Colors.grey.shade500,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

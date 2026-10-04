@@ -256,26 +256,27 @@ class _AppImageUploadState extends State<AppImageUpload> {
         const SizedBox(height: 8),
 
         // Área visual de upload / preview
-        MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            onTap: _pickImage,
-            child: Container(
-              width: widget.width ?? double.infinity,
-              height: widget.height,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                color: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
-                borderRadius: widget.shape == BoxShape.circle ? null : BorderRadius.circular(8),
-                shape: widget.shape,
-                border: Border.all(
-                  color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
-                  width: 1.2,
+        Center(
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                width: widget.width ?? (widget.shape == BoxShape.circle ? widget.height : 220),
+                height: widget.height,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+                  borderRadius: widget.shape == BoxShape.circle ? null : BorderRadius.circular(10),
+                  shape: widget.shape,
+                  border: Border.all(
+                    color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+                    width: 1.2,
+                  ),
                 ),
-              ),
-              child: Stack(
-                children: [
-                  Positioned.fill(child: _buildImageWidget()),
+                child: Stack(
+                  children: [
+                    Positioned.fill(child: _buildImageWidget()),
 
                   // Loading overlay
                   if (_isLoading)
@@ -316,6 +317,7 @@ class _AppImageUploadState extends State<AppImageUpload> {
             ),
           ),
         ),
+      ),
 
         // Campo opcional para colar URL diretamente
         if (_showUrlField && widget.allowUrlInput) ...[

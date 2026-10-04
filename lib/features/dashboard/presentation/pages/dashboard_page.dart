@@ -253,48 +253,16 @@ class DashboardPage extends ConsumerWidget {
               crossAxisCount: crossCount,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              mainAxisExtent: 140,
+              mainAxisExtent: 150,
             ),
             itemCount: items.length,
             itemBuilder: (context, index) {
               final item = items[index];
-              return InkWell(
-                onTap: () => context.go(item['path'] as String),
-                child: AppCard(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8.0,
-                    vertical: 12.0,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        item['icon'] as IconData,
-                        color: ThemeColors.primary,
-                        size: 28,
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        item['label'] as String,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item['desc'] as String,
-                        style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
+              return AppActionButton(
+                label: item['label'] as String,
+                icon: item['icon'] as IconData,
+                subtitle: item['desc'] as String,
+                onPressed: () => context.go(item['path'] as String),
               );
             },
           );

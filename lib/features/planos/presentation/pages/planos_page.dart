@@ -389,47 +389,30 @@ class PlanosPage extends ConsumerWidget {
   }
 
   void _showDeleteDialog(BuildContext context, WidgetRef ref, Plano plan) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    showDialog(
+    AppConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: Text(
-          'Excluir Plano',
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black87,
-            fontWeight: FontWeight.bold,
+      title: 'Excluir Plano',
+      message: 'Tem certeza que deseja excluir o plano "${plan.name}"? Isso cancelará as cobranças futuras.',
+      confirmLabel: 'Excluir',
+      confirmColor: ThemeColors.danger,
+      confirmTextColor: Colors.white,
+      icon: Icons.delete_outline,
+      iconColor: ThemeColors.danger,
+      details: [
+        MapEntry('Plano', plan.name),
+        MapEntry('Valor', '${AppFormatters.formatCurrency(plan.price)}/${plan.period}'),
+        MapEntry('Cortes/mês', plan.cutsCount >= 9999 ? 'Ilimitados' : '${plan.cutsCount} cortes'),
+        MapEntry('Desconto em produtos', '${(plan.productDiscount * 100).toStringAsFixed(0)}%'),
+      ],
+      onConfirm: () {
+        ref.read(planosControllerProvider.notifier).removePlano(plan.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Plano "${plan.name}" excluído.'),
+            backgroundColor: ThemeColors.danger,
           ),
-        ),
-        content: Text(
-          'Tem certeza que deseja excluir o plano "${plan.name}"? Isso cancelará as cobranças futuras.',
-          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(
-              'Cancelar',
-              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ThemeColors.danger,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ),
-            onPressed: () {
-              ref.read(planosControllerProvider.notifier).removePlano(plan.id);
-              Navigator.of(ctx).pop();
-            },
-            child: const Text('Excluir', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -832,11 +815,11 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
                 Expanded(
                   child: AppInput(
                     label: 'Novo Benefício',
-                    placeholder: 'Ex: Cerveja grátis por visita',
+                    placeholder: 'Ex: Cerveja cortesia em todas as visitas',
                     controller: _benefitInputController,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 2.0),
                   child: SizedBox(
@@ -863,7 +846,7 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
-                  'Nenhum benefício adicionado.',
+                  'Nenhum benefício adicional cadastrado.',
                   style: TextStyle(
                     color: isDark ? Colors.white30 : Colors.grey,
                     fontSize: 12,
@@ -872,33 +855,63 @@ class _PlanoFormDialogState extends ConsumerState<_PlanoFormDialog> {
                 ),
               )
             else
-              ..._benefits.asMap().entries.map((entry) {
-                final idx = entry.key;
-                final b = entry.value;
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(
-                    Icons.check,
-                    color: ThemeColors.primary,
-                    size: 16,
-                  ),
-                  title: Text(
-                    b,
-                    style: TextStyle(
-                      color: isDark ? Colors.white : Colors.black87,
-                      fontSize: 13,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: _benefits.asMap().entries.map((entry) {
+                  final idx = entry.key;
+                  final b = entry.value;
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
                     ),
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(
-                      Icons.remove_circle_outline,
-                      color: ThemeColors.danger,
-                      size: 18,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? ThemeColors.darkSurface
+                          : Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: isDark
+                            ? ThemeColors.darkBorder
+                            : Colors.grey.shade200,
+                      ),
                     ),
-                    onPressed: () => setState(() => _benefits.removeAt(idx)),
-                  ),
-                );
-              }),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.check_circle_outline,
+                          color: ThemeColors.primary,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            b,
+                            style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          icon: const Icon(
+                            Icons.close,
+                            color: ThemeColors.danger,
+                            size: 16,
+                          ),
+                          onPressed: () =>
+                              setState(() => _benefits.removeAt(idx)),
+                          tooltip: 'Remover benefício',
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
           ],
         ),
       ),

@@ -238,40 +238,15 @@ class _FuncionariosPageState extends ConsumerState<FuncionariosPage> {
                 ),
               ],
             ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Switch(
-                  value: f.status,
-                  activeThumbColor: ThemeColors.primary,
-                  onChanged: (val) {
-                    ref
-                        .read(funcionariosControllerProvider.notifier)
-                        .editFuncionario(f.copyWith(status: val));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          val
-                              ? 'Profissional "${f.name}" ativado na agenda.'
-                              : 'Profissional "${f.name}" inativado.',
-                        ),
-                        backgroundColor: val
-                            ? ThemeColors.success
-                            : Colors.orange.shade800,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  },
-                ),
-                Text(
-                  f.status ? 'Ativo' : 'Inativo',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: f.status ? ThemeColors.success : ThemeColors.danger,
-                  ),
-                ),
-              ],
+            Transform.scale(
+              scale: 0.75,
+              child: Switch.adaptive(
+                value: f.status,
+                activeThumbColor: ThemeColors.primary,
+                onChanged: (val) {
+                  _showDeleteDialog(context, f);
+                },
+              ),
             ),
             Row(
               mainAxisSize: MainAxisSize.min,
@@ -297,23 +272,6 @@ class _FuncionariosPageState extends ConsumerState<FuncionariosPage> {
                   onPressed: () => _showFormDialog(context, f),
                   tooltip: 'Editar',
                 ),
-                const SizedBox(width: 4),
-                IconButton(
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(
-                    minWidth: 32,
-                    minHeight: 32,
-                  ),
-                  icon: Icon(
-                    f.status
-                        ? Icons.person_off_outlined
-                        : Icons.person_add_alt_1_outlined,
-                    size: 18,
-                    color: f.status ? ThemeColors.warning : ThemeColors.success,
-                  ),
-                  onPressed: () => _showDeleteDialog(context, f),
-                  tooltip: f.status ? 'Inativar Funcionário' : 'Reativar Funcionário',
-                ),
               ],
             ),
           ],
@@ -330,87 +288,44 @@ class _FuncionariosPageState extends ConsumerState<FuncionariosPage> {
   }
 
   void _showDeleteDialog(BuildContext context, Funcionario employee) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isCurrentlyActive = employee.status;
 
-    showDialog(
+    AppConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: Row(
-          children: [
-            Icon(
+      title: isCurrentlyActive ? 'Inativar Funcionário' : 'Reativar Funcionário',
+      message: isCurrentlyActive
+          ? 'Tem certeza que deseja inativar o profissional da agenda? O histórico de atendimentos e comissões permanecerá intacto.'
+          : 'Deseja reativar este profissional para voltar a receber agendamentos?',
+      confirmLabel: isCurrentlyActive ? 'Inativar' : 'Reativar',
+      confirmColor: isCurrentlyActive ? ThemeColors.warning : ThemeColors.success,
+      confirmTextColor: isCurrentlyActive ? Colors.black : Colors.white,
+      icon: isCurrentlyActive
+          ? Icons.person_off_outlined
+          : Icons.person_add_alt_1_outlined,
+      iconColor: isCurrentlyActive ? ThemeColors.warning : ThemeColors.success,
+      details: [
+        MapEntry('Profissional', employee.name),
+        MapEntry('Cargo', employee.cargo),
+        if (employee.phone.isNotEmpty) MapEntry('Telefone', employee.phone),
+        MapEntry('Comissão', '${(employee.commissionRate * 100).toStringAsFixed(0)}%'),
+      ],
+      onConfirm: () {
+        ref
+            .read(funcionariosControllerProvider.notifier)
+            .editFuncionario(employee.copyWith(status: !isCurrentlyActive));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
               isCurrentlyActive
-                  ? Icons.person_off_outlined
-                  : Icons.person_add_alt_1_outlined,
-              color: isCurrentlyActive ? ThemeColors.warning : ThemeColors.success,
-              size: 22,
+                  ? 'Profissional "${employee.name}" inativado com sucesso.'
+                  : 'Profissional "${employee.name}" reativado.',
             ),
-            const SizedBox(width: 8),
-            Text(
-              isCurrentlyActive ? 'Inativar Funcionário' : 'Reativar Funcionário',
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black87,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          isCurrentlyActive
-              ? 'Deseja inativar o profissional "${employee.name}"? O profissional não receberá novos agendamentos na agenda, mas todo o seu histórico de atendimentos e comissões permanecerá intacto.'
-              : 'Deseja reativar o profissional "${employee.name}" para permitir novos agendamentos?',
-          style: TextStyle(
-            color: isDark ? Colors.white70 : Colors.black87,
-            fontSize: 13,
+            backgroundColor: isCurrentlyActive
+                ? Colors.orange.shade800
+                : ThemeColors.success,
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(
-              'Cancelar',
-              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isCurrentlyActive
-                  ? ThemeColors.warning
-                  : ThemeColors.success,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ),
-            onPressed: () {
-              ref
-                  .read(funcionariosControllerProvider.notifier)
-                  .editFuncionario(employee.copyWith(status: !isCurrentlyActive));
-              Navigator.of(ctx).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    isCurrentlyActive
-                        ? 'Profissional "${employee.name}" inativado com sucesso.'
-                        : 'Profissional "${employee.name}" reativado.',
-                  ),
-                  backgroundColor: isCurrentlyActive
-                      ? Colors.orange.shade800
-                      : ThemeColors.success,
-                ),
-              );
-            },
-            child: Text(
-              isCurrentlyActive ? 'Inativar' : 'Reativar',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -699,23 +614,42 @@ class _FuncionarioFormDialogState
   late final TextEditingController _emailController;
   late final TextEditingController _cpfController;
   late final TextEditingController _commissionRateController;
-  late final TextEditingController _horarioController;
   late final TextEditingController _avatarUrlController;
   final TextEditingController _newSpecialtyController = TextEditingController();
 
   late List<String> _specialties;
-  late List<String> _selectedDays;
-  late List<String> _selectedFolgas;
   late bool _active;
 
-  final _weekDays = [
-    'Segunda',
-    'Terça',
-    'Quarta',
-    'Quinta',
-    'Sexta',
-    'Sábado',
-    'Domingo',
+  bool _workWeekdays = true;
+  String _weekStart = '09:00';
+  String _weekEnd = '18:00';
+
+  bool _workSaturday = true;
+  String _satStart = '09:00';
+  String _satEnd = '13:00';
+
+  bool _workSunday = false;
+  String _sunStart = '09:00';
+  String _sunEnd = '13:00';
+
+  static const _timeSlots = [
+    '07:00', '07:30', '08:00', '08:30', '09:00', '09:30',
+    '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
+    '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
+    '16:00', '16:30', '17:00', '17:30', '18:00', '18:30',
+    '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00',
+  ];
+
+  static const _catalogSpecialties = [
+    'Corte Tradicional',
+    'Degradê / Fade',
+    'Barba Terapia',
+    'Pigmentação',
+    'Design de Sobrancelha',
+    'Platinado / Luzes',
+    'Corte Infantil',
+    'Selagem / Alisamento',
+    'Limpeza de Pele',
   ];
 
   @override
@@ -730,18 +664,30 @@ class _FuncionarioFormDialogState
     _commissionRateController = TextEditingController(
       text: f != null ? (f.commissionRate * 100).toStringAsFixed(0) : '',
     );
-    _horarioController = TextEditingController(
-      text: f?.horarioTrabalho ?? '',
-    );
     _avatarUrlController = TextEditingController(text: f?.avatarUrl ?? '');
-
     _specialties = f != null ? List<String>.from(f.specialties) : [];
-    _selectedDays = List.from(
-      f?.diasDisponiveis ??
-          ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
-    );
-    _selectedFolgas = List.from(f?.folgas ?? ['Domingo']);
     _active = f?.status ?? true;
+
+    if (f != null && f.diasDisponiveis.isNotEmpty) {
+      _workWeekdays = f.diasDisponiveis.any(
+        (d) => ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'].contains(d),
+      );
+      _workSaturday = f.diasDisponiveis.contains('Sábado');
+      _workSunday = f.diasDisponiveis.contains('Domingo');
+
+      final hoursMatches = RegExp(r'(\d{2}:\d{2})')
+          .allMatches(f.horarioTrabalho)
+          .map((m) => m.group(0)!)
+          .toList();
+      if (hoursMatches.length >= 2) {
+        if (_timeSlots.contains(hoursMatches[0])) _weekStart = hoursMatches[0];
+        if (_timeSlots.contains(hoursMatches[1])) _weekEnd = hoursMatches[1];
+      }
+      if (hoursMatches.length >= 4) {
+        if (_timeSlots.contains(hoursMatches[2])) _satStart = hoursMatches[2];
+        if (_timeSlots.contains(hoursMatches[3])) _satEnd = hoursMatches[3];
+      }
+    }
   }
 
   @override
@@ -752,7 +698,6 @@ class _FuncionarioFormDialogState
     _emailController.dispose();
     _cpfController.dispose();
     _commissionRateController.dispose();
-    _horarioController.dispose();
     _avatarUrlController.dispose();
     _newSpecialtyController.dispose();
     super.dispose();
@@ -768,10 +713,135 @@ class _FuncionarioFormDialogState
     }
   }
 
+  Widget _buildScheduleRow({
+    required BuildContext context,
+    required String label,
+    required bool enabled,
+    required ValueChanged<bool> onToggle,
+    required String start,
+    required String end,
+    required ValueChanged<String> onStartChanged,
+    required ValueChanged<String> onEndChanged,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: isDark ? ThemeColors.darkSurface : Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
+        ),
+      ),
+      child: Row(
+        children: [
+          Checkbox(
+            value: enabled,
+            activeColor: ThemeColors.primary,
+            checkColor: Colors.black,
+            onChanged: (val) => onToggle(val ?? false),
+          ),
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+          ),
+          const Spacer(),
+          if (enabled) ...[
+            _buildTimeDropdown(
+              context: context,
+              value: start,
+              onChanged: onStartChanged,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                'às',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? Colors.white54 : Colors.black54,
+                ),
+              ),
+            ),
+            _buildTimeDropdown(
+              context: context,
+              value: end,
+              onChanged: onEndChanged,
+            ),
+          ] else ...[
+            Text(
+              'Folga',
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: isDark ? Colors.white38 : Colors.black38,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimeDropdown({
+    required BuildContext context,
+    required String value,
+    required ValueChanged<String> onChanged,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      decoration: BoxDecoration(
+        color: isDark ? ThemeColors.darkBg : Colors.white,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+        ),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _timeSlots.contains(value) ? value : _timeSlots.first,
+          isDense: true,
+          dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+          items: _timeSlots.map((time) {
+            return DropdownMenuItem<String>(
+              value: time,
+              child: Text(time),
+            );
+          }).toList(),
+          onChanged: (newVal) {
+            if (newVal != null) onChanged(newVal);
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final employee = widget.employee;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final existingEmployees =
+        ref.watch(funcionariosControllerProvider).data ?? [];
+    final allKnownSpecialties = <String>{
+      ..._catalogSpecialties,
+      for (final emp in existingEmployees) ...emp.specialties,
+    };
+    final availableSuggestions = allKnownSpecialties
+        .where((s) => !_specialties.contains(s))
+        .toList();
 
     return AppResponsiveDialog(
       title: employee == null ? 'Cadastrar Funcionário' : 'Editar Funcionário',
@@ -808,6 +878,47 @@ class _FuncionarioFormDialogState
                   0.0;
               final commVal = commRateParsed / 100.0;
 
+              final scheduleParts = <String>[];
+              final computedDays = <String>[];
+              final computedFolgas = <String>[];
+
+              if (_workWeekdays) {
+                scheduleParts.add('Seg-Sex: $_weekStart às $_weekEnd');
+                computedDays.addAll([
+                  'Segunda',
+                  'Terça',
+                  'Quarta',
+                  'Quinta',
+                  'Sexta',
+                ]);
+              } else {
+                computedFolgas.addAll([
+                  'Segunda',
+                  'Terça',
+                  'Quarta',
+                  'Quinta',
+                  'Sexta',
+                ]);
+              }
+
+              if (_workSaturday) {
+                scheduleParts.add('Sáb: $_satStart às $_satEnd');
+                computedDays.add('Sábado');
+              } else {
+                computedFolgas.add('Sábado');
+              }
+
+              if (_workSunday) {
+                scheduleParts.add('Dom: $_sunStart às $_sunEnd');
+                computedDays.add('Domingo');
+              } else {
+                computedFolgas.add('Domingo');
+              }
+
+              final finalHorario = scheduleParts.isNotEmpty
+                  ? scheduleParts.join(' • ')
+                  : 'Sem horário cadastrado';
+
               final newFunc = Funcionario(
                 id: employee?.id ?? '',
                 name: _nameController.text.trim(),
@@ -820,9 +931,9 @@ class _FuncionarioFormDialogState
                     ? _specialties
                     : ['Atendimento Geral'],
                 commissionRate: commVal,
-                horarioTrabalho: _horarioController.text.trim(),
-                diasDisponiveis: _selectedDays,
-                folgas: _selectedFolgas,
+                horarioTrabalho: finalHorario,
+                diasDisponiveis: computedDays,
+                folgas: computedFolgas,
                 status: _active,
                 rating: employee?.rating ?? 5.0,
               );
@@ -949,34 +1060,16 @@ class _FuncionarioFormDialogState
               ],
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: AppInput(
-                    label: 'E-mail',
-                    placeholder: 'Ex: arthur@barberosbao.com',
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: AppValidators.email(),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: AppInput(
-                    label: 'Horário de Trabalho',
-                    placeholder: 'Ex: 09:00 - 18:00',
-                    controller: _horarioController,
-                    validator: (val) =>
-                        val == null || val.trim().isEmpty
-                            ? 'Horário obrigatório'
-                            : null,
-                  ),
-                ),
-              ],
+            AppInput(
+              label: 'E-mail',
+              placeholder: 'Ex: arthur@barberosbao.com',
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              validator: AppValidators.email(),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
-            // Chip Input for Specialties
+            // Especialidades Section
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1016,17 +1109,59 @@ class _FuncionarioFormDialogState
                       );
                     }).toList(),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
                 ],
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
-                      child: AppInput(
-                        label: '',
-                        placeholder:
-                            'Digite uma especialidade (Ex: Degradê, Barba)',
+                      child: TextFormField(
                         controller: _newSpecialtyController,
-                        onSubmitted: _addSpecialty,
+                        style: TextStyle(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontSize: 13,
+                        ),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          hintText:
+                              'Digite ou selecione uma especialidade abaixo...',
+                          hintStyle: TextStyle(
+                            color: isDark ? Colors.white38 : Colors.black38,
+                            fontSize: 13,
+                          ),
+                          filled: true,
+                          fillColor: isDark
+                              ? ThemeColors.darkSurface
+                              : Colors.grey.shade50,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade300,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(
+                              color: ThemeColors.primary,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                        onFieldSubmitted: _addSpecialty,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -1037,8 +1172,8 @@ class _FuncionarioFormDialogState
                           borderRadius: BorderRadius.circular(8),
                         ),
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
+                          horizontal: 18,
+                          vertical: 13,
                         ),
                       ),
                       onPressed: () =>
@@ -1054,70 +1189,109 @@ class _FuncionarioFormDialogState
                     ),
                   ],
                 ),
+                if (availableSuggestions.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    'Sugestões rápidas:',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? Colors.white54 : Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: availableSuggestions.map((s) {
+                      return ActionChip(
+                        avatar: const Icon(Icons.add, size: 13),
+                        label: Text(
+                          s,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
+                        ),
+                        backgroundColor: isDark
+                            ? ThemeColors.darkSurface
+                            : Colors.grey.shade100,
+                        side: BorderSide(
+                          color: isDark
+                              ? ThemeColors.darkBorder
+                              : Colors.grey.shade300,
+                        ),
+                        onPressed: () => _addSpecialty(s),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
+
+            // Structured Schedule Section
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Jornada e Horário de Trabalho',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Defina os dias e horários em que o profissional estará disponível para agendamento',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.white38 : Colors.black45,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildScheduleRow(
+                  context: context,
+                  label: 'Segunda a Sexta',
+                  enabled: _workWeekdays,
+                  onToggle: (v) => setState(() => _workWeekdays = v),
+                  start: _weekStart,
+                  end: _weekEnd,
+                  onStartChanged: (v) => setState(() => _weekStart = v),
+                  onEndChanged: (v) => setState(() => _weekEnd = v),
+                ),
+                const SizedBox(height: 8),
+                _buildScheduleRow(
+                  context: context,
+                  label: 'Sábado',
+                  enabled: _workSaturday,
+                  onToggle: (v) => setState(() => _workSaturday = v),
+                  start: _satStart,
+                  end: _satEnd,
+                  onStartChanged: (v) => setState(() => _satStart = v),
+                  onEndChanged: (v) => setState(() => _satEnd = v),
+                ),
+                const SizedBox(height: 8),
+                _buildScheduleRow(
+                  context: context,
+                  label: 'Domingo',
+                  enabled: _workSunday,
+                  onToggle: (v) => setState(() => _workSunday = v),
+                  start: _sunStart,
+                  end: _sunEnd,
+                  onStartChanged: (v) => setState(() => _sunStart = v),
+                  onEndChanged: (v) => setState(() => _sunEnd = v),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
 
             AppImageUpload(
               label: 'Foto do Profissional / Barbeiro',
               controller: _avatarUrlController,
               height: 140,
               helperText: 'Upload do arquivo ou informe o link',
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Dias Disponíveis de Trabalho',
-              style: TextStyle(
-                color: isDark ? Colors.white70 : Colors.black87,
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _weekDays.map((day) {
-                final isSelected = _selectedDays.contains(day);
-                return FilterChip(
-                  label: Text(
-                    day,
-                    style: TextStyle(
-                      color: isSelected
-                          ? Colors.black
-                          : (isDark ? Colors.white70 : Colors.black87),
-                      fontSize: 12,
-                      fontWeight: isSelected
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                    ),
-                  ),
-                  selected: isSelected,
-                  selectedColor: ThemeColors.primary,
-                  backgroundColor: isDark
-                      ? ThemeColors.darkBg
-                      : Colors.grey.shade100,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                    side: BorderSide(
-                      color: isDark
-                          ? ThemeColors.darkBorder
-                          : Colors.grey.shade300,
-                    ),
-                  ),
-                  onSelected: (val) {
-                    setState(() {
-                      if (val) {
-                        _selectedDays.add(day);
-                        _selectedFolgas.remove(day);
-                      } else {
-                        _selectedDays.remove(day);
-                        _selectedFolgas.add(day);
-                      }
-                    });
-                  },
-                );
-              }).toList(),
             ),
           ],
         ),

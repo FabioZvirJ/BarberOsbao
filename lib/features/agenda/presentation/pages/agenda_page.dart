@@ -9,6 +9,7 @@ import 'package:barber_osbao/packages/design_system/molecules/app_filters.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_search_bar.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/atoms/app_status_chip.dart';
+import 'package:barber_osbao/packages/design_system/atoms/app_avatar.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/organisms/app_dialog.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
@@ -720,81 +721,71 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
   }
 
   void _confirmCancel(BuildContext context, Agendamento apt) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    showDialog(
+    AppConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: const Text(
-          'Cancelar Agendamento',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          'Tem certeza que deseja cancelar o agendamento de "${apt.clientName}" às ${apt.time}? O horário do profissional será liberado.',
-          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(
-              'Voltar',
-              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
-            ),
+      title: 'Cancelar Agendamento',
+      message:
+          'Tem certeza que deseja cancelar este agendamento? O horário na agenda do profissional será imediatamente liberado.',
+      confirmLabel: 'Sim, Cancelar',
+      confirmColor: ThemeColors.danger,
+      confirmTextColor: Colors.white,
+      icon: Icons.event_busy_outlined,
+      iconColor: ThemeColors.danger,
+      details: [
+        MapEntry('Cliente', apt.clientName),
+        MapEntry('Profissional', apt.barberName),
+        MapEntry('Horário', '${AppFormatters.formatDate(apt.date)} às ${apt.time}'),
+        MapEntry('Serviço', apt.services),
+        MapEntry('Valor', AppFormatters.formatCurrency(apt.price)),
+      ],
+      onConfirm: () {
+        ref
+            .read(agendaControllerProvider.notifier)
+            .updateStatus(apt.id, 'cancelled');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Agendamento cancelado com sucesso.'),
+            backgroundColor: ThemeColors.danger,
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ThemeColors.danger,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ),
-            onPressed: () {
-              ref
-                  .read(agendaControllerProvider.notifier)
-                  .updateStatus(apt.id, 'cancelled');
-              Navigator.of(ctx).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Agendamento cancelado com sucesso.'),
-                  backgroundColor: ThemeColors.danger,
-                ),
-              );
-            },
-            child: const Text('Sim, Cancelar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   void _showCalendarPicker(BuildContext context) async {
-    final picked = await showDatePicker(
-      context: context,
-      locale: const Locale('pt', 'BR'),
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2025, 1, 1),
-      lastDate: DateTime(2027, 12, 31),
-      builder: (context, child) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: isDark
-                ? const ColorScheme.dark(
-                    primary: ThemeColors.primary,
-                    onPrimary: Colors.black,
-                    surface: ThemeColors.darkSurface,
-                    onSurface: Colors.white,
-                  )
-                : const ColorScheme.light(
-                    primary: ThemeColors.primary,
-                    onPrimary: Colors.white,
-                  ),
-          ),
-          child: child!,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    DateTime initDate = DateTime.now();
+    if (_calendarSelectedDate.isNotEmpty) {
+      final parts = _calendarSelectedDate.split('-');
+      if (parts.length == 3) {
+        initDate = DateTime(
+          int.tryParse(parts[0]) ?? initDate.year,
+          int.tryParse(parts[1]) ?? initDate.month,
+          int.tryParse(parts[2]) ?? initDate.day,
         );
-      },
+      }
+    }
+
+    final picked = await showDialog<DateTime>(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 360, maxHeight: 400),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: CalendarDatePicker(
+              initialDate: initDate,
+              firstDate: DateTime(2025, 1, 1),
+              lastDate: DateTime(2027, 12, 31),
+              onDateChanged: (val) => Navigator.of(ctx).pop(val),
+            ),
+          ),
+        ),
+      ),
     );
+
     if (picked != null) {
       final dateStr =
           '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
@@ -919,6 +910,50 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
   }
 }
 
+class _ClientItem {
+  final String id;
+  final String name;
+  final String phone;
+  final String avatarUrl;
+
+  const _ClientItem({
+    required this.id,
+    required this.name,
+    required this.phone,
+    required this.avatarUrl,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _ClientItem && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+}
+
+class _BarberItem {
+  final String id;
+  final String name;
+  final String cargo;
+  final String avatarUrl;
+
+  const _BarberItem({
+    required this.id,
+    required this.name,
+    required this.cargo,
+    required this.avatarUrl,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _BarberItem && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+}
+
 class AppointmentFormDialog extends ConsumerStatefulWidget {
   final AppState<List<dynamic>>? clientsState;
   final AppState<List<dynamic>>? employeesState;
@@ -946,14 +981,14 @@ class _AppointmentFormDialogState
   late final TextEditingController _timeController;
   late final TextEditingController _priceController;
 
-  String? _selectedClient;
-  String? _selectedBarber;
+  _ClientItem? _selectedClientItem;
+  _BarberItem? _selectedBarberItem;
   String? _selectedService;
   late String _status;
   String? _conflictError;
 
-  final List<String> _clients = [];
-  final List<String> _barbers = [];
+  final List<_ClientItem> _clientItems = [];
+  final List<_BarberItem> _barberItems = [];
   final List<String> _services = [];
 
   @override
@@ -967,44 +1002,66 @@ class _AppointmentFormDialogState
       text: apt != null ? AppMasks.formatCurrencyValue(apt.price) : '',
     );
 
-    // Extract dynamic dropdown items
+    // Extract dynamic dropdown items, filtering active clients
     final List<dynamic>? cData =
         widget.clientsState?.data ?? ref.read(clientesControllerProvider).data;
     if (cData != null) {
-      _clients.addAll(
-        cData.map((c) => c.name as String).cast<String>(),
-      );
+      for (final c in cData) {
+        final isActive = c.status == 'active';
+        final isCurrent = apt != null && c.name == apt.clientName;
+        if (isActive || isCurrent) {
+          _clientItems.add(_ClientItem(
+            id: c.id ?? c.name,
+            name: c.name,
+            phone: c.phone ?? '',
+            avatarUrl: c.avatarUrl ?? '',
+          ));
+        }
+      }
     }
-    if (_clients.isEmpty) {
-      _clients.addAll([
-        'João Silva',
-        'Lucas Ferreira',
-        'Rafael Costa',
-        'Bruno Albuquerque',
-        'Matheus Lima',
+    if (_clientItems.isEmpty) {
+      _clientItems.addAll([
+        const _ClientItem(id: 'c1', name: 'João Silva', phone: '(11) 98765-4321', avatarUrl: ''),
+        const _ClientItem(id: 'c2', name: 'Lucas Ferreira', phone: '(11) 97654-3210', avatarUrl: ''),
+        const _ClientItem(id: 'c3', name: 'Rafael Costa', phone: '(11) 96543-2109', avatarUrl: ''),
+        const _ClientItem(id: 'c4', name: 'Bruno Albuquerque', phone: '(11) 95432-1098', avatarUrl: ''),
+        const _ClientItem(id: 'c5', name: 'Matheus Lima', phone: '(11) 94321-0987', avatarUrl: ''),
       ]);
     }
 
     final List<dynamic>? eData = widget.employeesState?.data ??
         ref.read(funcionariosControllerProvider).data;
     if (eData != null) {
-      _barbers.addAll(
-        eData
-            .where((f) => f.cargo.toString().toLowerCase().contains('barbeiro'))
-            .map((f) => f.name as String)
-            .cast<String>(),
-      );
+      for (final f in eData) {
+        final isBarber = f.cargo.toString().toLowerCase().contains('barbeiro');
+        final isActive = f.status == true;
+        final isCurrent = apt != null && f.name == apt.barberName;
+        if (isBarber && (isActive || isCurrent)) {
+          _barberItems.add(_BarberItem(
+            id: f.id ?? f.name,
+            name: f.name,
+            cargo: f.cargo ?? 'Barbeiro',
+            avatarUrl: f.avatarUrl ?? '',
+          ));
+        }
+      }
     }
-    if (_barbers.isEmpty) {
-      _barbers.addAll(['Marcos Silva', 'Arthur Santos', 'Gabriel Neves']);
+    if (_barberItems.isEmpty) {
+      _barberItems.addAll([
+        const _BarberItem(id: 'b1', name: 'Marcos Silva', cargo: 'Barbeiro Master', avatarUrl: ''),
+        const _BarberItem(id: 'b2', name: 'Arthur Santos', cargo: 'Barbeiro Especialista', avatarUrl: ''),
+        const _BarberItem(id: 'b3', name: 'Gabriel Neves', cargo: 'Barbeiro Clássico', avatarUrl: ''),
+      ]);
     }
 
     final List<dynamic>? sData = widget.servicesState?.data ??
         ref.read(servicosControllerProvider).data;
     if (sData != null) {
-      _services.addAll(
-        sData.map((s) => s.name as String).cast<String>(),
-      );
+      for (final s in sData) {
+        if (s.status == true || (apt != null && s.name == apt.services)) {
+          _services.add(s.name as String);
+        }
+      }
     }
     if (_services.isEmpty) {
       _services.addAll([
@@ -1018,15 +1075,33 @@ class _AppointmentFormDialogState
     }
 
     if (apt != null) {
-      if (apt.clientName.isNotEmpty && !_clients.contains(apt.clientName)) {
-        _clients.insert(0, apt.clientName);
-      }
-      _selectedClient = apt.clientName;
+      _selectedClientItem = _clientItems.cast<_ClientItem?>().firstWhere(
+            (c) => c?.name == apt.clientName,
+            orElse: () {
+              final fallback = _ClientItem(
+                id: apt.clientName,
+                name: apt.clientName,
+                phone: '',
+                avatarUrl: '',
+              );
+              _clientItems.insert(0, fallback);
+              return fallback;
+            },
+          );
 
-      if (apt.barberName.isNotEmpty && !_barbers.contains(apt.barberName)) {
-        _barbers.insert(0, apt.barberName);
-      }
-      _selectedBarber = apt.barberName;
+      _selectedBarberItem = _barberItems.cast<_BarberItem?>().firstWhere(
+            (b) => b?.name == apt.barberName,
+            orElse: () {
+              final fallback = _BarberItem(
+                id: apt.barberName,
+                name: apt.barberName,
+                cargo: 'Barbeiro',
+                avatarUrl: '',
+              );
+              _barberItems.insert(0, fallback);
+              return fallback;
+            },
+          );
 
       final sName = apt.services.trim();
       if (sName.isNotEmpty && !_services.contains(sName)) {
@@ -1035,10 +1110,10 @@ class _AppointmentFormDialogState
       _selectedService = sName;
       _status = apt.status;
     } else {
-      _selectedClient = null;
-      _selectedBarber = null;
+      _selectedClientItem = null;
+      _selectedBarberItem = null;
       _selectedService = null;
-      _status = 'pending';
+      _status = 'confirmed';
     }
   }
 
@@ -1052,14 +1127,26 @@ class _AppointmentFormDialogState
   }
 
   int _getServiceDurationMinutes(String? serviceName) {
+    if (serviceName == null || serviceName.trim().isEmpty) return 30;
+    final cleanName = serviceName.trim().toLowerCase();
     final List<dynamic>? sData = widget.servicesState?.data ??
         ref.read(servicosControllerProvider).data;
-    if (serviceName != null && sData != null) {
+    if (sData != null) {
       for (final s in sData) {
-        if (s.name == serviceName) {
+        final sClean = s.name.toString().trim().toLowerCase();
+        if (sClean == cleanName || sClean.contains(cleanName) || cleanName.contains(sClean)) {
           return s.durationMinutes as int;
         }
       }
+    }
+    if (cleanName.contains('combo') || (cleanName.contains('corte') && cleanName.contains('barba'))) {
+      return 60;
+    }
+    if (cleanName.contains('platinado') || cleanName.contains('química') || cleanName.contains('luzes')) {
+      return 90;
+    }
+    if (cleanName.contains('sobrancelha')) {
+      return 15;
     }
     final settings = ref.read(businessSettingsControllerProvider).data;
     return int.tryParse(settings?.slotInterval ?? '30') ?? 30;
@@ -1096,6 +1183,7 @@ class _AppointmentFormDialogState
   }
 
   Future<void> _selectDate() async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     DateTime initDate = DateTime.now();
     if (_dateController.text.isNotEmpty) {
       final parts = _dateController.text.split('-');
@@ -1108,12 +1196,24 @@ class _AppointmentFormDialogState
       }
     }
 
-    final picked = await showDatePicker(
+    final picked = await showDialog<DateTime>(
       context: context,
-      locale: const Locale('pt', 'BR'),
-      initialDate: initDate,
-      firstDate: DateTime(2025, 1, 1),
-      lastDate: DateTime(2027, 12, 31),
+      builder: (ctx) => Dialog(
+        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 360, maxHeight: 400),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: CalendarDatePicker(
+              initialDate: initDate,
+              firstDate: DateTime(2025, 1, 1),
+              lastDate: DateTime(2027, 12, 31),
+              onDateChanged: (val) => Navigator.of(ctx).pop(val),
+            ),
+          ),
+        ),
+      ),
     );
 
     if (picked != null) {
@@ -1195,11 +1295,11 @@ class _AppointmentFormDialogState
               final targetDate = _dateController.text.trim();
               final targetTime = _timeController.text.trim();
 
-              if (_selectedClient == null || _selectedClient!.isEmpty) {
+              if (_selectedClientItem == null) {
                 setState(() => _conflictError = 'Selecione o cliente.');
                 return;
               }
-              if (_selectedBarber == null || _selectedBarber!.isEmpty) {
+              if (_selectedBarberItem == null) {
                 setState(() => _conflictError = 'Selecione o barbeiro.');
                 return;
               }
@@ -1220,13 +1320,24 @@ class _AppointmentFormDialogState
                 final targetEndMin = targetStartMin + targetDuration;
 
                 for (final existing in existingList) {
-                  if (existing.id == appointment?.id) continue;
-                  if (existing.status == 'cancelled') continue;
-                  if (existing.barberName != _selectedBarber) continue;
-                  if (existing.date != targetDate) continue;
+                  if (existing.id == appointment?.id) {
+                    continue;
+                  }
+                  if (existing.status == 'cancelled') {
+                    continue;
+                  }
+                  if (existing.barberName.trim().toLowerCase() !=
+                      _selectedBarberItem!.name.trim().toLowerCase()) {
+                    continue;
+                  }
+                  if (existing.date != targetDate) {
+                    continue;
+                  }
 
                   final exParts = existing.time.split(':');
-                  if (exParts.length != 2) continue;
+                  if (exParts.length != 2) {
+                    continue;
+                  }
                   final exStartMin = (int.tryParse(exParts[0]) ?? 0) * 60 +
                       (int.tryParse(exParts[1]) ?? 0);
                   final exDuration = _getServiceDurationMinutes(existing.services);
@@ -1238,7 +1349,7 @@ class _AppointmentFormDialogState
                     final exEndM = (exEndMin % 60).toString().padLeft(2, '0');
                     setState(() {
                       _conflictError =
-                          'O barbeiro $_selectedBarber já possui agendamento das ${existing.time} às $exEndH:$exEndM ($exDuration min). Horário livre após às $exEndH:$exEndM.';
+                          'O profissional ${_selectedBarberItem!.name} já possui atendimento agendado das ${existing.time} às $exEndH:$exEndM ($exDuration min) com "${existing.clientName}". Horário livre a partir das $exEndH:$exEndM.';
                     });
                     return;
                   }
@@ -1249,8 +1360,8 @@ class _AppointmentFormDialogState
 
               final newApt = Agendamento(
                 id: appointment?.id ?? '',
-                clientName: _selectedClient!,
-                barberName: _selectedBarber!,
+                clientName: _selectedClientItem!.name,
+                barberName: _selectedBarberItem!.name,
                 services: _selectedService!,
                 date: targetDate,
                 time: targetTime,
@@ -1327,10 +1438,10 @@ class _AppointmentFormDialogState
                   ),
                 ),
                 const SizedBox(height: 6),
-                DropdownButtonFormField<String>(
+                DropdownButtonFormField<_ClientItem>(
                   dropdownColor:
                       isDark ? ThemeColors.darkSurface : Colors.white,
-                  initialValue: _selectedClient,
+                  initialValue: _selectedClientItem,
                   hint: Text(
                     'Selecione o cliente',
                     style: TextStyle(
@@ -1371,14 +1482,69 @@ class _AppointmentFormDialogState
                     fontSize: 14,
                   ),
                   validator: (val) =>
-                      val == null || val.isEmpty ? 'Selecione o cliente' : null,
-                  items: _clients
-                      .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                      val == null ? 'Selecione o cliente' : null,
+                  selectedItemBuilder: (context) {
+                    return _clientItems.map((c) {
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          AppAvatar(url: c.avatarUrl, name: c.name, size: 24),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              c.phone.isNotEmpty ? '${c.name} (${c.phone})' : c.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: isDark ? Colors.white : Colors.black87,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList();
+                  },
+                  items: _clientItems
+                      .map(
+                        (c) => DropdownMenuItem<_ClientItem>(
+                          value: c,
+                          child: Row(
+                            children: [
+                              AppAvatar(url: c.avatarUrl, name: c.name, size: 28),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      c.name,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
+                                        color: isDark ? Colors.white : Colors.black87,
+                                      ),
+                                    ),
+                                    Text(
+                                      c.phone.isNotEmpty ? c.phone : 'Sem telefone',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: isDark ? Colors.white54 : Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
                       .toList(),
                   onChanged: (val) {
                     if (val != null) {
                       setState(() {
-                        _selectedClient = val;
+                        _selectedClientItem = val;
                         _conflictError = null;
                       });
                     }
@@ -1402,10 +1568,10 @@ class _AppointmentFormDialogState
                         ),
                       ),
                       const SizedBox(height: 6),
-                      DropdownButtonFormField<String>(
+                      DropdownButtonFormField<_BarberItem>(
                         dropdownColor:
                             isDark ? ThemeColors.darkSurface : Colors.white,
-                        initialValue: _selectedBarber,
+                        initialValue: _selectedBarberItem,
                         hint: Text(
                           'Selecione o barbeiro',
                           style: TextStyle(
@@ -1447,19 +1613,72 @@ class _AppointmentFormDialogState
                           color: isDark ? Colors.white : Colors.black87,
                           fontSize: 14,
                         ),
-                        validator: (val) => val == null || val.isEmpty
+                        validator: (val) => val == null
                             ? 'Selecione o barbeiro'
                             : null,
-                        items: _barbers
+                        selectedItemBuilder: (context) {
+                          return _barberItems.map((b) {
+                            return Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                AppAvatar(url: b.avatarUrl, name: b.name, size: 24),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    '${b.name} (${b.cargo})',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: isDark ? Colors.white : Colors.black87,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }).toList();
+                        },
+                        items: _barberItems
                             .map(
                               (b) =>
-                                  DropdownMenuItem(value: b, child: Text(b)),
+                                  DropdownMenuItem<_BarberItem>(
+                                    value: b,
+                                    child: Row(
+                                      children: [
+                                        AppAvatar(url: b.avatarUrl, name: b.name, size: 28),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                b.name,
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 13,
+                                                  color: isDark ? Colors.white : Colors.black87,
+                                                ),
+                                              ),
+                                              Text(
+                                                b.cargo,
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: isDark ? Colors.white54 : Colors.grey.shade600,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                             )
                             .toList(),
                         onChanged: (val) {
                           if (val != null) {
                             setState(() {
-                              _selectedBarber = val;
+                              _selectedBarberItem = val;
                               _conflictError = null;
                             });
                           }
@@ -1660,24 +1879,35 @@ class _AppointmentFormDialogState
                           color: isDark ? Colors.white : Colors.black87,
                           fontSize: 14,
                         ),
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'pending',
-                            child: Text('Pendente'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'confirmed',
-                            child: Text('Confirmado'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'completed',
-                            child: Text('Finalizado'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'cancelled',
-                            child: Text('Cancelado'),
-                          ),
-                        ],
+                        items: appointment == null
+                            ? const [
+                                DropdownMenuItem(
+                                  value: 'pending',
+                                  child: Text('Pendente'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'confirmed',
+                                  child: Text('Confirmado'),
+                                ),
+                              ]
+                            : const [
+                                DropdownMenuItem(
+                                  value: 'pending',
+                                  child: Text('Pendente'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'confirmed',
+                                  child: Text('Confirmado'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'completed',
+                                  child: Text('Finalizado'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'cancelled',
+                                  child: Text('Cancelado'),
+                                ),
+                              ],
                         onChanged: (val) {
                           if (val != null) setState(() => _status = val);
                         },

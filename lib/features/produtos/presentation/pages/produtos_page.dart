@@ -214,23 +214,45 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
         final isLowStock = p.stock <= p.minStock;
         return AppTableRow(
           cells: [
-            InkWell(
-              onTap: () => _showImageZoomDialog(context, p.imageUrl, p.name),
-              borderRadius: BorderRadius.circular(8),
-              child: Tooltip(
-                message: 'Clique para ampliar imagem',
-                child: ClipRRect(
+            Builder(
+              builder: (context) {
+                final hasImage = p.imageUrl.trim().isNotEmpty;
+                return InkWell(
+                  onTap: hasImage
+                      ? () => _showImageZoomDialog(context, p.imageUrl, p.name)
+                      : null,
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    p.imageUrl,
-                    width: 44,
-                    height: 44,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.shopping_bag_outlined, size: 24),
+                  child: Tooltip(
+                    message: hasImage
+                        ? 'Clique para ampliar imagem'
+                        : 'Sem imagem cadastrada',
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: hasImage
+                          ? Image.network(
+                              p.imageUrl,
+                              width: 44,
+                              height: 44,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.broken_image_outlined, size: 24),
+                            )
+                          : Container(
+                              width: 44,
+                              height: 44,
+                              color: isDark
+                                  ? ThemeColors.darkBorder
+                                  : Colors.grey.shade200,
+                              child: Icon(
+                                Icons.image_not_supported_outlined,
+                                size: 20,
+                                color: isDark ? Colors.white38 : Colors.black38,
+                              ),
+                            ),
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -341,65 +363,79 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
 
   void _showImageZoomDialog(BuildContext context, String imageUrl, String name) {
     if (imageUrl.trim().isEmpty) return;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
-      builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(24),
-        child: Stack(
-          alignment: Alignment.topRight,
-          children: [
-            Container(
-              constraints: const BoxConstraints(maxWidth: 500, maxHeight: 500),
-              decoration: BoxDecoration(
-                color: Colors.black87,
-                borderRadius: BorderRadius.circular(12),
+      builder: (ctx) => AppResponsiveDialog(
+        title: name,
+        subtitle: 'Visualização ampliada da imagem do produto',
+        maxWidth: 580,
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ThemeColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  InteractiveViewer(
-                    maxScale: 4.0,
-                    child: Image.network(
-                      imageUrl,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => Container(
-                        height: 250,
-                        alignment: Alignment.center,
-                        child: const Icon(
-                          Icons.broken_image,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text(
+              'Fechar',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark ? ThemeColors.darkSurface : Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isDark ? ThemeColors.darkBorder : Colors.grey.shade300,
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: 280,
+              maxHeight: 460,
+            ),
+            child: Center(
+              child: InteractiveViewer(
+                minScale: 1.0,
+                maxScale: 4.0,
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => Padding(
+                    padding: const EdgeInsets.all(40),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.broken_image_outlined,
                           size: 48,
-                          color: Colors.white54,
+                          color: isDark ? Colors.white38 : Colors.grey,
                         ),
-                      ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Não foi possível carregar a imagem',
+                          style: TextStyle(
+                            color: isDark ? Colors.white54 : Colors.grey.shade600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8,
-                      horizontal: 16,
-                    ),
-                    color: Colors.black54,
-                    child: Text(
-                      name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.close, color: Colors.white, size: 26),
-              onPressed: () => Navigator.of(ctx).pop(),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -418,55 +454,32 @@ class _ProdutosPageState extends ConsumerState<ProdutosPage> {
   }
 
   void _showDeleteDialog(BuildContext context, Produto product) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    showDialog(
+    AppConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: Text(
-          'Excluir Produto',
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black87,
-            fontWeight: FontWeight.bold,
+      title: 'Excluir Produto',
+      message: 'Tem certeza que deseja excluir o produto "${product.name}"? Essa ação removerá o registro permanente no estoque.',
+      confirmLabel: 'Excluir',
+      confirmColor: ThemeColors.danger,
+      confirmTextColor: Colors.white,
+      icon: Icons.delete_outline,
+      iconColor: ThemeColors.danger,
+      details: [
+        MapEntry('Produto', product.name),
+        MapEntry('Código', product.code),
+        MapEntry('Estoque Atual', '${product.stock} un'),
+        MapEntry('Preço Venda', AppFormatters.formatCurrency(product.price)),
+      ],
+      onConfirm: () {
+        ref
+            .read(produtosControllerProvider.notifier)
+            .removeProduto(product.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Produto "${product.name}" excluído.'),
+            backgroundColor: ThemeColors.danger,
           ),
-        ),
-        content: Text(
-          'Tem certeza que deseja excluir o produto "${product.name}"? Essa ação removerá o registro permanente no estoque.',
-          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(
-              'Cancelar',
-              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ThemeColors.danger,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ),
-            onPressed: () {
-              ref
-                  .read(produtosControllerProvider.notifier)
-                  .removeProduto(product.id);
-              Navigator.of(ctx).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Produto "${product.name}" excluído.'),
-                  backgroundColor: ThemeColors.danger,
-                ),
-              );
-            },
-            child: const Text('Excluir', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -723,6 +736,42 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.03)
+                    : Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
+                ),
+              ),
+              child: SwitchListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                title: Text(
+                  'Produto Ativo',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  'Disponível para venda direta e inclusão em comandas',
+                  style: TextStyle(
+                    color: isDark ? Colors.white54 : Colors.black45,
+                    fontSize: 12,
+                  ),
+                ),
+                value: _status,
+                activeThumbColor: ThemeColors.primary,
+                onChanged: (val) => setState(() => _status = val),
+              ),
+            ),
             AppInput(
               label: 'Nome do Produto',
               placeholder: 'Ex: Pomada Modeladora Efeito Seco',
@@ -892,42 +941,6 @@ class _ProdutoFormDialogState extends ConsumerState<_ProdutoFormDialog> {
               placeholder: 'Ex: Características do produto...',
               controller: _descriptionController,
               maxLines: 2,
-            ),
-            const SizedBox(height: 16),
-            Container(
-              decoration: BoxDecoration(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.03)
-                    : Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isDark ? ThemeColors.darkBorder : Colors.grey.shade200,
-                ),
-              ),
-              child: SwitchListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
-                ),
-                title: Text(
-                  'Produto Ativo',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black87,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                subtitle: Text(
-                  'Disponível para venda direta e inclusão em comandas',
-                  style: TextStyle(
-                    color: isDark ? Colors.white54 : Colors.black45,
-                    fontSize: 12,
-                  ),
-                ),
-                value: _status,
-                activeThumbColor: ThemeColors.primary,
-                onChanged: (val) => setState(() => _status = val),
-              ),
             ),
           ],
         ),

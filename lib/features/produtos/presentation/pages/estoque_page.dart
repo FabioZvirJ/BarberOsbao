@@ -265,9 +265,8 @@ class _EstoquePageState extends ConsumerState<EstoquePage> {
   }
 
   void _showReplenishDialog(BuildContext context, Produto prod) {
-    final defaultQty = (prod.minStock * 2 - prod.stock).clamp(5, 50);
-    final qtyController = TextEditingController(text: defaultQty.toString());
-    final reasonController = TextEditingController(text: '');
+    final qtyController = TextEditingController(text: '');
+    final reasonController = TextEditingController(text: 'Reposição de estoque');
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showDialog(

@@ -254,40 +254,15 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
                 shape: BoxShape.circle,
               ),
             ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Switch(
-                  value: s.status,
-                  activeThumbColor: ThemeColors.primary,
-                  onChanged: (val) {
-                    ref
-                        .read(servicosControllerProvider.notifier)
-                        .editServico(s.copyWith(status: val));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          val
-                              ? 'Serviço "${s.name}" ativado para agendamentos.'
-                              : 'Serviço "${s.name}" inativado.',
-                        ),
-                        backgroundColor: val
-                            ? ThemeColors.success
-                            : Colors.orange.shade800,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  },
-                ),
-                Text(
-                  s.status ? 'Ativo' : 'Inativo',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: s.status ? ThemeColors.success : ThemeColors.danger,
-                  ),
-                ),
-              ],
+            Transform.scale(
+              scale: 0.75,
+              child: Switch.adaptive(
+                value: s.status,
+                activeThumbColor: ThemeColors.primary,
+                onChanged: (val) {
+                  _showDeleteDialog(context, s);
+                },
+              ),
             ),
             // Reorder actions
             Row(
@@ -329,15 +304,6 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
                   onPressed: () => _showFormDialog(context, formCategories, s),
                   tooltip: 'Editar',
                 ),
-                IconButton(
-                  icon: Icon(
-                    s.status ? Icons.archive_outlined : Icons.unarchive_outlined,
-                    size: 18,
-                    color: s.status ? ThemeColors.warning : ThemeColors.success,
-                  ),
-                  onPressed: () => _showDeleteDialog(context, s),
-                  tooltip: s.status ? 'Inativar Serviço' : 'Reativar Serviço',
-                ),
               ],
             ),
           ],
@@ -347,87 +313,44 @@ class _ServicosPageState extends ConsumerState<ServicosPage> {
   }
 
   void _showDeleteDialog(BuildContext context, Servico service) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isCurrentlyActive = service.status;
 
-    showDialog(
+    AppConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: Row(
-          children: [
-            Icon(
+      title: isCurrentlyActive ? 'Inativar Serviço' : 'Reativar Serviço',
+      message: isCurrentlyActive
+          ? 'Tem certeza que deseja inativar o serviço "${service.name}"? Ele deixará de aparecer para novos agendamentos, mas todo o histórico anterior continuará preservado.'
+          : 'Deseja reativar o serviço "${service.name}" para permitir novos agendamentos?',
+      confirmLabel: isCurrentlyActive ? 'Inativar' : 'Reativar',
+      confirmColor: isCurrentlyActive ? ThemeColors.warning : ThemeColors.success,
+      confirmTextColor: isCurrentlyActive ? Colors.black : Colors.white,
+      icon: isCurrentlyActive
+          ? Icons.archive_outlined
+          : Icons.unarchive_outlined,
+      iconColor: isCurrentlyActive ? ThemeColors.warning : ThemeColors.success,
+      details: [
+        MapEntry('Serviço', service.name),
+        MapEntry('Categoria', service.category.toUpperCase()),
+        MapEntry('Duração', '${service.durationMinutes} minutos'),
+        MapEntry('Preço', AppFormatters.formatCurrency(service.price)),
+      ],
+      onConfirm: () {
+        ref
+            .read(servicosControllerProvider.notifier)
+            .editServico(service.copyWith(status: !isCurrentlyActive));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
               isCurrentlyActive
-                  ? Icons.archive_outlined
-                  : Icons.unarchive_outlined,
-              color: isCurrentlyActive ? ThemeColors.warning : ThemeColors.success,
-              size: 22,
+                  ? 'Serviço "${service.name}" inativado com sucesso.'
+                  : 'Serviço "${service.name}" reativado.',
             ),
-            const SizedBox(width: 8),
-            Text(
-              isCurrentlyActive ? 'Inativar Serviço' : 'Reativar Serviço',
-              style: TextStyle(
-                color: isDark ? Colors.white : Colors.black87,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          isCurrentlyActive
-              ? 'Deseja inativar o serviço "${service.name}"? Ele deixará de aparecer para novos agendamentos, mas todo o histórico anterior continuará intacto.'
-              : 'Deseja reativar o serviço "${service.name}" para permitir novos agendamentos?',
-          style: TextStyle(
-            color: isDark ? Colors.white70 : Colors.black87,
-            fontSize: 13,
+            backgroundColor: isCurrentlyActive
+                ? Colors.orange.shade800
+                : ThemeColors.success,
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(
-              'Cancelar',
-              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isCurrentlyActive
-                  ? ThemeColors.warning
-                  : ThemeColors.success,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ),
-            onPressed: () {
-              ref
-                  .read(servicosControllerProvider.notifier)
-                  .editServico(service.copyWith(status: !isCurrentlyActive));
-              Navigator.of(ctx).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    isCurrentlyActive
-                        ? 'Serviço "${service.name}" inativado com sucesso.'
-                        : 'Serviço "${service.name}" reativado.',
-                  ),
-                  backgroundColor: isCurrentlyActive
-                      ? Colors.orange.shade800
-                      : ThemeColors.success,
-                ),
-              );
-            },
-            child: Text(
-              isCurrentlyActive ? 'Inativar' : 'Reativar',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
