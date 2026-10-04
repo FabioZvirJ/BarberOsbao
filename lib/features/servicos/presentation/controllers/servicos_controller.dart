@@ -2,10 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/servicos/domain/models/servico.dart';
 import 'package:barber_osbao/features/servicos/domain/repositories/servicos_repository.dart';
-import 'package:barber_osbao/features/servicos/data/repositories/mock_servicos_repository.dart';
+import 'package:barber_osbao/packages/core/network/dio_client.dart';
+import 'package:barber_osbao/features/servicos/data/repositories/http_servicos_repository.dart';
 
 final servicosRepositoryProvider = Provider<ServicosRepository>((ref) {
-  return MockServicosRepository();
+  final dioClient = ref.watch(dioClientProvider);
+  return HttpServicosRepository(dioClient);
 });
 
 class ServicosController extends Notifier<AppState<List<Servico>>> {

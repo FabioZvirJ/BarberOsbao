@@ -40,4 +40,29 @@ class MovimentacaoEstoque {
       user: user ?? this.user,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'productId': productId,
+        'productName': productName,
+        'type': type,
+        'qty': qty,
+        'quantity': qty,
+        'reason': reason,
+        'date': date,
+        'user': user,
+        'responsible': user,
+      };
+
+  factory MovimentacaoEstoque.fromJson(Map<String, dynamic> json) => MovimentacaoEstoque(
+        id: json['id'] ?? '',
+        productId: json['productId'] ?? '',
+        productName: json['productName'] ?? '',
+        type: json['type'] ?? 'Entrada',
+        qty: json['qty'] ?? json['quantity'] ?? 0,
+        reason: json['reason'] ?? '',
+        date: json['date'] ?? '',
+        user: json['user'] ?? json['responsible'] ?? '',
+      );
 }
+

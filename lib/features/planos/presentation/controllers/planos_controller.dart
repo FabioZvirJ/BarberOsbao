@@ -2,10 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/planos/domain/models/plano.dart';
 import 'package:barber_osbao/features/planos/domain/repositories/planos_repository.dart';
-import 'package:barber_osbao/features/planos/data/repositories/mock_planos_repository.dart';
+import 'package:barber_osbao/packages/core/network/dio_client.dart';
+import 'package:barber_osbao/features/planos/data/repositories/http_planos_repository.dart';
 
 final planosRepositoryProvider = Provider<PlanosRepository>((ref) {
-  return MockPlanosRepository();
+  final dioClient = ref.watch(dioClientProvider);
+  return HttpPlanosRepository(dioClient);
 });
 
 class PlanosController extends Notifier<AppState<List<Plano>>> {

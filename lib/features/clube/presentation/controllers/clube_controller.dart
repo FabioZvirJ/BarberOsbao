@@ -2,10 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/clube/domain/models/beneficio_clube.dart';
 import 'package:barber_osbao/features/clube/domain/repositories/clube_repository.dart';
-import 'package:barber_osbao/features/clube/data/repositories/mock_clube_repository.dart';
+import 'package:barber_osbao/packages/core/network/dio_client.dart';
+import 'package:barber_osbao/features/clube/data/repositories/http_clube_repository.dart';
 
 final clubeRepositoryProvider = Provider<ClubeRepository>((ref) {
-  return MockClubeRepository();
+  final dioClient = ref.watch(dioClientProvider);
+  return HttpClubeRepository(dioClient);
 });
 
 class ClubeController extends Notifier<AppState<List<BeneficioClube>>> {

@@ -2,10 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/clientes/domain/models/cliente.dart';
 import 'package:barber_osbao/features/clientes/domain/repositories/clientes_repository.dart';
-import 'package:barber_osbao/features/clientes/data/repositories/mock_clientes_repository.dart';
+import 'package:barber_osbao/packages/core/network/dio_client.dart';
+import 'package:barber_osbao/features/clientes/data/repositories/http_clientes_repository.dart';
 
 final clientesRepositoryProvider = Provider<ClientesRepository>((ref) {
-  return MockClientesRepository();
+  final dioClient = ref.watch(dioClientProvider);
+  return HttpClientesRepository(dioClient);
 });
 
 class ClientesController extends Notifier<AppState<List<Cliente>>> {

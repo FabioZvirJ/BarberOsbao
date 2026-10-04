@@ -2,10 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/funcionarios/domain/models/funcionario.dart';
 import 'package:barber_osbao/features/funcionarios/domain/repositories/funcionarios_repository.dart';
-import 'package:barber_osbao/features/funcionarios/data/repositories/mock_funcionarios_repository.dart';
+import 'package:barber_osbao/packages/core/network/dio_client.dart';
+import 'package:barber_osbao/features/funcionarios/data/repositories/http_funcionarios_repository.dart';
 
 final funcionariosRepositoryProvider = Provider<FuncionariosRepository>((ref) {
-  return MockFuncionariosRepository();
+  final dioClient = ref.watch(dioClientProvider);
+  return HttpFuncionariosRepository(dioClient);
 });
 
 class FuncionariosController extends Notifier<AppState<List<Funcionario>>> {

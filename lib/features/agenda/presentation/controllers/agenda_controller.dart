@@ -2,10 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/agenda/domain/models/agendamento.dart';
 import 'package:barber_osbao/features/agenda/domain/repositories/agenda_repository.dart';
-import 'package:barber_osbao/features/agenda/data/repositories/mock_agenda_repository.dart';
+import 'package:barber_osbao/packages/core/network/dio_client.dart';
+import 'package:barber_osbao/features/agenda/data/repositories/http_agenda_repository.dart';
 
 final agendaRepositoryProvider = Provider<AgendaRepository>((ref) {
-  return MockAgendaRepository();
+  final dioClient = ref.watch(dioClientProvider);
+  return HttpAgendaRepository(dioClient);
 });
 
 class AgendaController extends Notifier<AppState<List<Agendamento>>> {

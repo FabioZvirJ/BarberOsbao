@@ -4,10 +4,12 @@ import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
 import 'package:barber_osbao/features/produtos/domain/models/produto.dart';
 import 'package:barber_osbao/features/produtos/domain/models/movimentacao.dart';
 import 'package:barber_osbao/features/produtos/domain/repositories/produtos_repository.dart';
-import 'package:barber_osbao/features/produtos/data/repositories/mock_produtos_repository.dart';
+import 'package:barber_osbao/packages/core/network/dio_client.dart';
+import 'package:barber_osbao/features/produtos/data/repositories/http_produtos_repository.dart';
 
 final produtosRepositoryProvider = Provider<ProdutosRepository>((ref) {
-  return MockProdutosRepository();
+  final dioClient = ref.watch(dioClientProvider);
+  return HttpProdutosRepository(dioClient);
 });
 
 class ProdutosController extends Notifier<AppState<List<Produto>>> {

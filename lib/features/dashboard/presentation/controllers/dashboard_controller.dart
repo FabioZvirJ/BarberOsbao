@@ -1,18 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/dashboard/domain/repositories/dashboard_repository.dart';
-import 'package:barber_osbao/features/dashboard/data/repositories/mock_dashboard_repository.dart';
+import 'package:barber_osbao/packages/core/network/dio_client.dart';
+import 'package:barber_osbao/features/dashboard/data/repositories/http_dashboard_repository.dart';
 import 'package:barber_osbao/features/agenda/presentation/controllers/agenda_controller.dart';
 import 'package:barber_osbao/features/financeiro/presentation/controllers/financeiro_controller.dart';
 import 'package:barber_osbao/features/clientes/presentation/controllers/clientes_controller.dart';
 import 'package:barber_osbao/features/funcionarios/presentation/controllers/funcionarios_controller.dart';
 
 final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {
-  final agendaRepo = ref.watch(agendaRepositoryProvider);
-  final financeRepo = ref.watch(financeiroRepositoryProvider);
-  final clientesRepo = ref.watch(clientesRepositoryProvider);
-  final funcionariosRepo = ref.watch(funcionariosRepositoryProvider);
-  return MockDashboardRepository(agendaRepo, financeRepo, clientesRepo, funcionariosRepo);
+  final dioClient = ref.watch(dioClientProvider);
+  return HttpDashboardRepository(dioClient);
 });
 
 class DashboardController extends Notifier<AppState<Map<String, dynamic>>> {

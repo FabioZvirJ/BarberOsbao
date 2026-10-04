@@ -2,10 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/categorias/domain/models/categoria.dart';
 import 'package:barber_osbao/features/categorias/domain/repositories/categorias_repository.dart';
-import 'package:barber_osbao/features/categorias/data/repositories/mock_categorias_repository.dart';
+import 'package:barber_osbao/packages/core/network/dio_client.dart';
+import 'package:barber_osbao/features/categorias/data/repositories/http_categorias_repository.dart';
 
 final categoriasRepositoryProvider = Provider<CategoriasRepository>((ref) {
-  return MockCategoriasRepository();
+  final dioClient = ref.watch(dioClientProvider);
+  return HttpCategoriasRepository(dioClient);
 });
 
 class CategoriasController extends Notifier<AppState<List<Categoria>>> {

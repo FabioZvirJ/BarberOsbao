@@ -2,10 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/core/shared/state/app_state.dart';
 import 'package:barber_osbao/features/financeiro/domain/models/transacao.dart';
 import 'package:barber_osbao/features/financeiro/domain/repositories/financeiro_repository.dart';
-import 'package:barber_osbao/features/financeiro/data/repositories/mock_financeiro_repository.dart';
+import 'package:barber_osbao/packages/core/network/dio_client.dart';
+import 'package:barber_osbao/features/financeiro/data/repositories/http_financeiro_repository.dart';
 
 final financeiroRepositoryProvider = Provider<FinanceiroRepository>((ref) {
-  return MockFinanceiroRepository();
+  final dioClient = ref.watch(dioClientProvider);
+  return HttpFinanceiroRepository(dioClient);
 });
 
 class TransacoesController

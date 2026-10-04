@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter (Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "chrome"
+    },
+    {
+      "name": "Backend (Node.js API)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/backend",
+      "program": "${workspaceFolder}/backend/dist/index.js"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Stack (Backend + Flutter)",
+      "configurations": ["Backend (Node.js API)", "Flutter (Chrome)"]
+    }
+  ]
+}
+
