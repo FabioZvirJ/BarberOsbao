@@ -1,9 +1,12 @@
 import { Request, Response } from 'express';
 import { prisma } from '../app';
 
-export async function listServices(_req: Request, res: Response) {
+export async function listServices(req: Request, res: Response) {
   try {
+    const { branchId } = req.query;
     const services = await prisma.service.findMany({
+      where: branchId ? { OR: [{ branchId: String(branchId) }, { branchId: null }] } : undefined,
+      include: { branch: true },
       orderBy: [{ orderIndex: 'asc' }, { createdAt: 'desc' }],
     });
     res.json(services);
@@ -56,6 +59,7 @@ export async function createService(req: Request, res: Response) {
         colorHex: colorHex?.trim() || 'C89B3C',
         status: status !== undefined ? Boolean(status) : true,
         orderIndex: orderIndex !== undefined ? Number(orderIndex) : 0,
+        branchId: req.body.branchId || null,
       },
     });
 
@@ -94,6 +98,7 @@ export async function updateService(req: Request, res: Response) {
     if (colorHex !== undefined) data.colorHex = colorHex.trim();
     if (status !== undefined) data.status = Boolean(status);
     if (orderIndex !== undefined) data.orderIndex = Number(orderIndex);
+    if (req.body.branchId !== undefined) data.branchId = req.body.branchId || null;
 
     const service = await prisma.service.update({
       where: { id },

@@ -17,6 +17,7 @@ import 'package:barber_osbao/features/financeiro/presentation/pages/financeiro_p
 import 'package:barber_osbao/features/relatorios/presentation/pages/relatorios_page.dart';
 import 'package:barber_osbao/features/configuracoes/presentation/pages/configuracoes_page.dart';
 import 'package:barber_osbao/features/categorias/presentation/pages/categorias_page.dart';
+import 'package:barber_osbao/features/filiais/presentation/pages/filiais_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'manager_root');
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'manager_shell');
@@ -55,6 +56,8 @@ final GoRouter managerRouter = GoRouter(
           activeId = 'configuracoes';
         } else if (location.startsWith('/categorias')) {
           activeId = 'categorias';
+        } else if (location.startsWith('/filiais')) {
+          activeId = 'filiais';
         }
 
         return Consumer(
@@ -63,6 +66,7 @@ final GoRouter managerRouter = GoRouter(
               activeSidebarId: activeId,
               sidebarItems: [
                 AppSidebarItem(id: 'dashboard', title: 'Dashboard', icon: Icons.dashboard_outlined),
+                AppSidebarItem(id: 'filiais', title: 'Filiais & Lojas', icon: Icons.storefront_outlined),
                 AppSidebarItem(id: 'agenda', title: 'Agenda', icon: Icons.calendar_today_outlined),
                 AppSidebarItem(id: 'clientes', title: 'Clientes', icon: Icons.people_outline),
                 AppSidebarItem(id: 'funcionarios', title: 'Funcionários', icon: Icons.badge_outlined),
@@ -80,6 +84,9 @@ final GoRouter managerRouter = GoRouter(
                 switch (id) {
                   case 'dashboard':
                     context.go('/');
+                    break;
+                  case 'filiais':
+                    context.go('/filiais');
                     break;
                   case 'agenda':
                     context.go('/agenda');
@@ -179,6 +186,10 @@ final GoRouter managerRouter = GoRouter(
         GoRoute(
           path: '/categorias',
           builder: (context, state) => const CategoriasPage(),
+        ),
+        GoRoute(
+          path: '/filiais',
+          builder: (context, state) => const FiliaisPage(),
         ),
       ],
     ),

@@ -13,9 +13,12 @@ function formatAppointment(appt: any) {
   };
 }
 
-export async function listAppointments(_req: Request, res: Response) {
+export async function listAppointments(req: Request, res: Response) {
   try {
+    const { branchId } = req.query;
     const appointments = await prisma.appointment.findMany({
+      where: branchId ? { branchId: String(branchId) } : undefined,
+      include: { branch: true },
       orderBy: { dateTime: 'desc' },
     });
     res.json(appointments.map(formatAppointment));
@@ -88,7 +91,9 @@ export async function createAppointment(req: Request, res: Response) {
         price: price !== undefined ? Number(price) : 0.0,
         status: status || 'Pendente',
         notes: notes?.trim() || null,
+        branchId: req.body.branchId || null,
       },
+      include: { branch: true },
     });
 
     res.status(201).json(formatAppointment(appointment));
@@ -133,10 +138,12 @@ export async function updateAppointment(req: Request, res: Response) {
     if (price !== undefined) data.price = Number(price);
     if (status !== undefined) data.status = status;
     if (notes !== undefined) data.notes = notes?.trim() || null;
+    if (req.body.branchId !== undefined) data.branchId = req.body.branchId || null;
 
     const appointment = await prisma.appointment.update({
       where: { id },
       data,
+      include: { branch: true },
     });
 
     res.json(formatAppointment(appointment));

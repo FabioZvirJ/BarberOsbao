@@ -13,6 +13,7 @@ class Funcionario {
   final List<String> folgas;
   final bool status; // true = Ativo, false = Inativo
   final double rating;
+  final String? branchId;
 
   const Funcionario({
     required this.id,
@@ -29,6 +30,7 @@ class Funcionario {
     required this.folgas,
     required this.status,
     this.rating = 5.0,
+    this.branchId,
   });
 
   Funcionario copyWith({
@@ -46,6 +48,7 @@ class Funcionario {
     List<String>? folgas,
     bool? status,
     double? rating,
+    String? branchId,
   }) {
     return Funcionario(
       id: id ?? this.id,
@@ -62,6 +65,7 @@ class Funcionario {
       folgas: folgas ?? this.folgas,
       status: status ?? this.status,
       rating: rating ?? this.rating,
+      branchId: branchId ?? this.branchId,
     );
   }
 
@@ -80,6 +84,7 @@ class Funcionario {
         'folgas': folgas,
         'status': status,
         'rating': rating,
+        'branchId': branchId,
       };
 
   factory Funcionario.fromJson(Map<String, dynamic> json) => Funcionario(
@@ -97,5 +102,6 @@ class Funcionario {
         folgas: List<String>.from(json['folgas'] ?? []),
         status: json['status'] ?? true,
         rating: (json['rating'] as num?)?.toDouble() ?? 5.0,
+        branchId: json['branchId'],
       );
 }

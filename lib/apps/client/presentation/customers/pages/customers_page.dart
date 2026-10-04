@@ -11,6 +11,7 @@ import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/packages/core/shared/appointments/application/appointment_controller.dart';
 import 'package:barber_osbao/packages/core/models/barber.dart';
 import 'package:barber_osbao/apps/client/presentation/appointments/widgets/booking_wizard.dart';
+import 'package:barber_osbao/features/filiais/application/branches_controller.dart';
 
 class CustomersPage extends ConsumerStatefulWidget {
   const CustomersPage({super.key});
@@ -23,16 +24,6 @@ class _CustomersPageState extends ConsumerState<CustomersPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedUnit = 'Todas';
-
-  final List<String> _units = [
-    'Todas',
-    'Jardins',
-    'Pinheiros',
-    'Centro',
-    'Moema',
-    'Paulista',
-    'Vila Madalena',
-  ];
 
   @override
   void dispose() {
@@ -66,6 +57,8 @@ class _CustomersPageState extends ConsumerState<CustomersPage> {
   @override
   Widget build(BuildContext context) {
     final barbersState = ref.watch(barbersProvider);
+    final branches = ref.watch(branchesProvider).value ?? [];
+    final units = ['Todas', ...branches.map((b) => b.name)];
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -124,32 +117,36 @@ class _CustomersPageState extends ConsumerState<CustomersPage> {
             const SizedBox(height: 14),
 
             // Unit Filter Chips
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: _units.map((unit) {
-                  final isSelected = _selectedUnit == unit;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(unit),
-                      selected: isSelected,
-                      selectedColor: ThemeColors.primary,
-                      backgroundColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade100,
-                      labelStyle: TextStyle(
-                        color: isSelected ? Colors.black : (isDark ? Colors.white70 : Colors.black87),
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        fontSize: 12,
+            if (branches.length > 1) ...[
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: units.map((unit) {
+                    final isSelected = _selectedUnit == unit;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(unit),
+                        selected: isSelected,
+                        selectedColor: ThemeColors.primary,
+                        backgroundColor: isDark ? ThemeColors.darkSurface : Colors.grey.shade100,
+                        labelStyle: TextStyle(
+                          color: isSelected ? Colors.black : (isDark ? Colors.white70 : Colors.black87),
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontSize: 12,
+                        ),
+                        onSelected: (val) {
+                          if (val) setState(() => _selectedUnit = unit);
+                        },
                       ),
-                      onSelected: (val) {
-                        if (val) setState(() => _selectedUnit = unit);
-                      },
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
+            ] else ...[
+              const SizedBox(height: 10),
+            ],
 
             // Barbers Grid
             barbersState.when(

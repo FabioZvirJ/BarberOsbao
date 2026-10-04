@@ -12,8 +12,6 @@ import 'package:barber_osbao/packages/design_system/organisms/app_modal.dart';
 import 'package:barber_osbao/packages/core/models/appointment.dart';
 import 'package:barber_osbao/packages/core/models/barber.dart';
 import 'package:barber_osbao/packages/core/models/service_model.dart';
-import 'package:barber_osbao/packages/core/shared/repositories/barber_repository.dart';
-import 'package:barber_osbao/packages/core/utils/mock_data.dart';
 import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
 
 class AppointmentsPage extends ConsumerStatefulWidget {
@@ -43,8 +41,8 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
   }
 
   void _rebookAppointment(Appointment apt) {
-    final barbersAsync = ref.read(barbersListProvider);
-    final barbers = barbersAsync.value ?? MockData.barbers;
+    final barbersAsync = ref.read(barbersProvider);
+    final barbers = barbersAsync.value ?? [];
     Barber? barber;
     try {
       barber = barbers.firstWhere(

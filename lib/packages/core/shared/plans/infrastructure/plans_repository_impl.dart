@@ -1,44 +1,57 @@
 import 'package:barber_osbao/packages/core/models/plan.dart';
 import 'package:barber_osbao/packages/core/models/membership.dart';
-import 'package:barber_osbao/packages/core/utils/mock_data.dart';
+import 'package:barber_osbao/packages/core/network/dio_client.dart';
 import 'package:barber_osbao/packages/core/storage/pref_helper.dart';
 import 'package:barber_osbao/packages/core/shared/plans/domain/plans_repository.dart';
 
 class PlansRepositoryImpl implements PlansRepository {
   final PrefHelper _prefHelper;
+  final DioClient _dioClient;
 
-  PlansRepositoryImpl(this._prefHelper);
+  PlansRepositoryImpl(this._prefHelper, this._dioClient);
 
   @override
   Future<List<Plan>> getPlans() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    return MockData.plans;
+    try {
+      final response = await _dioClient.dio.get('/plans');
+      final data = response.data as List;
+      return data.map((json) {
+        final p = json as Map<String, dynamic>;
+        final bList = (p['benefits'] is List)
+            ? List<String>.from(p['benefits'])
+            : <String>[];
+        return Plan(
+          id: p['id'] ?? '',
+          name: p['name'] ?? '',
+          price: (p['price'] as num?)?.toDouble() ?? 0.0,
+          period: p['period'] ?? 'mensal',
+          benefits: bList,
+          recommended: p['recommended'] == true,
+        );
+      }).toList();
+    } catch (_) {
+      return [];
+    }
   }
 
   @override
   Future<Membership?> getActiveMembership() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    final cached = _prefHelper.getUserJson(); // Retrieve from storage helper
+    final cached = _prefHelper.getUserJson();
     if (cached == null) return null;
-    
-    // Let's check if we have a membership stored, if not return active mock
-    return MockData.activeMembership;
+    return null;
   }
 
   @override
   Future<Membership> subscribeToPlan(String planId) async {
-    await Future.delayed(const Duration(milliseconds: 900));
-    final plan = MockData.plans.firstWhere((p) => p.id == planId);
-    
     final newMem = Membership(
       id: 'mem_${DateTime.now().millisecondsSinceEpoch}',
-      userId: 'usr_1',
+      userId: 'usr_current',
       planId: planId,
-      planName: plan.name,
+      planName: 'Plano Assinado',
       startDate: DateTime.now().toIso8601String().split('T')[0],
       endDate: DateTime.now().add(const Duration(days: 30)).toIso8601String().split('T')[0],
       status: 'active',
-      remainingBenefits: plan.benefits,
+      remainingBenefits: const [],
       discountsUsed: 0,
       nextRenewalDate: DateTime.now().add(const Duration(days: 30)).toIso8601String().split('T')[0],
     );
@@ -47,7 +60,5 @@ class PlansRepositoryImpl implements PlansRepository {
   }
 
   @override
-  Future<void> cancelMembership() async {
-    await Future.delayed(const Duration(milliseconds: 800));
-  }
+  Future<void> cancelMembership() async {}
 }

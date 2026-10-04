@@ -17,6 +17,7 @@ import 'package:barber_osbao/packages/core/utils/app_masks.dart';
 import 'package:barber_osbao/features/servicos/domain/models/servico.dart';
 import 'package:barber_osbao/features/servicos/presentation/controllers/servicos_controller.dart';
 import 'package:barber_osbao/features/categorias/presentation/controllers/categorias_controller.dart';
+import 'package:barber_osbao/features/filiais/application/branches_controller.dart';
 
 class ServicosPage extends ConsumerStatefulWidget {
   const ServicosPage({super.key});
@@ -387,6 +388,7 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
   late String _category;
   late String _colorHex;
   late bool _status;
+  String? _selectedBranchId;
 
   final _colorOptions = const [
     {'name': 'Dourado', 'hex': 'C89B3C'},
@@ -414,6 +416,7 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
         (widget.categories.isNotEmpty ? widget.categories[0] : 'Cabelo');
     _colorHex = s?.colorHex ?? 'C89B3C';
     _status = s?.status ?? true;
+    _selectedBranchId = s?.branchId;
   }
 
   @override
@@ -430,6 +433,7 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
   Widget build(BuildContext context) {
     final service = widget.service;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final branches = ref.watch(branchesProvider).value ?? [];
 
     return AppResponsiveDialog(
       title: service == null ? 'Criar Serviço' : 'Editar Serviço',
@@ -470,6 +474,7 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
                 imageUrl: _imageUrlController.text.trim(),
                 colorHex: _colorHex,
                 status: _status,
+                branchId: _selectedBranchId,
               );
 
               if (service == null) {
@@ -532,6 +537,72 @@ class _ServicoFormDialogState extends ConsumerState<_ServicoFormDialog> {
                 onChanged: (val) => setState(() => _status = val),
               ),
             ),
+
+            if (branches.isNotEmpty) ...[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Filial / Unidade de Atendimento',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white70 : Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  DropdownButtonFormField<String?>(
+                    initialValue: _selectedBranchId,
+                    dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(
+                        Icons.storefront_outlined,
+                        size: 20,
+                        color: ThemeColors.primary,
+                      ),
+                      filled: true,
+                      fillColor: isDark
+                          ? ThemeColors.darkSurface
+                          : Colors.grey.shade50,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: isDark
+                              ? ThemeColors.darkBorder
+                              : Colors.grey.shade300,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: isDark
+                              ? ThemeColors.darkBorder
+                              : Colors.grey.shade300,
+                        ),
+                      ),
+                    ),
+                    items: [
+                      const DropdownMenuItem(
+                        value: null,
+                        child: Text('Todas as Filiais / Geral'),
+                      ),
+                      ...branches.map(
+                        (b) => DropdownMenuItem(
+                          value: b.id,
+                          child: Text('${b.name} (${b.neighborhood})'),
+                        ),
+                      ),
+                    ],
+                    onChanged: (val) => setState(() => _selectedBranchId = val),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
 
             AppInput(
               label: 'Nome do Serviço',

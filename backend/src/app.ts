@@ -16,6 +16,7 @@ import plansRoutes from './routes/plans';
 import financialRoutes from './routes/financial';
 import dashboardRoutes from './routes/dashboard';
 import clubRoutes from './routes/club';
+import branchesRoutes from './routes/branches';
 const swaggerUi = require('swagger-ui-express');
 import swaggerSpec from './swagger';
 
@@ -112,6 +113,7 @@ app.use('/financial', financialRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/club', clubRoutes);
 app.use('/payments', paymentsRoutes);
+app.use('/branches', branchesRoutes);
 
 // 8. Documentação Swagger apenas em ambiente não-produção
 if (process.env.NODE_ENV !== 'production') {

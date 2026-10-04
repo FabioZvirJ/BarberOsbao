@@ -10,9 +10,14 @@ function serializeEmployee(emp: any) {
   };
 }
 
-export async function listEmployees(_req: Request, res: Response) {
+export async function listEmployees(req: Request, res: Response) {
   try {
-    const employees = await prisma.employee.findMany({ orderBy: { createdAt: 'desc' } });
+    const { branchId } = req.query;
+    const employees = await prisma.employee.findMany({
+      where: branchId ? { branchId: String(branchId) } : undefined,
+      include: { branch: true },
+      orderBy: { createdAt: 'desc' },
+    });
     res.json(employees.map(serializeEmployee));
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -69,6 +74,7 @@ export async function createEmployee(req: Request, res: Response) {
         folgas: JSON.stringify(Array.isArray(folgas) ? folgas : []),
         status: status !== undefined ? Boolean(status) : true,
         rating: rating !== undefined ? Number(rating) : 5.0,
+        branchId: req.body.branchId || null,
       },
     });
 
@@ -117,6 +123,7 @@ export async function updateEmployee(req: Request, res: Response) {
     }
     if (status !== undefined) data.status = Boolean(status);
     if (rating !== undefined) data.rating = Number(rating);
+    if (req.body.branchId !== undefined) data.branchId = req.body.branchId || null;
 
     const employee = await prisma.employee.update({
       where: { id },

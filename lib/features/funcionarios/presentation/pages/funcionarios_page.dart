@@ -19,6 +19,7 @@ import 'package:barber_osbao/packages/core/utils/app_masks.dart';
 import 'package:barber_osbao/features/agenda/presentation/controllers/agenda_controller.dart';
 import 'package:barber_osbao/features/funcionarios/domain/models/funcionario.dart';
 import 'package:barber_osbao/features/funcionarios/presentation/controllers/funcionarios_controller.dart';
+import 'package:barber_osbao/features/filiais/application/branches_controller.dart';
 
 class FuncionariosPage extends ConsumerStatefulWidget {
   const FuncionariosPage({super.key});
@@ -619,6 +620,7 @@ class _FuncionarioFormDialogState
 
   late List<String> _specialties;
   late bool _active;
+  String? _selectedBranchId;
 
   bool _workWeekdays = true;
   String _weekStart = '09:00';
@@ -667,6 +669,7 @@ class _FuncionarioFormDialogState
     _avatarUrlController = TextEditingController(text: f?.avatarUrl ?? '');
     _specialties = f != null ? List<String>.from(f.specialties) : [];
     _active = f?.status ?? true;
+    _selectedBranchId = f?.branchId;
 
     if (f != null && f.diasDisponiveis.isNotEmpty) {
       _workWeekdays = f.diasDisponiveis.any(
@@ -832,6 +835,7 @@ class _FuncionarioFormDialogState
   Widget build(BuildContext context) {
     final employee = widget.employee;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final branches = ref.watch(branchesProvider).value ?? [];
 
     final existingEmployees =
         ref.watch(funcionariosControllerProvider).data ?? [];
@@ -936,6 +940,7 @@ class _FuncionarioFormDialogState
                 folgas: computedFolgas,
                 status: _active,
                 rating: employee?.rating ?? 5.0,
+                branchId: _selectedBranchId,
               );
 
               if (employee == null) {
@@ -998,6 +1003,72 @@ class _FuncionarioFormDialogState
                 onChanged: (val) => setState(() => _active = val),
               ),
             ),
+
+            if (branches.isNotEmpty) ...[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Filial / Unidade de Atendimento',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white70 : Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  DropdownButtonFormField<String?>(
+                    initialValue: _selectedBranchId,
+                    dropdownColor: isDark ? ThemeColors.darkSurface : Colors.white,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(
+                        Icons.storefront_outlined,
+                        size: 20,
+                        color: ThemeColors.primary,
+                      ),
+                      filled: true,
+                      fillColor: isDark
+                          ? ThemeColors.darkSurface
+                          : Colors.grey.shade50,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: isDark
+                              ? ThemeColors.darkBorder
+                              : Colors.grey.shade300,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: isDark
+                              ? ThemeColors.darkBorder
+                              : Colors.grey.shade300,
+                        ),
+                      ),
+                    ),
+                    items: [
+                      const DropdownMenuItem(
+                        value: null,
+                        child: Text('Todas as Filiais / Geral'),
+                      ),
+                      ...branches.map(
+                        (b) => DropdownMenuItem(
+                          value: b.id,
+                          child: Text('${b.name} (${b.neighborhood})'),
+                        ),
+                      ),
+                    ],
+                    onChanged: (val) => setState(() => _selectedBranchId = val),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
 
             AppInput(
               label: 'Nome Completo',

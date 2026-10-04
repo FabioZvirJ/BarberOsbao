@@ -16,6 +16,7 @@ const tables = [
   'ClubBenefit',
   'ClubMember',
   'CashMovement',
+  'Branch',
 ];
 
 async function enableRLS() {
@@ -37,3 +38,4 @@ enableRLS()
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());
+

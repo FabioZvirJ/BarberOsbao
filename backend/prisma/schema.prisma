@@ -50,6 +50,8 @@ model Employee {
   folgas          String   @default("[]")
   status          Boolean  @default(true)
   rating          Float    @default(5.0)
+  branchId        String?
+  branch          Branch?  @relation(fields: [branchId], references: [id])
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -65,6 +67,8 @@ model Service {
   colorHex        String   @default("C89B3C")
   status          Boolean  @default(true)
   orderIndex      Int      @default(0)
+  branchId        String?
+  branch          Branch?  @relation(fields: [branchId], references: [id])
   createdAt       DateTime @default(now())
 }
 
@@ -133,6 +137,8 @@ model Appointment {
   price        Float
   status       String   @default("Pendente")
   notes        String?
+  branchId     String?
+  branch       Branch?  @relation(fields: [branchId], references: [id])
   createdAt    DateTime @default(now())
 }
 
@@ -203,4 +209,24 @@ model CashMovement {
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
 }
+
+model Branch {
+  id           String        @id @default(cuid())
+  slug         String        @unique
+  name         String
+  address      String
+  neighborhood String?
+  city         String        @default("Mallet")
+  state        String        @default("PR")
+  phone        String?
+  avatarUrl    String?
+  active       Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  employees    Employee[]
+  services     Service[]
+  appointments Appointment[]
+}
+
 

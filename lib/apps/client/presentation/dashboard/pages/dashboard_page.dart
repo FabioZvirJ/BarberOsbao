@@ -18,6 +18,7 @@ import 'package:barber_osbao/packages/core/auth/application/auth_controller.dart
 import 'package:barber_osbao/packages/core/shared/appointments/application/appointment_controller.dart';
 import 'package:barber_osbao/apps/client/presentation/appointments/widgets/booking_wizard.dart';
 import 'package:barber_osbao/packages/core/shared/plans/application/plans_controller.dart';
+import 'package:barber_osbao/features/filiais/application/branches_controller.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -48,6 +49,8 @@ class DashboardPage extends ConsumerWidget {
     final membershipState = ref.watch(membershipControllerProvider);
     final barbersState = ref.watch(barbersProvider);
     final servicesState = ref.watch(servicesProvider);
+    final selectedBranch = ref.watch(selectedBranchProvider);
+    final branches = ref.watch(branchesProvider).value ?? [];
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -72,6 +75,88 @@ class DashboardPage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // Branch Banner if branch exists
+                      if (selectedBranch != null) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: isDark ? ThemeColors.darkSurface : Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: ThemeColors.primary.withValues(alpha: 0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: ThemeColors.primary.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(Icons.location_on, color: ThemeColors.primary, size: 20),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          selectedBranch.name,
+                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: ThemeColors.primary,
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: const Text(
+                                            'Sua Filial',
+                                            style: TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${selectedBranch.address}, ${selectedBranch.neighborhood} - ${selectedBranch.city}/${selectedBranch.state}',
+                                      style: TextStyle(fontSize: 12, color: isDark ? Colors.white60 : Colors.black54),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (branches.length > 1)
+                                PopupMenuButton<String>(
+                                  tooltip: 'Mudar Filial',
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: ThemeColors.primary),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: const [
+                                        Text('Trocar', style: TextStyle(color: ThemeColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
+                                        Icon(Icons.arrow_drop_down, color: ThemeColors.primary, size: 16),
+                                      ],
+                                    ),
+                                  ),
+                                  onSelected: (slug) {
+                                    ref.read(currentBranchSlugProvider.notifier).setSlug(slug);
+                                  },
+                                  itemBuilder: (context) => branches
+                                      .map((b) => PopupMenuItem(value: b.slug, child: Text(b.name)))
+                                      .toList(),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+
                       // Banner
                       AppCard(
                         padding: const EdgeInsets.all(32),

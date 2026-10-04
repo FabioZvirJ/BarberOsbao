@@ -18,7 +18,7 @@ class DioClient {
           BaseOptions(
             baseUrl: const String.fromEnvironment(
               'API_URL',
-              defaultValue: 'http://localhost:3000',
+              defaultValue: 'https://barberosbao-api.onrender.com',
             ),
             connectTimeout: const Duration(seconds: 15),
             receiveTimeout: const Duration(seconds: 15),

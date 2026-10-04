@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:barber_osbao/packages/core/models/branch.dart';
 
 part 'barber.freezed.dart';
 part 'barber.g.dart';
@@ -21,81 +22,49 @@ abstract class Barber with _$Barber {
   factory Barber.fromJson(Map<String, dynamic> json) => _$BarberFromJson(json);
 }
 
-extension BarberLocationExtension on Barber {
-  String get shopName {
-    switch (id) {
-      case 'barb_1':
-        return 'Barber Osbão - Unidade Jardins';
-      case 'barb_2':
-        return 'Barber Osbão - Unidade Pinheiros';
-      case 'barb_3':
-        return 'Barber Osbão - Unidade Centro Histórico';
-      case 'barb_4':
-        return 'Barber Osbão - Unidade Moema';
-      case 'barb_5':
-        return 'Barber Osbão - Unidade Paulista';
-      case 'barb_6':
-        return 'Barber Osbão - Unidade Vila Madalena';
-      default:
-        return 'Barber Osbão - Unidade Jardins';
+class BarberBranchRegistry {
+  static final Map<String, Branch> _registry = {};
+
+  static void register(String key, Branch branch) {
+    if (key.isNotEmpty) {
+      _registry[key] = branch;
     }
+  }
+
+  static Branch? getBranch(String key) => _registry[key];
+
+  static void clear() => _registry.clear();
+}
+
+extension BarberLocationExtension on Barber {
+  Branch? get branch =>
+      BarberBranchRegistry.getBranch(id) ??
+      BarberBranchRegistry.getBranch(name);
+
+  String get shopName {
+    final b = branch;
+    if (b != null) return b.name;
+    return 'Barber Osbão';
   }
 
   String get address {
-    switch (id) {
-      case 'barb_1':
-        return 'Rua Oscar Freire, 1020 - Jardins, São Paulo';
-      case 'barb_2':
-        return 'Rua dos Pinheiros, 450 - Pinheiros, São Paulo';
-      case 'barb_3':
-        return 'Rua Direita, 88 - Centro Histórico, São Paulo';
-      case 'barb_4':
-        return 'Av. Moema, 312 - Moema, São Paulo';
-      case 'barb_5':
-        return 'Av. Paulista, 1578 - Bela Vista, São Paulo';
-      case 'barb_6':
-        return 'Rua Aspicuelta, 260 - Vila Madalena, São Paulo';
-      default:
-        return 'Rua Oscar Freire, 1020 - Jardins, São Paulo';
+    final b = branch;
+    if (b != null) {
+      return '${b.address}, ${b.neighborhood} - ${b.city}, ${b.state}';
     }
+    return '';
   }
 
   String get neighborhood {
-    switch (id) {
-      case 'barb_1':
-        return 'Jardins';
-      case 'barb_2':
-        return 'Pinheiros';
-      case 'barb_3':
-        return 'Centro';
-      case 'barb_4':
-        return 'Moema';
-      case 'barb_5':
-        return 'Paulista';
-      case 'barb_6':
-        return 'Vila Madalena';
-      default:
-        return 'Jardins';
-    }
+    final b = branch;
+    if (b != null && b.neighborhood != null) return b.neighborhood!;
+    return '';
   }
 
   String get phone {
-    switch (id) {
-      case 'barb_1':
-        return '(11) 98765-4321';
-      case 'barb_2':
-        return '(11) 97654-3210';
-      case 'barb_3':
-        return '(11) 96543-2109';
-      case 'barb_4':
-        return '(11) 95432-1098';
-      case 'barb_5':
-        return '(11) 94321-0987';
-      case 'barb_6':
-        return '(11) 93210-9876';
-      default:
-        return '(11) 98765-4321';
-    }
+    final b = branch;
+    if (b != null && b.phone != null && b.phone!.isNotEmpty) return b.phone!;
+    return '';
   }
 
   String get workingHours => 'Segunda a Sábado: 09:00 - 20:00';

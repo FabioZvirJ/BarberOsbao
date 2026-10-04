@@ -8,6 +8,7 @@ class Servico {
   final String imageUrl;
   final String colorHex;
   final bool status; // true = Ativo, false = Inativo
+  final String? branchId;
 
   const Servico({
     required this.id,
@@ -19,6 +20,7 @@ class Servico {
     required this.imageUrl,
     required this.colorHex,
     required this.status,
+    this.branchId,
   });
 
   Servico copyWith({
@@ -31,6 +33,7 @@ class Servico {
     String? imageUrl,
     String? colorHex,
     bool? status,
+    String? branchId,
   }) {
     return Servico(
       id: id ?? this.id,
@@ -42,6 +45,7 @@ class Servico {
       imageUrl: imageUrl ?? this.imageUrl,
       colorHex: colorHex ?? this.colorHex,
       status: status ?? this.status,
+      branchId: branchId ?? this.branchId,
     );
   }
 
@@ -55,6 +59,7 @@ class Servico {
         'imageUrl': imageUrl,
         'colorHex': colorHex,
         'status': status,
+        'branchId': branchId,
       };
 
   factory Servico.fromJson(Map<String, dynamic> json) => Servico(
@@ -67,5 +72,6 @@ class Servico {
         imageUrl: json['imageUrl'] ?? '',
         colorHex: json['colorHex'] ?? 'C89B3C',
         status: json['status'] ?? true,
+        branchId: json['branchId'],
       );
 }

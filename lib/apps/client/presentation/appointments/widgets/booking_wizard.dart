@@ -14,6 +14,7 @@ import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/packages/core/auth/application/auth_controller.dart';
 import 'package:barber_osbao/packages/core/shared/appointments/application/appointment_controller.dart';
 import 'package:barber_osbao/packages/core/utils/app_formatters.dart';
+import 'package:barber_osbao/features/filiais/application/branches_controller.dart';
 
 class BookingWizard extends ConsumerStatefulWidget {
   final ServiceModel? preselectedService;
@@ -232,11 +233,14 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
 
   // STEP 0: Professional & Barbershop Selection
   Widget _buildBarberStep(List<Barber> barbers, bool isDark) {
+    final branches = ref.watch(branchesProvider).value ?? [];
+    final selectedBranch = ref.watch(selectedBranchProvider);
     final query = _searchBarberController.text.trim().toLowerCase();
-    final units = ['Todas', 'Jardins', 'Pinheiros', 'Centro', 'Moema', 'Paulista', 'Vila Madalena'];
+    final units = ['Todas', ...branches.map((b) => b.name)];
 
     final filtered = barbers.where((b) {
       final matchesUnit = _selectedUnitFilter == 'Todas' ||
+          b.shopName.toLowerCase() == _selectedUnitFilter.toLowerCase() ||
           b.neighborhood.toLowerCase() == _selectedUnitFilter.toLowerCase();
       final matchesSearch = query.isEmpty ||
           b.name.toLowerCase().contains(query) ||
@@ -249,13 +253,137 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (selectedBranch != null) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: ThemeColors.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: ThemeColors.primary.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.storefront,
+                  color: ThemeColors.primary,
+                  size: 22,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            selectedBranch.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: ThemeColors.primary,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'Unidade Ativa',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${selectedBranch.address}, ${selectedBranch.neighborhood} - ${selectedBranch.city}/${selectedBranch.state}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                      if (selectedBranch.phone != null &&
+                          selectedBranch.phone!.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          'WhatsApp: ${selectedBranch.phone}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: ThemeColors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (branches.length > 1)
+                  PopupMenuButton<String>(
+                    tooltip: 'Trocar Filial',
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: ThemeColors.primary),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Text(
+                            'Trocar',
+                            style: TextStyle(
+                              color: ThemeColors.primary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_drop_down,
+                            color: ThemeColors.primary,
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                    onSelected: (slug) {
+                      ref.read(currentBranchSlugProvider.notifier).setSlug(slug);
+                    },
+                    itemBuilder: (context) => branches
+                        .map(
+                          (b) => PopupMenuItem(
+                            value: b.slug,
+                            child: Text(b.name),
+                          ),
+                        )
+                        .toList(),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+        ],
+
         const Text(
           '1. Escolha o Profissional & Barbearia',
           style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
         Text(
-          'Selecione o barbeiro e a unidade de atendimento da sua preferência',
+          'Selecione o profissional de atendimento da sua preferência',
           style: TextStyle(
             fontSize: 13,
             color: isDark ? Colors.white60 : Colors.black54,
@@ -274,32 +402,33 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
         const SizedBox(height: 12),
 
         // Unit Filter Chips
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: units.map((u) {
-              final isSel = _selectedUnitFilter == u;
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ChoiceChip(
-                  label: Text(u),
-                  selected: isSel,
-                  onSelected: (selected) {
-                    if (selected) setState(() => _selectedUnitFilter = u);
-                  },
-                  selectedColor: ThemeColors.primary,
-                  labelStyle: TextStyle(
-                    color: isSel
-                        ? Colors.black
-                        : (isDark ? Colors.white70 : Colors.black87),
-                    fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
-                    fontSize: 12,
+        if (branches.length > 1)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: units.map((u) {
+                final isSel = _selectedUnitFilter == u;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text(u),
+                    selected: isSel,
+                    onSelected: (selected) {
+                      if (selected) setState(() => _selectedUnitFilter = u);
+                    },
+                    selectedColor: ThemeColors.primary,
+                    labelStyle: TextStyle(
+                      color: isSel
+                          ? Colors.black
+                          : (isDark ? Colors.white70 : Colors.black87),
+                      fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
+                      fontSize: 12,
+                    ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              }).toList(),
+            ),
           ),
-        ),
         const SizedBox(height: 16),
 
         if (barbers.isNotEmpty &&
@@ -407,14 +536,26 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
               children: [
                 Icon(
                   Icons.person_search,
-                  size: 40,
-                  color: isDark ? Colors.white30 : Colors.grey,
+                  size: 44,
+                  color: isDark ? Colors.white30 : Colors.grey.shade400,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Text(
-                  'Nenhum profissional encontrado para os filtros.',
+                  'Nenhum profissional cadastrado para esta filial ainda.',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: isDark ? Colors.white60 : Colors.grey.shade600,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Assim que o administrador cadastrar profissionais nesta unidade, eles estarão disponíveis para agendamento aqui.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.white38 : Colors.grey.shade600,
                   ),
                 ),
               ],
@@ -572,11 +713,45 @@ class _BookingWizardState extends ConsumerState<BookingWizard> {
           ),
         ),
         const SizedBox(height: 16),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 380),
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: services.length,
+        if (services.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(32),
+            alignment: Alignment.center,
+            child: Column(
+              children: [
+                Icon(
+                  Icons.content_cut,
+                  size: 44,
+                  color: isDark ? Colors.white30 : Colors.grey.shade400,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Nenhum serviço cadastrado no momento.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Cadastre serviços no Painel do Administrador para exibi-los aqui.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.white38 : Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 380),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: services.length,
             itemBuilder: (context, index) {
               final srv = services[index];
               final isSelected = _selectedServices.any((s) => s.id == srv.id);
