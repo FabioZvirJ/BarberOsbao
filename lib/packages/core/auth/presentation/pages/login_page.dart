@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:barber_osbao/packages/core/auth/application/auth_controller.dart';
 import 'package:barber_osbao/packages/core/auth/presentation/pages/register_page.dart';
 import 'package:barber_osbao/packages/core/utils/app_masks.dart';
@@ -62,170 +63,59 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
     }
   }
 
-  // --- POP-UP MODERNO GOOGLE ---
-  Future<void> _handleGooglePopup() async {
-    final googleEmailCtrl = TextEditingController();
-    final googleNameCtrl = TextEditingController();
+  bool _googleSignInInitialized = false;
 
-    await showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (dialogCtx) => StatefulBuilder(
-        builder: (ctx, setDialogState) {
-          return Dialog(
-            backgroundColor: Colors.transparent,
-            insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 420),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1E22),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.6),
-                    blurRadius: 32,
-                    offset: const Offset(0, 12),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.all(28.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Google Brand Header
-                  Row(
-                    children: [
-                      _buildGoogleGLogo(size: 28),
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Fazer login com o Google',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 2),
-                            Text(
-                              'Escolha uma conta para continuar em BarberOsbao',
-                              style: TextStyle(color: Colors.white60, fontSize: 12),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  const Divider(color: Colors.white12, height: 1),
-                  const SizedBox(height: 18),
+  // --- LOGIN OFICIAL GOOGLE (OAuth 2.0 / Google Identity Services) ---
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
+    });
 
-                  // Sugestão de Conta Rápida
-                  InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () async {
-                      Navigator.of(dialogCtx).pop();
-                      _executeGoogleAuth('cliente.google@gmail.com', 'Cliente Google');
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.04),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.white10),
-                      ),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 18,
-                            backgroundColor: ThemeColors.primary.withValues(alpha: 0.2),
-                            child: const Text('G', style: TextStyle(color: ThemeColors.primary, fontWeight: FontWeight.bold)),
-                          ),
-                          const SizedBox(width: 12),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Conta Google Conectada', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
-                                Text('cliente.google@gmail.com', style: TextStyle(color: Colors.white54, fontSize: 12)),
-                              ],
-                            ),
-                          ),
-                          const Icon(Icons.arrow_forward_ios, color: Colors.white38, size: 14),
-                        ],
-                      ),
-                    ),
-                  ),
+    try {
+      if (!_googleSignInInitialized) {
+        const clientId = String.fromEnvironment('GOOGLE_CLIENT_ID');
+        await GoogleSignIn.instance.initialize(
+          clientId: clientId.isNotEmpty ? clientId : null,
+        );
+        _googleSignInInitialized = true;
+      }
 
-                  const SizedBox(height: 18),
-                  Row(
-                    children: [
-                      const Expanded(child: Divider(color: Colors.white12)),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Text('OU INFORME OUTRO E-MAIL', style: TextStyle(color: Colors.white.withValues(alpha: 0.35), fontSize: 10, fontWeight: FontWeight.bold)),
-                      ),
-                      const Expanded(child: Divider(color: Colors.white12)),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  AppInput(
-                    label: 'E-mail da Conta Google',
-                    placeholder: 'seunome@gmail.com',
-                    controller: googleEmailCtrl,
-                    keyboardType: TextInputType.emailAddress,
-                    prefixIcon: const Icon(Icons.email_outlined, color: Colors.white38, size: 18),
-                  ),
-                  const SizedBox(height: 12),
-                  AppInput(
-                    label: 'Seu Nome (opcional)',
-                    placeholder: 'Como prefere ser chamado',
-                    controller: googleNameCtrl,
-                    prefixIcon: const Icon(Icons.person_outline, color: Colors.white38, size: 18),
-                  ),
-                  const SizedBox(height: 24),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(dialogCtx).pop(),
-                        child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF4285F4),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        ),
-                        onPressed: () {
-                          final email = googleEmailCtrl.text.trim();
-                          if (email.isEmpty || !email.contains('@')) return;
-                          Navigator.of(dialogCtx).pop();
-                          _executeGoogleAuth(email, googleNameCtrl.text.trim());
-                        },
-                        child: const Text('Entrar com Google', style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
+      final account = await GoogleSignIn.instance.authenticate();
+      await _executeGoogleAuth(
+        account.email,
+        account.displayName ?? '',
+        account.photoUrl,
+      );
+    } catch (e) {
+      if (mounted) {
+        final errText = e.toString();
+        if (errText.contains('canceled') ||
+            errText.contains('interrupted') ||
+            errText.contains('popup_closed_by_user')) {
+          // Usuário cancelou ou fechou a janela do Google
+        } else if (errText.contains('clientId') || errText.contains('client_id')) {
+          setState(() {
+            _errorMessage =
+                'Configure o Google Client ID no Google Cloud Console para habilitar a autenticação oficial do Google.';
+          });
+        } else {
+          setState(() {
+            _errorMessage =
+                'Erro ao autenticar com Google: ${errText.replaceAll('Exception:', '').replaceAll('GoogleSignInException:', '').trim()}';
+          });
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
   }
 
-  Future<void> _executeGoogleAuth(String email, String name) async {
+  Future<void> _executeGoogleAuth(String email, String name, [String? avatarUrl]) async {
     setState(() {
       _loading = true;
       _errorMessage = null;
@@ -235,6 +125,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
       await ref.read(authControllerProvider.notifier).loginWithGoogle(
             email: email,
             name: name.isNotEmpty ? name : email.split('@').first,
+            avatarUrl: avatarUrl,
           );
     } catch (e) {
       if (mounted) {
@@ -1002,7 +893,7 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
                 // Google Button
                 Expanded(
                   child: InkWell(
-                    onTap: _loading ? null : _handleGooglePopup,
+                    onTap: _loading ? null : _handleGoogleSignIn,
                     borderRadius: BorderRadius.circular(22),
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 10),

@@ -39,7 +39,8 @@ jobs:
           if [ -z "$API_URL_VAL" ]; then
             API_URL_VAL="https://barberosbao-api.onrender.com"
           fi
-          flutter build web --release --base-href /BarberOsbao/ --dart-define=API_URL=$API_URL_VAL --verbose 2>&1 | tee flutter_build.log
+          GOOGLE_CLIENT_ID_VAL="${{ secrets.GOOGLE_CLIENT_ID }}"
+          flutter build web --release --base-href /BarberOsbao/ --dart-define=API_URL=$API_URL_VAL --dart-define=GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID_VAL --verbose 2>&1 | tee flutter_build.log
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
