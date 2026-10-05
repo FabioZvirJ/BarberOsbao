@@ -19,6 +19,7 @@ import 'package:barber_osbao/features/configuracoes/presentation/pages/configura
 import 'package:barber_osbao/features/categorias/presentation/pages/categorias_page.dart';
 import 'package:barber_osbao/features/filiais/presentation/pages/filiais_page.dart';
 import 'package:barber_osbao/features/usuarios/presentation/pages/usuarios_page.dart';
+import 'package:barber_osbao/features/whatsapp_bot/presentation/pages/whatsapp_bot_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'manager_root');
 final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'manager_shell');
@@ -61,6 +62,8 @@ final GoRouter managerRouter = GoRouter(
           activeId = 'filiais';
         } else if (location.startsWith('/usuarios')) {
           activeId = 'usuarios';
+        } else if (location.startsWith('/bot-whatsapp')) {
+          activeId = 'bot_whatsapp';
         }
 
         return Consumer(
@@ -71,6 +74,7 @@ final GoRouter managerRouter = GoRouter(
                 AppSidebarItem(id: 'dashboard', title: 'Dashboard', icon: Icons.dashboard_outlined),
                 AppSidebarItem(id: 'filiais', title: 'Filiais & Lojas', icon: Icons.storefront_outlined),
                 AppSidebarItem(id: 'usuarios', title: 'Usuários', icon: Icons.manage_accounts_outlined),
+                AppSidebarItem(id: 'bot_whatsapp', title: 'Bot WhatsApp', icon: Icons.chat_bubble_outline),
                 AppSidebarItem(id: 'agenda', title: 'Agenda', icon: Icons.calendar_today_outlined),
                 AppSidebarItem(id: 'clientes', title: 'Clientes', icon: Icons.people_outline),
                 AppSidebarItem(id: 'funcionarios', title: 'Funcionários', icon: Icons.badge_outlined),
@@ -94,6 +98,9 @@ final GoRouter managerRouter = GoRouter(
                     break;
                   case 'usuarios':
                     context.go('/usuarios');
+                    break;
+                  case 'bot_whatsapp':
+                    context.go('/bot-whatsapp');
                     break;
                   case 'agenda':
                     context.go('/agenda');
@@ -201,6 +208,10 @@ final GoRouter managerRouter = GoRouter(
         GoRoute(
           path: '/usuarios',
           builder: (context, state) => const UsuariosPage(),
+        ),
+        GoRoute(
+          path: '/bot-whatsapp',
+          builder: (context, state) => const WhatsAppBotPage(),
         ),
       ],
     ),

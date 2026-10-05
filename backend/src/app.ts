@@ -18,6 +18,7 @@ import dashboardRoutes from './routes/dashboard';
 import clubRoutes from './routes/club';
 import branchesRoutes from './routes/branches';
 import usersRoutes from './routes/users';
+import whatsappRoutes from './routes/whatsapp';
 const swaggerUi = require('swagger-ui-express');
 import swaggerSpec from './swagger';
 
@@ -116,6 +117,7 @@ app.use('/club', clubRoutes);
 app.use('/payments', paymentsRoutes);
 app.use('/branches', branchesRoutes);
 app.use('/users', usersRoutes);
+app.use('/webhook/whatsapp', whatsappRoutes);
 
 // 8. Documentação Swagger apenas em ambiente não-produção
 if (process.env.NODE_ENV !== 'production') {
