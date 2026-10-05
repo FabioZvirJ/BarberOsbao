@@ -1,15 +1,14 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:barber_osbao/packages/core/auth/application/auth_controller.dart';
 import 'package:barber_osbao/packages/core/auth/presentation/pages/register_page.dart';
 import 'package:barber_osbao/packages/core/utils/app_masks.dart';
-import 'package:barber_osbao/packages/design_system/atoms/app_button.dart';
 import 'package:barber_osbao/packages/design_system/molecules/app_input.dart';
 import 'package:barber_osbao/packages/design_system/theme/theme_colors.dart';
 import 'package:barber_osbao/features/filiais/application/branches_controller.dart';
+import 'package:barber_osbao/packages/core/models/branch.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -23,7 +22,6 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  int _selectedTab = 0; // 0 = Acesso Rápido (Google / Celular), 1 = E-mail & Senha
   bool _obscurePassword = true;
   bool _loading = false;
   String? _errorMessage;
@@ -575,522 +573,708 @@ class _LoginPageState extends ConsumerState<LoginPage> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
-    // Filial ativa (SOMENTE se veio pelo link ?unidade=slug, sem nenhum default)
     final selectedBranch = ref.watch(selectedBranchProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF070709),
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // 1. ARTE MODERNA DE FUNDO EM ESTILO PRETO (CustomPainter com luzes douradas e malha sutil)
-          CustomPaint(
-            painter: ModernDarkArtPainter(),
-          ),
+      backgroundColor: const Color(0xFF09090B),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isDesktop = constraints.maxWidth >= 860;
 
-          // 2. CONTEÚDO CENTRALIZADO (Glassmorphism card)
-          SafeArea(
-            child: Center(
+            return Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                    child: Container(
-                      constraints: const BoxConstraints(maxWidth: 430),
-                      padding: const EdgeInsets.all(32.0),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF101014).withValues(alpha: 0.88),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: ThemeColors.primary.withValues(alpha: 0.35),
-                          width: 1.2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.8),
-                            blurRadius: 40,
-                            offset: const Offset(0, 16),
-                          ),
-                          BoxShadow(
-                            color: ThemeColors.primary.withValues(alpha: 0.08),
-                            blurRadius: 30,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // LOGO & MARCA
-                          Center(
-                            child: Column(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      constraints: const BoxConstraints(maxWidth: 960),
+                      child: isDesktop
+                          ? Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        ThemeColors.primary.withValues(alpha: 0.25),
-                                        ThemeColors.primary.withValues(alpha: 0.05),
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    border: Border.all(
-                                      color: ThemeColors.primary.withValues(alpha: 0.5),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  child: const Icon(
-                                    Icons.content_cut,
-                                    color: ThemeColors.primary,
-                                    size: 38,
-                                  ),
+                                // Left Hero & Features
+                                Expanded(
+                                  flex: 6,
+                                  child: _buildLeftHeroSection(selectedBranch),
                                 ),
-                                const SizedBox(height: 14),
-                                const Text(
-                                  'BarberOsbao',
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                    letterSpacing: 1.2,
-                                  ),
+                                const SizedBox(width: 56),
+                                // Right Credentials Form Card
+                                SizedBox(
+                                  width: 400,
+                                  child: _buildLoginCard(),
                                 ),
-                                const SizedBox(height: 4),
-                                const Text(
-                                  'EXPERIÊNCIA & TRADIÇÃO',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                    color: ThemeColors.primary,
-                                    letterSpacing: 3.5,
-                                  ),
-                                ),
-
-                                // SOMENTE EXIBE CRACHÁ DE FILIAL SE O LINK CORRESPONDER A UMA FILIAL (SEM DEFAULT)
-                                if (selectedBranch != null) ...[
-                                  const SizedBox(height: 14),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: ThemeColors.primary.withValues(alpha: 0.12),
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(color: ThemeColors.primary.withValues(alpha: 0.35)),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(Icons.storefront, color: ThemeColors.primary, size: 16),
-                                        const SizedBox(width: 8),
-                                        Flexible(
-                                          child: Text(
-                                            '${selectedBranch.name} • ${selectedBranch.city}/${selectedBranch.state}',
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 12,
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
                               ],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-
-                          // ERRO SE HOUVER
-                          if (_errorMessage != null) ...[
-                            Container(
-                              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-                              decoration: BoxDecoration(
-                                color: ThemeColors.danger.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: ThemeColors.danger.withValues(alpha: 0.35)),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.error_outline, color: ThemeColors.danger, size: 18),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      _errorMessage!,
-                                      style: const TextStyle(color: ThemeColors.danger, fontSize: 13),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 18),
-                          ],
-
-                          // SELETOR DE MODO (Acesso Rápido vs E-mail / Senha)
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.white12),
-                            ),
-                            child: Row(
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Expanded(
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(8),
-                                    onTap: () => setState(() => _selectedTab = 0),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(vertical: 10),
-                                      decoration: BoxDecoration(
-                                        color: _selectedTab == 0 ? ThemeColors.primary.withValues(alpha: 0.2) : Colors.transparent,
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: _selectedTab == 0
-                                            ? Border.all(color: ThemeColors.primary.withValues(alpha: 0.6))
-                                            : null,
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.flash_on_rounded,
-                                            size: 16,
-                                            color: _selectedTab == 0 ? ThemeColors.primary : Colors.white54,
-                                          ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            'Acesso Rápido',
-                                            style: TextStyle(
-                                              color: _selectedTab == 0 ? Colors.white : Colors.white54,
-                                              fontWeight: _selectedTab == 0 ? FontWeight.bold : FontWeight.normal,
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(8),
-                                    onTap: () => setState(() => _selectedTab = 1),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(vertical: 10),
-                                      decoration: BoxDecoration(
-                                        color: _selectedTab == 1 ? ThemeColors.primary.withValues(alpha: 0.2) : Colors.transparent,
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: _selectedTab == 1
-                                            ? Border.all(color: ThemeColors.primary.withValues(alpha: 0.6))
-                                            : null,
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.lock_outline,
-                                            size: 16,
-                                            color: _selectedTab == 1 ? ThemeColors.primary : Colors.white54,
-                                          ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            'E-mail & Senha',
-                                            style: TextStyle(
-                                              color: _selectedTab == 1 ? Colors.white : Colors.white54,
-                                              fontWeight: _selectedTab == 1 ? FontWeight.bold : FontWeight.normal,
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                _buildLeftHeroSection(selectedBranch, isCompact: true),
+                                const SizedBox(height: 32),
+                                Center(
+                                  child: SizedBox(
+                                    width: 410,
+                                    child: _buildLoginCard(),
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                          const SizedBox(height: 24),
-
-                          // --- ABA 0: ACESSO RÁPIDO (GOOGLE E CELULAR PRIORIZADOS) ---
-                          if (_selectedTab == 0) ...[
-                            // Botão Google Pro
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: const Color(0xFF1F1F1F),
-                                padding: const EdgeInsets.symmetric(vertical: 15),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                elevation: 0,
-                              ),
-                              onPressed: _loading ? null : _handleGooglePopup,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  _buildGoogleGLogo(size: 22),
-                                  const SizedBox(width: 12),
-                                  const Text(
-                                    'Continuar com o Google',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF1F1F1F),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-
-                            // Botão Celular com Validação
-                            OutlinedButton(
-                              style: OutlinedButton.styleFrom(
-                                backgroundColor: const Color(0xFF25D366).withValues(alpha: 0.08),
-                                side: const BorderSide(color: Color(0xFF25D366), width: 1.2),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 15),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                              onPressed: _loading ? null : _handlePhonePopup,
-                              child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.phone_iphone, color: Color(0xFF25D366), size: 20),
-                                  SizedBox(width: 12),
-                                  Text(
-                                    'Continuar com Celular (SMS / Zap)',
-                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-
-                            // Botão Convidado (acesso direto)
-                            TextButton.icon(
-                              onPressed: _loading
-                                  ? null
-                                  : () async {
-                                      setState(() {
-                                        _loading = true;
-                                        _errorMessage = null;
-                                      });
-                                      try {
-                                        await ref.read(authControllerProvider.notifier).loginAsGuest();
-                                      } catch (e) {
-                                        if (mounted) {
-                                          setState(() {
-                                            _errorMessage = e.toString().replaceAll('Exception:', '').trim();
-                                          });
-                                        }
-                                      } finally {
-                                        if (mounted) {
-                                          setState(() {
-                                            _loading = false;
-                                          });
-                                        }
-                                      }
-                                    },
-                              icon: const Icon(Icons.arrow_forward, size: 16, color: ThemeColors.primary),
-                              label: const Text(
-                                'Entrar como Visitante sem conta',
-                                style: TextStyle(color: ThemeColors.primary, fontSize: 13, fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ],
-
-                          // --- ABA 1: E-MAIL & SENHA (ADMINS E CLIENTES TRADICIONAIS) ---
-                          if (_selectedTab == 1) ...[
-                            Form(
-                              key: _emailFormKey,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  AppInput(
-                                    label: 'E-mail ou Usuário',
-                                    placeholder: 'admin@barberosbao.com.br',
-                                    controller: _emailController,
-                                    keyboardType: TextInputType.emailAddress,
-                                    prefixIcon: const Icon(Icons.email_outlined, color: Colors.white38, size: 20),
-                                    validator: (value) {
-                                      if (value == null || value.trim().isEmpty) {
-                                        return 'Informe seu e-mail cadastrado';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(height: 16),
-
-                                  AppInput(
-                                    label: 'Senha',
-                                    placeholder: 'Digite sua senha',
-                                    controller: _passwordController,
-                                    obscureText: _obscurePassword,
-                                    prefixIcon: const Icon(Icons.lock_outline, color: Colors.white38, size: 20),
-                                    suffixIcon: IconButton(
-                                      icon: Icon(
-                                        _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                                        color: Colors.white38,
-                                        size: 20,
-                                      ),
-                                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Informe sua senha';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(height: 8),
-
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: TextButton(
-                                      onPressed: _showForgotPasswordDialog,
-                                      style: TextButton.styleFrom(
-                                        padding: EdgeInsets.zero,
-                                        minimumSize: Size.zero,
-                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                      ),
-                                      child: const Text('Esqueceu sua senha?', style: TextStyle(color: Colors.white54, fontSize: 12)),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-
-                                  AppButton(
-                                    label: 'Entrar no Sistema',
-                                    loading: _loading,
-                                    onPressed: _handleEmailLogin,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-
-                          const SizedBox(height: 26),
-                          const Divider(color: Colors.white12, height: 1),
-                          const SizedBox(height: 20),
-
-                          // Rodapé: Criar Conta
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('Não tem uma conta?', style: TextStyle(color: Colors.white54, fontSize: 13)),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(builder: (_) => const RegisterPage()),
-                                  );
-                                },
-                                child: const Text(
-                                  'Cadastre-se',
-                                  style: TextStyle(color: ThemeColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
                     ),
-                  ),
+                    const SizedBox(height: 36),
+                    // Footer
+                    Text(
+                      'Copyright © 2026 BarberOsbao. Todos os direitos reservados.',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.32),
+                        fontSize: 11,
+                        letterSpacing: 0.3,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLeftHeroSection(Branch? selectedBranch, {bool isCompact = false}) {
+    return Column(
+      crossAxisAlignment:
+          isCompact ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Brand Logo & Title
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment:
+              isCompact ? MainAxisAlignment.center : MainAxisAlignment.start,
+          children: [
+            const BarberScissorsCombLogo(size: 42),
+            const SizedBox(width: 14),
+            RichText(
+              text: const TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Barber',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 38,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'Osbao',
+                    style: TextStyle(
+                      color: Color(0xFFCFA348),
+                      fontSize: 38,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+
+        // Tagline
+        Text(
+          'Agendamento, histórico de serviços e seleção de estilo para a Barbearia BarberOsbao em tempo real.',
+          style: TextStyle(
+            fontSize: 14,
+            height: 1.45,
+            color: Colors.white.withValues(alpha: 0.72),
+          ),
+          textAlign: isCompact ? TextAlign.center : TextAlign.start,
+        ),
+
+        // Branch Badge (if specified)
+        if (selectedBranch != null) ...[
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFFD4AF37).withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: const Color(0xFFD4AF37).withValues(alpha: 0.35),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.storefront, color: Color(0xFFD4AF37), size: 15),
+                const SizedBox(width: 8),
+                Text(
+                  '${selectedBranch.name} • ${selectedBranch.city}/${selectedBranch.state}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+
+        const SizedBox(height: 24),
+
+        // Feature Card 1: Estilo & Precisão
+        _buildFeatureCard(
+          icon: Icons.content_cut_outlined,
+          title: 'Estilo & Precisão',
+          description: 'Cortes de cabelo e barbas com técnicas clássicas.',
+        ),
+        const SizedBox(height: 12),
+
+        // Feature Card 2: Agendamento & Histórico
+        _buildFeatureCard(
+          icon: Icons.calendar_today_outlined,
+          title: 'Agendamento & Histórico',
+          description: 'Acesse seus horários e histórico de serviços online.',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeatureCard({
+    required IconData icon,
+    required String title,
+    required String description,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+      decoration: BoxDecoration(
+        color: const Color(0xFF151412),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: const Color(0xFF4A3B24).withValues(alpha: 0.8),
+          width: 1.2,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF221E17),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: const Color(0xFF5A492E),
+                width: 1.0,
+              ),
+            ),
+            child: Icon(
+              icon,
+              color: const Color(0xFFD4AF37),
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Color(0xFFEAD2A1),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.5,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildLoginCard() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 28),
+      decoration: BoxDecoration(
+        color: const Color(0xFF131315),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF2B2824),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.6),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Form(
+        key: _emailFormKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Title
+            const Center(
+              child: Text(
+                'Entrar com Credenciais',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ),
+            const SizedBox(height: 22),
+
+            // Error Message (if any)
+            if (_errorMessage != null) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: ThemeColors.danger.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: ThemeColors.danger.withValues(alpha: 0.35)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: ThemeColors.danger, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: ThemeColors.danger, fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            // Input: E-mail ou Usuário
+            _buildCustomInput(
+              controller: _emailController,
+              hintText: 'E-mail ou Usuário',
+              prefixIcon: Icons.mail_outline,
+              keyboardType: TextInputType.emailAddress,
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return 'Informe seu e-mail ou usuário';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 14),
+
+            // Input: Senha
+            _buildCustomInput(
+              controller: _passwordController,
+              hintText: 'Senha',
+              prefixIcon: Icons.lock_outline,
+              obscureText: _obscurePassword,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  color: Colors.white38,
+                  size: 19,
+                ),
+                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+              ),
+              validator: (val) {
+                if (val == null || val.isEmpty) {
+                  return 'Informe sua senha';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 8),
+
+            // Link: Esqueceu sua senha?
+            Align(
+              alignment: Alignment.centerRight,
+              child: InkWell(
+                onTap: _showForgotPasswordDialog,
+                child: Text(
+                  'Esqueceu sua senha?',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    fontSize: 11.5,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+
+            // Button: Entrar no Sistema (Golden Gradient)
+            Container(
+              height: 46,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFFDFB453),
+                    Color(0xFFBA8A2D),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFBA8A2D).withValues(alpha: 0.35),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: _loading ? null : _handleEmailLogin,
+                child: _loading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Color(0xFF141414),
+                        ),
+                      )
+                    : const Text(
+                        'Entrar no Sistema',
+                        style: TextStyle(
+                          color: Color(0xFF141414),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14.5,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Divider: OU ACESSO RÁPIDO
+            Row(
+              children: [
+                Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.12))),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Text(
+                    'OU ACESSO RÁPIDO',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.38),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.1,
+                    ),
+                  ),
+                ),
+                Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.12))),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Row: [ Google ] [ Celular/Zap ]
+            Row(
+              children: [
+                // Google Button
+                Expanded(
+                  child: InkWell(
+                    onTap: _loading ? null : _handleGooglePopup,
+                    borderRadius: BorderRadius.circular(22),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF18181C),
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildGoogleGLogo(size: 18),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Google',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Celular / Zap Button
+                Expanded(
+                  child: InkWell(
+                    onTap: _loading ? null : _handlePhonePopup,
+                    borderRadius: BorderRadius.circular(22),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF18181C),
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(
+                          color: const Color(0xFF25D366).withValues(alpha: 0.55),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.phone_android,
+                            color: Color(0xFF25D366),
+                            size: 17,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Celular/Zap',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+
+            // Guest access link
+            Center(
+              child: InkWell(
+                onTap: _loading
+                    ? null
+                    : () async {
+                        setState(() {
+                          _loading = true;
+                          _errorMessage = null;
+                        });
+                        try {
+                          await ref.read(authControllerProvider.notifier).loginAsGuest();
+                        } catch (e) {
+                          if (mounted) {
+                            setState(() {
+                              _errorMessage = e.toString().replaceAll('Exception:', '').trim();
+                            });
+                          }
+                        } finally {
+                          if (mounted) {
+                            setState(() => _loading = false);
+                          }
+                        }
+                      },
+                child: Text(
+                  'Entrar como Visitante sem conta',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Register prompt
+            Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Não tem uma conta? ',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.55),
+                      fontSize: 12.5,
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const RegisterPage()),
+                      );
+                    },
+                    child: const Text(
+                      'Cadastre-se',
+                      style: TextStyle(
+                        color: Color(0xFFDFB453),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomInput({
+    required TextEditingController controller,
+    required String hintText,
+    required IconData prefixIcon,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscureText = false,
+    Widget? suffixIcon,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      validator: validator,
+      style: const TextStyle(color: Colors.white, fontSize: 13.5),
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: TextStyle(
+          color: Colors.white.withValues(alpha: 0.35),
+          fontSize: 13,
+        ),
+        filled: true,
+        fillColor: const Color(0xFF19191D),
+        prefixIcon: Icon(prefixIcon, color: Colors.white38, size: 19),
+        suffixIcon: suffixIcon,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(
+            color: Colors.white.withValues(alpha: 0.12),
+            width: 1.0,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(
+            color: Colors.white.withValues(alpha: 0.12),
+            width: 1.0,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(
+            color: Color(0xFFDFB453),
+            width: 1.2,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: ThemeColors.danger, width: 1.0),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: ThemeColors.danger, width: 1.2),
+        ),
+        errorStyle: const TextStyle(fontSize: 11, height: 1.1),
+      ),
+    );
+  }
 }
 
-/// CustomPainter que gera uma arte moderna em estilo preto com iluminação dourada e malha geométrica sutil
-class ModernDarkArtPainter extends CustomPainter {
+/// Logo composto com tesoura e pente desenhados em traços dourados
+class BarberScissorsCombLogo extends StatelessWidget {
+  final double size;
+  final Color color;
+
+  const BarberScissorsCombLogo({
+    super.key,
+    this.size = 40,
+    this.color = const Color(0xFFD4AF37),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(size, size),
+      painter: _ScissorsCombPainter(color: color),
+    );
+  }
+}
+
+class _ScissorsCombPainter extends CustomPainter {
+  final Color color;
+  const _ScissorsCombPainter({required this.color});
+
   @override
   void paint(Canvas canvas, Size size) {
-    // 1. Fundo Gradiente Preto Profundo
-    final bgPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Color(0xFF060608),
-          Color(0xFF0B0B0E),
-          Color(0xFF030304),
-        ],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), bgPaint);
-
-    // 2. Luz Âmbar / Dourada Superior
-    final topGlowPaint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          const Color(0xFFC89B3C).withValues(alpha: 0.15),
-          const Color(0xFFC89B3C).withValues(alpha: 0.04),
-          Colors.transparent,
-        ],
-        stops: const [0.0, 0.45, 1.0],
-      ).createShader(Rect.fromCircle(
-        center: Offset(size.width * 0.5, size.height * 0.15),
-        radius: size.width * 0.45,
-      ));
-    canvas.drawCircle(Offset(size.width * 0.5, size.height * 0.15), size.width * 0.45, topGlowPaint);
-
-    // 3. Luz Inferior Suave
-    final bottomGlowPaint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          const Color(0xFFC89B3C).withValues(alpha: 0.08),
-          Colors.transparent,
-        ],
-      ).createShader(Rect.fromCircle(
-        center: Offset(size.width * 0.85, size.height * 0.85),
-        radius: size.width * 0.5,
-      ));
-    canvas.drawCircle(Offset(size.width * 0.85, size.height * 0.85), size.width * 0.5, bottomGlowPaint);
-
-    // 4. Linhas Geométricas Modernas Sutis (Estilo Arte Abstrata / Dark Luxury)
-    final linePaint = Paint()
-      ..color = const Color(0xFFC89B3C).withValues(alpha: 0.04)
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-
-    final accentLinePaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.03)
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-
-    // Linhas diagonais dinâmicas
-    for (double i = -size.height; i < size.width + size.height; i += 90) {
-      canvas.drawLine(
-        Offset(i, 0),
-        Offset(i + size.height * 0.7, size.height),
-        linePaint,
-      );
-    }
-
-    // Linhas opostas cruzando
-    for (double i = 0; i < size.width + size.height; i += 130) {
-      canvas.drawLine(
-        Offset(size.width - i, 0),
-        Offset(size.width - (i + size.height * 0.5), size.height),
-        accentLinePaint,
-      );
-    }
-
-    // Arcos decorativos de barbearia
-    final circleAccentPaint = Paint()
-      ..color = const Color(0xFFC89B3C).withValues(alpha: 0.035)
+    final paint = Paint()
+      ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
+      ..strokeWidth = 2.4
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
 
-    canvas.drawCircle(Offset(size.width * 0.1, size.height * 0.5), size.width * 0.25, circleAccentPaint);
-    canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.4), size.width * 0.35, circleAccentPaint);
+    // Scissor Rings (loops na esquerda)
+    canvas.drawCircle(Offset(size.width * 0.22, size.height * 0.74), size.width * 0.12, paint);
+    canvas.drawCircle(Offset(size.width * 0.22, size.height * 0.38), size.width * 0.12, paint);
+
+    // Scissor Blades (lâminas cruzando em direção ao canto direito)
+    canvas.drawLine(
+      Offset(size.width * 0.32, size.height * 0.74),
+      Offset(size.width * 0.65, size.height * 0.26),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(size.width * 0.32, size.height * 0.38),
+      Offset(size.width * 0.65, size.height * 0.86),
+      paint,
+    );
+
+    // Comb Spine (espinha do pente diagonal)
+    final spinePaint = Paint()
+      ..color = color
+      ..strokeWidth = 3.2
+      ..strokeCap = StrokeCap.round;
+
+    final start = Offset(size.width * 0.45, size.height * 0.78);
+    final end = Offset(size.width * 0.88, size.height * 0.22);
+    canvas.drawLine(start, end, spinePaint);
+
+    // Dentes do pente
+    final teethPaint = Paint()
+      ..color = color
+      ..strokeWidth = 1.8
+      ..strokeCap = StrokeCap.round;
+
+    for (int i = 1; i <= 6; i++) {
+      final t = i / 7.0;
+      final base = Offset.lerp(start, end, t)!;
+      final toothEnd = base + const Offset(5.5, -5.5);
+      canvas.drawLine(base, toothEnd, teethPaint);
+    }
   }
 
   @override
